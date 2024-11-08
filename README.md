@@ -1,5 +1,4 @@
-![HappyTails Logo](Logo/logo.svg)
-
+<img src="Logo/logo.svg" alt="HappyTails Logo" width="150"/>
 
 # HappyTails 🐾
 
