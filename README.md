@@ -1,4 +1,4 @@
-![HappyTails Logo](logo/logo.svg)
+![HappyTails Logo](Logo/logo.svg)
 
 
 # HappyTails 🐾
