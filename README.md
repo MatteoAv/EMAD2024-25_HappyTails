@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Logo/logo.svg" alt="HappyTails Logo" width="150"/>
+  <img src="Logo/logo.svg" alt="HappyTails Logo" width="250"/>
 </p>
 
 # HappyTails 🐾
