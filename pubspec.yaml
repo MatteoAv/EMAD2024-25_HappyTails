@@ -56,8 +56,17 @@ flutter:
   #aggiungere qui le immagini
   assets:
     - assets/logo.png
+    - assets/puppies.png
+    - assets/pawShaking.png
 
-    
+  #aggiungere qui i font
+  fonts:
+    - family: Montserrat
+      fonts:
+        - asset: fonts/Montserrat/Montserrat-Italic-VariableFont_wght.ttf
+        - asset: fonts/Montserrat/Montserrat-VariableFont_wght.ttf
+          weight: 700
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
