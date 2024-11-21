@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'header.dart'; // Importa il widget Header
+//import 'header.dart'; // Importa il widget Header
 
 
 class ProfiloPage extends StatelessWidget {
