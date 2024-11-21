@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-
-// Esegui la tua app Material 3
-
+import 'package:google_fonts/google_fonts.dart';
 
 class PrenotazioniPage extends StatelessWidget {
   const PrenotazioniPage({super.key});
@@ -9,10 +7,6 @@ class PrenotazioniPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Prenotazioni'),
-        centerTitle: true,
-      ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -21,43 +15,80 @@ class PrenotazioniPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Header(), // Widget Header
-                  const SizedBox(height: 16),
+                  // Blocco con testo, immagine e pulsanti dentro un container
                   Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    height: MediaQuery.of(context).size.height - 115,
                     padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          'Per visualizzare le prenotazioni in corso accedi con il tuo account oppure registrati',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
+                        // Titolo del messaggio
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: Text(
+                            'Per visualizzare le prenotazioni attualmente in corso, accedi con il tuo account oppure registrati.',
+                            style: GoogleFonts.poppins(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w500,
+                              color: Theme.of(context).colorScheme.onSurface,
+                              height: 1.5,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        // Blocco immagine e pulsanti
+                        _buildImageBlock(
+                          context,
+                          'assets/dog1.png',
+                          [
+                            ElevatedButton(
+                              onPressed: () {
+                                // Aggiungi logica per accedere
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color.fromARGB(255, 244, 132, 34),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                elevation: 5,
                               ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 20),
-                        // Primo blocco: Immagine e pulsante
-                        _buildImageBlock(
-                          context,
-                          'assets/pawShaking.png',
-                          'Accedi',
-                          onPressed: () {
-                            // Aggiungi logica per accedere
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        // Secondo blocco: Immagine e pulsante
-                        _buildImageBlock(
-                          context,
-                          'assets/puppies.png',
-                          'Registrati',
-                          onPressed: () {
-                            // Aggiungi logica per registrarsi
-                          },
+                              child: const Text(
+                                'Accedi',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
+                            //const SizedBox(height: 12),
+                            ElevatedButton(
+                              onPressed: () {
+                                // Aggiungi logica per registrarsi
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color.fromARGB(255, 244, 132, 34),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                elevation: 5,
+                              ),
+                              child: const Text(
+                                'Registrati',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -71,73 +102,33 @@ class PrenotazioniPage extends StatelessWidget {
     );
   }
 
-  /// Metodo per costruire blocco immagine + pulsante
-  Widget _buildImageBlock(BuildContext context, String imagePath, String buttonText,
-      {required VoidCallback onPressed}) {
+  /// Metodo per costruire blocco immagine + pulsanti dinamici
+  Widget _buildImageBlock(
+      BuildContext context, String imagePath, List<Widget> buttons) {
     return Column(
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20),
           child: Image.asset(
             imagePath,
             width: double.infinity,
-            height: 190,
-            fit: BoxFit.cover,
+            height: 250,
+            fit: BoxFit.contain,
           ),
         ),
-        const SizedBox(height: 10),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: onPressed,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+        const SizedBox(height: 40),
+        Column(
+          children: buttons.map((button) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: button,
               ),
-            ),
-            child: Text(
-              buttonText,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
-            ),
-          ),
+            );
+          }).toList(),
         ),
       ],
-    );
-  }
-}
-
-class Header extends StatelessWidget {
-  const Header({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.primaryContainer,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Icon(
-              Icons.pets,
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-              size: 32,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              'Benvenuto!',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

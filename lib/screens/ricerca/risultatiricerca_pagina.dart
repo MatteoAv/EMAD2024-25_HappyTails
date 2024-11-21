@@ -3,8 +3,8 @@ import 'package:happy_tails/screens/ricerca/risultato_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happy_tails/screens/ricerca/risultati_provider.dart';
 
-class CercaPage extends ConsumerWidget {
-  const CercaPage({Key? key}) : super(key: key);
+class RisultatiCercaPage extends ConsumerWidget {
+  const RisultatiCercaPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

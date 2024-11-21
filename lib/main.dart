@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:happy_tails/screens/ricerca/risultatiRicerca_pagina.dart';
+import 'package:google_fonts/google_fonts.dart';
+//import 'package:happy_tails/screens/ricerca/risultatiRicerca_pagina.dart';
 import 'home.dart';           // Importa HomePage
 import 'prenotazioni.dart';   // Importa PrenotazioniPage
 import 'profilo.dart';        // Importa ProfiloPage
-import 'bottom_navbar.dart';  // Importa BottomNavBar
+import 'ricerca.dart';        // Importa CercaPage
+//import 'bottom_navbar.dart';  // Importa BottomNavBar
 
 void main() {
-    runApp( ProviderScope(child: MyApp()));
-
+  runApp(ProviderScope(child: MyApp()));
 }
 
 //Commento di prova
@@ -41,12 +42,11 @@ class _MyAppState extends State<MyApp> {
       title: 'HappyTails',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-        textTheme: TextTheme(
-          displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-          bodyMedium: TextStyle(fontSize: 16),
-          )
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        textTheme: GoogleFonts.latoTextTheme(
+          Theme.of(context).textTheme,
         ),
+      ),
 
       debugShowCheckedModeBanner: false, //rimuove la scritta debug in alto a destra
       home: Scaffold(
@@ -55,28 +55,39 @@ class _MyAppState extends State<MyApp> {
           children: _pages,  // Le pagine da mostrare
         ),
         bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _onItemTapped,
-        destinations: [
-          NavigationDestination(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.search),
-            label: 'Cerca',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.book),
-            label: 'Prenotazioni',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person),
-            label: 'Profilo',
-          ),
-        ],
-      ),
-
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: _onItemTapped,
+          destinations: [
+            NavigationDestination(
+              icon: Icon(
+                Icons.home,
+                color: _selectedIndex == 0 ? Colors.orange : Colors.black,
+              ),
+              label: 'Home',
+            ),
+            NavigationDestination(
+              icon: Icon(
+                Icons.search,
+                color: _selectedIndex == 1 ? Colors.orange : Colors.black,
+              ),
+              label: 'Cerca',
+            ),
+            NavigationDestination(
+              icon: Icon(
+                Icons.book,
+                color: _selectedIndex == 2 ? Colors.orange : Colors.black,
+              ),
+              label: 'Prenotazioni',
+            ),
+            NavigationDestination(
+              icon: Icon(
+                Icons.person,
+                color: _selectedIndex == 3 ? Colors.orange : Colors.black,
+              ),
+              label: 'Profilo',
+            ),
+          ],
+        ),
       ),
     );
   }
