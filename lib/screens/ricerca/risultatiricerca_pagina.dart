@@ -11,7 +11,7 @@ class CercaPage extends ConsumerWidget {
     final cardListAsyncValue = ref.watch(cardListProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Carousel Page')),
+      appBar: AppBar(title: const Text('Risultati di ricerca')),
       body: cardListAsyncValue.when(
         data: (cards) {
           if (cards.isEmpty) {

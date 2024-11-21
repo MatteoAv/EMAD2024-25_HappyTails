@@ -41,7 +41,7 @@ class _MyAppState extends State<MyApp> {
       title: 'HappyTails',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         textTheme: TextTheme(
           displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
           bodyMedium: TextStyle(fontSize: 16),
