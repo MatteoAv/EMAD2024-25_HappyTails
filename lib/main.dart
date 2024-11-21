@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:happy_tails/screens/ricerca/risultatiRicerca_pagina.dart';
 import 'home.dart';           // Importa HomePage
 import 'prenotazioni.dart';   // Importa PrenotazioniPage
 import 'profilo.dart';        // Importa ProfiloPage
-import 'bottom_navbar.dart';  // Importa BottomNavBar
+//import 'bottom_navbar.dart';  // Importa BottomNavBar
 
 void main() {
     runApp( ProviderScope(child: MyApp()));
@@ -42,11 +43,10 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        textTheme: TextTheme(
-          displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-          bodyMedium: TextStyle(fontSize: 16),
-          )
+        textTheme: GoogleFonts.latoTextTheme(
+          Theme.of(context).textTheme,
         ),
+      ),
 
       debugShowCheckedModeBanner: false, //rimuove la scritta debug in alto a destra
       home: Scaffold(

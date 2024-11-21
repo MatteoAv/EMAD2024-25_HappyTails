@@ -27,9 +27,10 @@ environment:
 # dependencies can be manually updated by changing the version numbers below to
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
-dependencies:
+dependencies: 
   flutter:
     sdk: flutter
+  google_fonts: ^6.2.1
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -55,18 +56,18 @@ dev_dependencies:
 flutter:
 
   #aggiungere qui le immagini
+  #dopo aver modificato il pubspec eseguire il comando flutter pub get e riavviare l'app
   assets:
     - assets/logo.png
     - assets/puppies.png
     - assets/pawShaking.png
+    - assets/pawShaking2.png
+    - assets/dog-walking.png
+    - assets/dog.png    
+    - assets/dog1.png     
+    - assets/profile-setting.png
 
-  #aggiungere qui i font
-  fonts:
-    - family: Montserrat
-      fonts:
-        - asset: fonts/Montserrat/Montserrat-Italic-VariableFont_wght.ttf
-        - asset: fonts/Montserrat/Montserrat-VariableFont_wght.ttf
-          weight: 700
+
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -100,6 +101,12 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
-  #
+  fonts:
+    - family: Montserrat
+      fonts:
+        - asset: fonts/Montserrat/Montserrat-Italic-VariableFont_wght.ttf
+        - asset: fonts/Montserrat/Montserrat-VariableFont_wght.ttf
+          weight: 700
+
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
