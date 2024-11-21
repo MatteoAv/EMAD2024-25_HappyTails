@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:happy_tails/screens/ricerca/risultatiRicerca_pagina.dart';
 import 'home.dart';           // Importa HomePage
-import 'cerca.dart';          // Importa CercaPage
 import 'prenotazioni.dart';   // Importa PrenotazioniPage
 import 'profilo.dart';        // Importa ProfiloPage
 import 'bottom_navbar.dart';  // Importa BottomNavBar
 
 void main() {
-  runApp(MyApp());
+    runApp( ProviderScope(child: MyApp()));
+
 }
 
 //Commento di prova
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -40,18 +40,43 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'HappyTails',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        textTheme: TextTheme(
+          displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+          bodyMedium: TextStyle(fontSize: 16),
+          )
+        ),
+
       debugShowCheckedModeBanner: false, //rimuove la scritta debug in alto a destra
       home: Scaffold(
         body: IndexedStack(
           index: _selectedIndex,  // Mostra la pagina selezionata
           children: _pages,  // Le pagine da mostrare
         ),
-        bottomNavigationBar: BottomNavBar(
-          selectedIndex: _selectedIndex,
-          onItemTapped: _onItemTapped,  // Passa la funzione di gestione
-        ),
+        bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: _onItemTapped,
+        destinations: [
+          NavigationDestination(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.search),
+            label: 'Cerca',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.book),
+            label: 'Prenotazioni',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person),
+            label: 'Profilo',
+          ),
+        ],
+      ),
+
       ),
     );
   }
