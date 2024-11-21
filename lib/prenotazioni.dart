@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'header.dart'; // Importa il widget Header
 
-//aggiunta di un commento perchè il commit non funzionava
+// Esegui la tua app Material 3
+
 
 class PrenotazioniPage extends StatelessWidget {
   const PrenotazioniPage({super.key});
@@ -9,162 +9,134 @@ class PrenotazioniPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: <Widget>[
-          Header(), // Aggiungi il widget Header in cima
-
-          Container(
-            margin: const EdgeInsets.all(10.0),
-            height: 610,
-            decoration: BoxDecoration(
-              color: Color.fromARGB(255, 150, 142, 125),
-              borderRadius: BorderRadius.circular(10), // Arrotonda gli angoli del Container
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
+      appBar: AppBar(
+        title: const Text('Prenotazioni'),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-
-                  //Testo
-                  const Text(
-                    'Per visualizzare le prenotazioni in corso accedi con il tuo account oppure registrati',
-                    style: TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontSize: 20, fontWeight: FontWeight.bold
+                  const Header(), // Widget Header
+                  const SizedBox(height: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Primo blocco: Immagine e bottone
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10), // Arrotonda gli angoli dell'immagine
-                    child: Image.asset(
-                      'assets/pawShaking.png', 
-                      //dopo aver caricato un'immagine nella cartella assets e aver aggiornato il pubspec.yaml eseguire il comando flutter pub get
-                      width: double.infinity, // Aggiunge larghezza per riempire il container
-                      height: 190, // Imposta un'altezza per l'immagine
-                      fit: BoxFit.cover, // Imposta il tipo di ritaglio dell'immagine
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 300,
-                        child:                      
-                        ElevatedButton(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Per visualizzare le prenotazioni in corso accedi con il tuo account oppure registrati',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 20),
+                        // Primo blocco: Immagine e pulsante
+                        _buildImageBlock(
+                          context,
+                          'assets/pawShaking.png',
+                          'Accedi',
                           onPressed: () {
-                            // Azione per il pulsante 
+                            // Aggiungi logica per accedere
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange, // Colore arancione
-                            foregroundColor: Colors.white, // Testo bianco
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10), // Angoli arrotondati
-                            ),
-                          ),
-                          child: const Text('Accedi'),
-                        )
-                      )
-
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 20), // Spaziatura tra i due blocchi
-
-                  // Secondo blocco: Immagine e bottone 
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10), // Arrotonda gli angoli dell'immagine
-                    child: Image.asset(
-                      'assets/puppies.png', 
-                      //dopo aver caricato un'immagine nella cartella assets e aver aggiornato il pubspec.yaml eseguire il comando flutter pub get
-                      width: double.infinity, // Aggiunge larghezza per riempire il container
-                      height: 190, // Imposta un'altezza per l'immagine
-                      fit: BoxFit.cover, // Imposta il tipo di ritaglio dell'immagine
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 300,
-                        child:                      
-                        ElevatedButton(
+                        ),
+                        const SizedBox(height: 20),
+                        // Secondo blocco: Immagine e pulsante
+                        _buildImageBlock(
+                          context,
+                          'assets/puppies.png',
+                          'Registrati',
                           onPressed: () {
-                            // Azione per il pulsante 
+                            // Aggiungi logica per registrarsi
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange, // Colore arancione
-                            foregroundColor: Colors.white, // Testo bianco
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10), // Angoli arrotondati
-                            ),
-                          ),
-                          child: const Text('Registrati'),
-                        )
-                      )
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Metodo per costruire blocco immagine + pulsante
+  Widget _buildImageBlock(BuildContext context, String imagePath, String buttonText,
+      {required VoidCallback onPressed}) {
+    return Column(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.asset(
+            imagePath,
+            width: double.infinity,
+            height: 190,
+            fit: BoxFit.cover,
+          ),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: onPressed,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              buttonText,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
             ),
           ),
+        ),
+      ],
+    );
+  }
+}
 
-          /*
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Per poter vedere le tue prenotazioni attive registrati o effettua il login',
-                    style: TextStyle(fontSize: 24),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20), // Spaziatura tra il testo e i pulsanti
-                  SizedBox(
-                    width: 350, // Larghezza uniforme per i pulsanti
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Azione per il pulsante Accedi
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange, // Colore arancione
-                        foregroundColor: Colors.white, // Testo bianco
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10), // Angoli arrotondati
-                        ),
-                      ),
-                      child: const Text('Accedi'),
-                    ),
-                  ),
-                  const SizedBox(height: 10), // Spaziatura tra i due pulsanti
-                  SizedBox(
-                    width: 350, // Larghezza uniforme per i pulsanti
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Azione per il pulsante Registrati
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange, // Colore arancione
-                        foregroundColor: Colors.white, // Testo bianco
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10), // Angoli arrotondati
-                        ),
-                      ),
-                      child: const Text('Registrati'),
-                    ),
-                  ),
-                ],
-              ),
+class Header extends StatelessWidget {
+  const Header({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).colorScheme.primaryContainer,
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Icon(
+              Icons.pets,
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+              size: 32,
             ),
-          ),*/
-        ],
+            const SizedBox(width: 10),
+            Text(
+              'Benvenuto!',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }
