@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:happy_tails/UserManage/screens/profile_page.dart';
 import 'package:happy_tails/home.dart';
 import 'package:happy_tails/prenotazioni.dart';
 import 'package:happy_tails/profilo.dart';
@@ -22,7 +23,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     HomePage(),
     CercaPage(),
     PrenotazioniPage(),
-    ProfiloPage(),
+    UserProfilePage(),
   ];
 
   // Handle navigation bar selection
