@@ -36,12 +36,14 @@ class PrenotazioniPage extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 20),
                           child: Text(
-                            'Per visualizzare le prenotazioni attualmente in corso, accedi con il tuo account oppure registrati.',
+                            'Accedi per visualizzare le tue prenotazioni',
                             style: GoogleFonts.poppins(
                               fontSize: 22,
                               fontWeight: FontWeight.w500,
                               color: Theme.of(context).colorScheme.onSurface,
                               height: 1.5,
+                              
+                              
                             ),
                             textAlign: TextAlign.center,
                           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:happy_tails/screens/ricerca/risultatiRicerca_pagina.dart';
 import 'package:intl/intl.dart'; // Per il formato della data del calendario
 
 class CercaPage extends StatefulWidget {
@@ -176,9 +177,14 @@ class _CercaPageState extends State<CercaPage> {
                           onPressed: () {
                             if (_formKey.currentState?.validate() ?? false) {
                               // Processa i dati del form
+
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Elaborazione in corso...')),
                               );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const RisultatiCercaPage()),
+    );
                             }
                           },
                           style: ElevatedButton.styleFrom(
