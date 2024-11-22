@@ -1,3 +1,4 @@
+import 'package:happy_tails/UserManage/providers/profile_providers.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../model/user.dart';
@@ -69,6 +70,18 @@ class LocalDatabase {
   final path = join(dbPath, 'app.db');
   await deleteDatabase(path); // Elimina il database esistente
   print("Database eliminato con successo!");
+}
+
+// Aggiungi una funzione per aggiornare i dati dell'utente nel database
+Future<void> updateUser(int ?userId, String ?userName, String ?citta) async {
+  final db = await database;
+  await db.update(
+    'users',
+    {'userName': userName, 'citta': citta},
+    where: 'id = ?',
+    whereArgs: [userId],
+  );
+
 }
 
 

@@ -11,6 +11,7 @@ class Booking {
   final String? metaPayment;
   final int? vote;
   final String? summary;
+  final int pet_id;
 
   Booking({
     required this.id,
@@ -22,7 +23,8 @@ class Booking {
     required this.state,
     required this.vote,
     required this.summary,
-    required this.state_Payment
+    required this.state_Payment,
+    required this.pet_id
   });
 
   factory Booking.fromMap(Map<String, dynamic> map) {
@@ -36,7 +38,8 @@ class Booking {
       state_Payment: map ['state_Payment'],
       metaPayment: map ['metaPayment'],
       vote : map ['vote'],
-      summary: map ['summary']
+      summary: map ['summary'],
+      pet_id: map ['pet_id']
     );
   }
 
@@ -51,7 +54,8 @@ class Booking {
       'metaPayment' : metaPayment,
       'state_Payment' : state_Payment,
       'vote' : vote,
-      'summary' : summary
+      'summary' : summary,
+      'pet_id' : pet_id
     };
   }
 }

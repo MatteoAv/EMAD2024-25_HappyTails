@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:happy_tails/UserManage/repositories/local_database.dart';
+import 'package:happy_tails/app/routes.dart';
 import '../providers/profile_providers.dart';
+import '../widgets/expandable_button.dart';
 
 class UserProfilePage extends ConsumerWidget {
   const UserProfilePage({Key? key}) : super(key: key);
@@ -14,110 +17,89 @@ class UserProfilePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: const Text('Profile', style: const TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold
+          )
+        ),
         backgroundColor: Colors.deepOrange,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // User information
             userAsync.when(
-              data: (user) => Column(
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: NetworkImage(user?.imageUrl ?? ''),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Welcome, ${user?.userName ?? 'Guest'}',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepOrange,
+              data: (user) => Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.orange[100],
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.deepOrange, width: 2),
+                ),
+                child: Stack(
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundImage: NetworkImage(user?.imageUrl ?? ''),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'City: ${user?.citta ?? 'Unknown City'}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: Colors.black54,
+                    const SizedBox(height: 16),
+                    Text(
+                      'Welcome, ${user?.userName ?? 'Guest'}',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepOrange,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'City: ${user?.citta ?? 'Unknown City'}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+                //Rotella delle impostazioni in alto a destra
+                Positioned(
+                      top: MediaQuery.of(context).size.height * 0,
+                      right: MediaQuery.of(context).size.width * 0,
+                      child: GestureDetector(
+                        onTap: (){
+                            Navigator.pushNamed(context, AppRoutes.settings);
+                        },
+                        child: Icon(Icons.settings, color: Colors.black, size: 30)
+                      )
+                )
                 ],
+              ),
               ),
               loading: () => const CircularProgressIndicator(),
               error: (err, _) => Text('Error: $err'),
-            ),
+              ),
+            
+            
             const SizedBox(height: 24),
             // Expandable buttons for Pets and Bookings
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                GestureDetector(
+                ExpandableButton(
+                  icon: Icons.pets,
+                  label: 'Pets',
+                  isExpanded: isPetsTabSelected,
                   onTap: () => ref.read(tabSelectionProvider.notifier).state = true,
-                  child : Container(
-                    height:60,
-                    width: 90,
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: isPetsTabSelected ? Colors.orange[200] : Colors.grey[200],
-                      border: Border.all( 
-                        color: isPetsTabSelected ? Colors.redAccent : Colors.black,
-                        width: 2,),
-                        borderRadius: BorderRadius.circular(12)
-                    ),
-                  
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.pets,
-                        size: 25,
-                        color: isPetsTabSelected ? Colors.redAccent[700] : Colors.grey[900],
-                      ),
-                      Text(
-                        'Pets',
-                        style: TextStyle(
-                          color: isPetsTabSelected ? Colors.redAccent[700] : Colors.grey[900],
-                        ),
-                      ),
-                    ],
-                  ),
-                  ),
                 ),
-                GestureDetector(
+                ExpandableButton(
+                  icon: Icons.calendar_today,
+                  label: 'Bookings',
+                  isExpanded: !isPetsTabSelected,
                   onTap: () => ref.read(tabSelectionProvider.notifier).state = false,
-                  child: Container(
-                    height:60,
-                    width: 90,
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: !isPetsTabSelected ? Colors.orange[200] : Colors.grey[200],
-                      border: Border.all( 
-                        color: !isPetsTabSelected ? Colors.redAccent : Colors.black,
-                        width: 2,),
-                        borderRadius: BorderRadius.circular(12)
-                    ),
-                  
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.calendar_today,
-                        size: 25,
-                        color: !isPetsTabSelected ? Colors.redAccent[700] : Colors.grey[900],
-                      ),
-                      Text(
-                        'Bookings',
-                        style: TextStyle(
-                          color: !isPetsTabSelected ? Colors.redAccent[700] : Colors.grey[900],
-                        ),
-                      ),
-                    ],
-                  ),
-                  ),
                 ),
               ],
             ),
@@ -177,9 +159,9 @@ class UserProfilePage extends ConsumerWidget {
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  Text('Price: \$${booking.price.toStringAsFixed(2)}'),
+                                  Text('Price: ${booking.price.toStringAsFixed(2)}€'),
                                   const SizedBox(height: 4),
-                                  Text('Pet: ${booking.price ?? 'Unknown'}'),
+                                  Text('Pet: ${petsAsync.value?[index].name ?? 'Unknown'}'),
                                   const SizedBox(height: 4),
                                   Text(
                                     'Status: ${booking.state}',
