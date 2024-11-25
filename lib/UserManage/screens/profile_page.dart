@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:happy_tails/UserManage/repositories/local_database.dart';
+import 'package:happy_tails/UserManage/widgets/expandable_button.dart';
 import 'package:happy_tails/app/routes.dart';
-import '../providers/profile_providers.dart';
-import '../widgets/expandable_button.dart';
+import 'package:happy_tails/UserManage/providers/profile_providers.dart';
 
 class UserProfilePage extends ConsumerWidget {
   const UserProfilePage({Key? key}) : super(key: key);
@@ -17,77 +16,76 @@ class UserProfilePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile', style: const TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold
-          )
+        title: const Text(
+          'Profile',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Colors.deepOrange[50],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // User information
+            // User Info Section
             userAsync.when(
-              data: (user) => Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.orange[100],
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.deepOrange, width: 2),
-                ),
-                child: Stack(
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundImage: NetworkImage(user?.imageUrl ?? ''),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Welcome, ${user?.userName ?? 'Guest'}',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.deepOrange,
+              data: (user) => Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 60,
+                    backgroundImage: NetworkImage(user?.imageUrl ?? ''),
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Welcome',
+                        style: const TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepOrange,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'City: ${user?.citta ?? 'Unknown City'}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: Colors.black54,
+                      Text(
+                        user?.userName ?? 'Guest',
+                        style: const TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepOrange,
                       ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'City: ${user?.citta ?? 'Unknown City'}',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  InkWell(
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.settings);
+                    },
+                    child: const Icon(
+                      Icons.settings,
+                      color: Colors.black,
+                      size: 30,
                     ),
-                  ],
-                ),
-                //Rotella delle impostazioni in alto a destra
-                Positioned(
-                      top: MediaQuery.of(context).size.height * 0,
-                      right: MediaQuery.of(context).size.width * 0,
-                      child: GestureDetector(
-                        onTap: (){
-                            Navigator.pushNamed(context, AppRoutes.settings);
-                        },
-                        child: Icon(Icons.settings, color: Colors.black, size: 30)
-                      )
-                )
+                  ),
                 ],
-              ),
               ),
               loading: () => const CircularProgressIndicator(),
               error: (err, _) => Text('Error: $err'),
-              ),
-            
-            
-            const SizedBox(height: 24),
-            // Expandable buttons for Pets and Bookings
+            ),
+            const SizedBox(height: 50),
+            // Expandable Buttons
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 ExpandableButton(
                   icon: Icons.pets,
@@ -95,14 +93,24 @@ class UserProfilePage extends ConsumerWidget {
                   isExpanded: isPetsTabSelected,
                   onTap: () => ref.read(tabSelectionProvider.notifier).state = true,
                 ),
+                SizedBox(width: 30),
                 ExpandableButton(
                   icon: Icons.calendar_today,
                   label: 'Bookings',
                   isExpanded: !isPetsTabSelected,
                   onTap: () => ref.read(tabSelectionProvider.notifier).state = false,
                 ),
+               
               ],
             ),
+            const SizedBox(height: 20),
+             Text(
+                  textAlign: TextAlign.left,
+                  isPetsTabSelected ? 'Lista di Pet' : 'Lista prenotazioni',
+                  style: TextStyle(
+                    fontSize: 30,
+                  ),
+                ),
             const SizedBox(height: 24),
             // Tab content
             Expanded(
@@ -112,26 +120,49 @@ class UserProfilePage extends ConsumerWidget {
                         itemCount: pets.length,
                         itemBuilder: (context, index) {
                           final pet = pets[index];
-                          return Card(
-                            color: Colors.orange[100],
-                            margin: const EdgeInsets.symmetric(vertical: 8),
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: Colors.deepOrange,
-                                child: Icon(Icons.pets, color: Colors.white),
-                              ),
-                              title: Text(
-                                pet.name,
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Text('Type: ${pet.type}'),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.medical_services, color: Colors.deepOrange),
-                                onPressed: () {
-                                  // Placeholder for future veterinary record action
-                                },
+                          return InkWell(
+                            splashColor: Colors.deepOrange[50],
+                            onTap: () {
+                              // Placeholder for action when a pet is tapped
+                            },
+                            child: Container(
+                              height:90,
+                              child: Card(
+                              elevation: 20,
+                              color: Colors.deepOrange[50],
+                              margin: const EdgeInsets.symmetric(vertical: 8),
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  radius: 40,
+                                  backgroundColor: Colors.deepOrangeAccent,
+                                  child: const Icon(Icons.pets, color: Colors.white, size:40),
+                                ),
+                                title: Text(
+                                  pet.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                    ),
+                                ),
+                                subtitle: Text(
+                                  'Type: ${pet.type}',
+                                   style: const TextStyle(
+                                    fontSize: 18
+                                   ),
+                                  ),
+                                trailing: IconButton(
+                                  icon: const Icon(
+                                    Icons.medical_services,
+                                    color: Colors.deepOrangeAccent,
+                                    size: 40,
+                                  ),
+                                  onPressed: () {
+                                    // Placeholder for veterinary record action
+                                  },
+                                ),
                               ),
                             ),
+                            )
                           );
                         },
                       ),
@@ -143,37 +174,46 @@ class UserProfilePage extends ConsumerWidget {
                         itemCount: bookings.length,
                         itemBuilder: (context, index) {
                           final booking = bookings[index];
-                          return Card(
-                            color: Colors.orange[200],
-                            margin: const EdgeInsets.symmetric(vertical: 8),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Booking from ${booking.dateBegin} to ${booking.dateEnd}',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                          return InkWell(
+                            onTap: () {
+                              // Placeholder for action when a booking is tapped
+                            },
+                            child: Container(
+                              height: 135,
+                              child: Card(
+                              elevation: 20,
+                              color: Colors.deepOrange[50],
+                              margin: const EdgeInsets.symmetric(vertical: 8),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Booking from ${booking.dateBegin} to ${booking.dateEnd}',
+                                      style: const TextStyle(
+                                        fontSize: 19,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text('Price: ${booking.price.toStringAsFixed(2)}€'),
-                                  const SizedBox(height: 4),
-                                  Text('Pet: ${petsAsync.value?[index].name ?? 'Unknown'}'),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Status: ${booking.state}',
+                                    const SizedBox(height: 4),
+                                    Text('Price: ${booking.price.toStringAsFixed(2)}€',
                                     style: TextStyle(
-                                      color: booking.state == 'Confermata'
-                                          ? Colors.green
-                                          : Colors.red,
+                                      fontSize: 18
                                     ),
-                                  ),
-                                ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text('Status: ${booking.state}',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      color: booking.state == 'Confermata' ? Colors.green : Colors.red
+                                    ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
+                            )
                           );
                         },
                       ),

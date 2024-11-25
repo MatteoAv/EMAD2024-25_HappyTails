@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
       title: 'HappyTails',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
         textTheme: GoogleFonts.latoTextTheme(
           Theme.of(context).textTheme,
         ),

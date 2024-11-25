@@ -20,15 +20,12 @@ class ExpandableButton extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOutQuad,
         width: isExpanded ? 120 : 95, // Larghezza dinamica
         height: 50,
         decoration: BoxDecoration(
-          color: isExpanded ? Colors.orange[300] : Colors.grey[200],
+          color: isExpanded ? Colors.deepOrange[400] : Colors.grey[300],
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isExpanded ? Colors.deepOrange : Colors.black,
-            width: 2,
-          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -1,24 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:happy_tails/UserManage/repositories/local_database.dart';
-import 'package:happy_tails/app/routes.dart';
-import '../providers/profile_providers.dart'; // Aggiungi il provider per la gestione del profilo
+import '../providers/profile_providers.dart';
 
-class SettingsPage extends ConsumerWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends ConsumerState<SettingsPage> {
+  late final TextEditingController _nickController;
+  late final TextEditingController _cittaController;
+
+  @override
+  void initState() {
+    super.initState();
+    final user = ref.read(userProvider).valueOrNull;
+    _nickController = TextEditingController(text: user?.userName);
+    _cittaController = TextEditingController(text: user?.citta);
+  }
+
+  @override
+  void dispose() {
+    _nickController.dispose();
+    _cittaController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final userAsync = ref.watch(userProvider);
+    final isLoading = ref.watch(userProvider.notifier).isLoading;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: (){
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
         backgroundColor: Colors.deepOrange,
       ),
@@ -27,77 +47,83 @@ class SettingsPage extends ConsumerWidget {
         child: userAsync.when(
           data: (user) {
             return Form(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: ListView(
                 children: [
                   // Modifica Username
                   TextFormField(
-                    initialValue: user?.userName,
                     decoration: const InputDecoration(
                       labelText: 'Username',
                       prefixIcon: Icon(Icons.account_circle),
                     ),
+                    controller: _nickController,
                   ),
                   const SizedBox(height: 16),
 
                   // Modifica Città
                   TextFormField(
-                    initialValue: user?.citta,
                     decoration: const InputDecoration(
                       labelText: 'City',
                       prefixIcon: Icon(Icons.location_city),
                     ),
+                    controller: _cittaController,
                   ),
+                  const SizedBox(height: 24),
+
+                  // Pulsante per confermare le modifiche
                   ElevatedButton(
-                    onPressed: (){
-                      LocalDatabase.instance.updateUser(user?.id, user?.userName, user?.citta);
-                    }, 
-                    child: Text("Conferma modifiche")
-                    ),
-                  const SizedBox(height: 16),
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                            final success = await ref
+                                .read(userProvider.notifier)
+                                .updateUser(
+                                  _nickController.text.trim(),
+                                  _cittaController.text.trim(),
+                                );
+
+                            if (success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Modifiche salvate con successo!'),
+                                ),
+                              );
+                              Navigator.pop(context);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Errore nel salvataggio delle modifiche.'),
+                                ),
+                              );
+                            }
+                          },
+                    child: isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text("Conferma modifiche"),
+                  ),
+                  const SizedBox(height: 24),
 
                   // Metodo di pagamento
                   ListTile(
                     leading: const Icon(Icons.payment),
                     title: const Text('Payment Methods'),
                     onTap: () {
-                      // Logica per gestire i metodi di pagamento
-                      // Naviga a una pagina di gestione metodi di pagamento
+                     // Navigator.pushNamed(context, AppRoutes.paymentMethods);
                     },
                   ),
                   const SizedBox(height: 16),
 
-                  // Interruttore per ricevere notifiche
-                  Row(
-                    children: [
-                      const Icon(Icons.notifications),
-                      const SizedBox(width: 8),
-                      const Text('Receive Notifications'),
-                      //Switch(
-                        //value: user?.receiveNotifications ?? false,
-                        //onChanged: (value) {
-                          // Gestisci l'aggiornamento della preferenza
-                          //ref.read(userProvider.notifier).updateNotificationPreference(value);
-                        //},
-                      //),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
                   // Pulsante per effettuare il logout
                   ElevatedButton(
-                     onPressed: () {
-                      // Gestisci il logout dell'utente
-                      //ref.read(userProvider.notifier).logout();
-                      //Navigator.pop(context); // Torna indietro dopo il logout
+                    onPressed: () {
+                
                     },
                     style: ElevatedButton.styleFrom(
-                      iconColor: Colors.deepOrange, // Colore del bottone
-                      minimumSize: const Size(double.infinity, 50), // Larghezza del bottone
+                      minimumSize: const Size(double.infinity, 50),
+                      backgroundColor: Colors.red,
                     ),
                     child: const Text(
                       'Logout',
-                      style: TextStyle(fontSize: 18),
+                      style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
                 ],

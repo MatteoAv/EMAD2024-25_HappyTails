@@ -1,9 +1,9 @@
 import 'package:happy_tails/UserManage/providers/profile_providers.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../model/user.dart';
-import '../model/pet.dart';
-import '../model/booking.dart';
+import 'package:happy_tails/UserManage/model/user.dart';
+import 'package:happy_tails/UserManage/model/pet.dart';
+import 'package:happy_tails/UserManage/model/booking.dart';
 
 class LocalDatabase {
   static final LocalDatabase instance = LocalDatabase._init();
@@ -73,15 +73,17 @@ class LocalDatabase {
 }
 
 // Aggiungi una funzione per aggiornare i dati dell'utente nel database
-Future<void> updateUser(int ?userId, String ?userName, String ?citta) async {
+Future<bool> updateUser(int ?userId, String ?userName, String ?citta) async {
   final db = await database;
-  await db.update(
+  int res = await db.update(
     'users',
     {'userName': userName, 'citta': citta},
     where: 'id = ?',
     whereArgs: [userId],
   );
-
+  if(res==1) return true;
+  
+  return false;
 }
 
 

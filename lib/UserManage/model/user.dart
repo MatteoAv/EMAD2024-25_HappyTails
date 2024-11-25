@@ -1,8 +1,8 @@
 class User{
   final int id;
-  final String userName;
-  final String imageUrl;
-  final String citta;
+  String userName;
+  String imageUrl;
+  String citta;
 
 
   User({
@@ -33,4 +33,9 @@ class User{
     };
   }
 
+  User copyWith(String newUsername, String newCity){
+    citta = newCity;
+    userName = newUsername;
+    return this;
+  }
 }
