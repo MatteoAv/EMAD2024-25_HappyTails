@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:happy_tails/screens/ricerca/risultato_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happy_tails/screens/ricerca/risultati_provider.dart';
@@ -7,10 +6,6 @@ import 'package:happy_tails/screens/ricerca/risultati_provider.dart';
 import 'package:intl/intl.dart';
 
 
-
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class RisultatiCercaPage extends ConsumerWidget {
   const RisultatiCercaPage({Key? key}) : super(key: key);

@@ -20,7 +20,7 @@ class _ProfiloPetsitterState extends State<ProfiloPetsitter> {
       firstDate: DateTime.now(),
       lastDate: DateTime(2101),
     ))!;
-    if (picked != null && picked != selectedStartDate) {
+    if (picked != selectedStartDate) {
       setState(() {
         selectedStartDate = picked;
         selectedEndDate = null;
@@ -36,7 +36,7 @@ class _ProfiloPetsitterState extends State<ProfiloPetsitter> {
       firstDate: selectedStartDate!, // La data di fine deve essere maggiore o uguale a quella di inizio
       lastDate: DateTime(2101),
     ))!;
-    if (picked != null && picked != selectedEndDate) {
+    if (picked != selectedEndDate) {
       setState(() {
         selectedEndDate = picked;
       });
@@ -49,7 +49,7 @@ class _ProfiloPetsitterState extends State<ProfiloPetsitter> {
       context: context,
       initialTime: startTime ?? TimeOfDay.now(),
     ))!;
-    if (picked != null && picked != startTime) {
+    if (picked != startTime) {
       setState(() {
         startTime = picked;
       });
