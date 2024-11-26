@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happy_tails/home.dart';
+import 'package:happy_tails/screens/ricerca/petsitter_page.dart';
 import '../UserManage/screens/profile_page.dart';
 import '../UserManage/screens/settings_page.dart'; // La tua pagina delle impostazioni
 
@@ -9,6 +9,7 @@ class AppRoutes {
   static const String userProfile = '/profile';
   static const String settings = '/settings';
   static const String homePage = "/";
+  static const String sitterpage = '/sitter_page';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -23,6 +24,10 @@ class AppRoutes {
         return MaterialPageRoute(
           builder: (_) => const SettingsPage(),
         );
+      case '/sitter_page':
+        return MaterialPageRoute(
+          builder: (_) => const ProfiloPetsitter(),
+        );        
       default:
         return MaterialPageRoute(
           builder: (_) => const UserProfilePage(),

@@ -1,4 +1,4 @@
-import 'package:happy_tails/UserManage/providers/profile_providers.dart';
+//import 'package:happy_tails/UserManage/providers/profile_providers.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:happy_tails/UserManage/model/user.dart';
