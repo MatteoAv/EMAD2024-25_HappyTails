@@ -10,6 +10,9 @@ class CercaPage extends StatefulWidget {
 }
 
 class _CercaPageState extends State<CercaPage> {
+  DateTimeRange? _selectedDateRange;
+  final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
+
   final _formKey = GlobalKey<FormState>();
   String? selectedOption1;
   String? selectedOption2;
@@ -140,35 +143,65 @@ class _CercaPageState extends State<CercaPage> {
 
                       // Calendario (DatePicker) con icona
                       Row(
-                        children: [
-                          const Icon(Icons.calendar_today, color: Colors.black),
-                          const SizedBox(width: 8.0),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => _selectDate(context),
-                              child: AbsorbPointer(
-                                child: TextFormField(
-                                  controller: TextEditingController(
-                                    text: selectedDate == null
-                                        ? ''
-                                        : DateFormat('yyyy-MM-dd').format(selectedDate!),
-                                  ),
-                                  decoration: const InputDecoration(
-                                    labelText: 'Data',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Per favore, seleziona una data';
-                                    }
-                                    return null;
-                                  },
+                  children: [
+                    // Date Range Picker
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          final dateRange = await showDateRangePicker(
+                            context: context,
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                            initialDateRange: _selectedDateRange ??
+                                DateTimeRange(
+                                  start: DateTime.now(),
+                                  end: DateTime.now().add(const Duration(days: 7)),
                                 ),
+                          );
+                          if (dateRange != null) {
+                            setState(() {
+                              _selectedDateRange = dateRange;
+                            });
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.3),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
                               ),
-                            ),
+                            ],
+                            border: Border.all(color: Colors.grey),
                           ),
-                        ],
+                          child: Row(
+                            children: [
+                              const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
+                              const SizedBox(width: 8.0),
+                              Text(
+                                _selectedDateRange == null
+                                    ? "Select Date Range"
+                                    : "${_dateFormat.format(_selectedDateRange!.start)} - ${_dateFormat.format(_selectedDateRange!.end)}",
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
+                    ),
+                    const SizedBox(width: 16.0),
+                    // Number of Days
+                    Text(
+                      _selectedDateRange == null
+                          ? "0 giorni"
+                          : "${_selectedDateRange!.duration.inDays} giorni",
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
                       const SizedBox(height: 16.0),
 
                       // Pulsante per inviare il form

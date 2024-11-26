@@ -133,7 +133,6 @@ class _AdvancedHeaderState extends State<_AdvancedHeader> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 16.0),
           // Filters Row
           Container(
             padding: const EdgeInsets.all(12.0),
