@@ -25,13 +25,13 @@ class _CercaPageState extends State<CercaPage> {
   // Funzione per aprire il selettore di data
   Future<void> _selectDate(BuildContext context) async {
     final DateTime initialDate = DateTime.now();
-    final DateTime firstDate = DateTime(2020);
+    final DateTime firstDate = DateTime.now(); // Imposta la data di inizio come oggi
     final DateTime lastDate = DateTime(2101);
 
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDate ?? initialDate,
-      firstDate: firstDate,
+      firstDate: firstDate, // Limita la selezione a partire dalla data odierna
       lastDate: lastDate,
     );
 
@@ -143,65 +143,56 @@ class _CercaPageState extends State<CercaPage> {
 
                       // Calendario (DatePicker) con icona
                       Row(
-                  children: [
-                    // Date Range Picker
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () async {
-                          final dateRange = await showDateRangePicker(
-                            context: context,
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2100),
-                            initialDateRange: _selectedDateRange ??
-                                DateTimeRange(
-                                  start: DateTime.now(),
-                                  end: DateTime.now().add(const Duration(days: 7)),
+                        children: [
+                          const Icon(Icons.calendar_today, size: 20, color: Colors.black),
+                          const SizedBox(width: 8.0),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () async {
+                                final dateRange = await showDateRangePicker(
+                                  context: context,
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateTime(2100),
+                                  initialDateRange: _selectedDateRange ?? DateTimeRange(
+                                    start: DateTime.now(),
+                                    end: DateTime.now().add(const Duration(days: 7)),
+                                  ),
+                                );
+                                if (dateRange != null) {
+                                  setState(() {
+                                    _selectedDateRange = dateRange;
+                                  });
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.3),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                  border: Border.all(color: Colors.grey),
                                 ),
-                          );
-                          if (dateRange != null) {
-                            setState(() {
-                              _selectedDateRange = dateRange;
-                            });
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8.0),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.3),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
+                                child: Row(
+                                  children: [
+                                    const SizedBox(width: 8.0),
+                                    Text(
+                                      _selectedDateRange == null
+                                          ? "Seleziona un intervallo di date"
+                                          : "${_dateFormat.format(_selectedDateRange!.start)} - ${_dateFormat.format(_selectedDateRange!.end)}",
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ],
-                            border: Border.all(color: Colors.grey),
+                            ),
                           ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
-                              const SizedBox(width: 8.0),
-                              Text(
-                                _selectedDateRange == null
-                                    ? "Select Date Range"
-                                    : "${_dateFormat.format(_selectedDateRange!.start)} - ${_dateFormat.format(_selectedDateRange!.end)}",
-                              ),
-                            ],
-                          ),
-                        ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(width: 16.0),
-                    // Number of Days
-                    Text(
-                      _selectedDateRange == null
-                          ? "0 giorni"
-                          : "${_selectedDateRange!.duration.inDays} giorni",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
                       const SizedBox(height: 16.0),
 
                       // Pulsante per inviare il form
@@ -209,15 +200,26 @@ class _CercaPageState extends State<CercaPage> {
                         child: ElevatedButton(
                           onPressed: () {
                             if (_formKey.currentState?.validate() ?? false) {
-                              // Processa i dati del form
-
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Elaborazione in corso...')),
-                              );
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const RisultatiCercaPage()),
-    );
+                              // Verifica che tutti i campi siano compilati
+                              if (selectedOption1 != null && selectedOption2 != null && _selectedDateRange != null) {
+                                // Passa i dati alla pagina successiva
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RisultatiCercaPage(
+                                      selectedOption1!,
+                                      selectedOption2!,
+                                      _selectedDateRange!.start,
+                                      _selectedDateRange!.end,
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                // Mostra un messaggio se i campi non sono completi
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Per favore, completa tutti i campi.')),
+                                );
+                              }
                             }
                           },
                           style: ElevatedButton.styleFrom(
