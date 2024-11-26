@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
+import 'package:happy_tails/app/routes.dart';
 
 
 //Il widget del singolo risultato di ricerca
@@ -16,7 +17,7 @@ class VerticalCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 3,
       child: InkWell(
-        onTap: () {/* Navigate to profile page */},
+        onTap: () {Navigator.pushNamed(context, AppRoutes.sitterpage);},
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
