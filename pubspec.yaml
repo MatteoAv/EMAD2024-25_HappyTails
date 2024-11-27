@@ -42,6 +42,7 @@ dependencies:
   sqflite: ^2.4.1
   riverpod_annotation: ^2.6.1
   booking_calendar: ^1.1.10
+  meta: ^1.15.0
 
 dev_dependencies:
   flutter_test:

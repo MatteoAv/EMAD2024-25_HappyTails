@@ -33,13 +33,14 @@ class ExpandableButton extends StatelessWidget {
             Icon(
               icon,
               color: isExpanded ? Colors.white : Colors.black,
+              size:35
             ),
             if (isExpanded)
               Padding(
                 padding: const EdgeInsets.only(left: 8.0),
                 child: Text(
                   label,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
                 ),
               ),
           ],

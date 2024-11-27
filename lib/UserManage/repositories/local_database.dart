@@ -95,6 +95,17 @@ Future<bool> updateUser(int ?userId, String ?userName, String ?citta) async {
     return maps.map((map) => Pet.fromMap(map)).toList();
   }
 
+
+  Future <Pet?> AddPets(String name, String type, int owner_id) async{
+    final db = await database;
+    int res = 0;
+    res = await db.insert('pets', {'name': name, 'type': type, 'owner_id': owner_id} );
+    if(res!=0){
+      return Pet(id: res, name: name, type: type);
+    }
+    return null;
+  }
+
   Future<List<Booking>> getBookings() async {
     final db = await instance.database;
     final maps = await db.query('bookings');
