@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:happy_tails/screens/ricerca/risultato_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happy_tails/screens/ricerca/risultati_provider.dart';
-
-
-
+import 'package:intl/intl.dart';
 
 class RisultatiCercaPage extends ConsumerWidget {
-  const RisultatiCercaPage({Key? key}) : super(key: key);
+  const RisultatiCercaPage(this.animale, this.provincia, this.DateStart, this.DateEnd, {super.key});
+  final String animale;
+  final String provincia;
+  final DateTime DateStart;
+  final DateTime DateEnd;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,11 +27,76 @@ class RisultatiCercaPage extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          // Custom Header Section
-          _buildHeader(),
-
-          // Divider for clarity between header and results
-          const Divider(height: 1, thickness: 1, color: Colors.black12),
+          // Display parameters at the top as static text
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    // Display parameters (fixed text)
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.0),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        alignment: Alignment.center, // Centers the text
+                        child: Text("Animale: $animale", style: const TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                    const SizedBox(width: 16.0),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.0),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        alignment: Alignment.center, // Centers the text
+                        child: Text("Provincia: $provincia", style: const TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16.0),
+                Row(
+                  children: [
+                    // Date display (non-editable)
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.0),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        alignment: Alignment.center, // Centers the text
+                        child: Text("Inizio: ${DateFormat('dd/MM/yyyy').format(DateStart)}", style: const TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                    const SizedBox(width: 16.0),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.0),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        alignment: Alignment.center, // Centers the text
+                        child: Text("Fine: ${DateFormat('dd/MM/yyyy').format(DateEnd)}", style: const TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
 
           // Results List
           Expanded(
@@ -56,74 +122,4 @@ class RisultatiCercaPage extends ConsumerWidget {
       ),
     );
   }
-
-  // Header with two levels
-  // Header Widget
-  Widget _buildHeader() {
-    return Container(
-      color: Colors.blue.shade50, // Light background for header
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Level 1: Animal and City
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildChip('Cane'),
-              const SizedBox(width: 8),
-              _buildChip('Ancona'),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Level 2: Date Range and Stay Length
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: '22-29 Agosto',
-                  style: GoogleFonts.lato(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blueAccent,
-                  ),
-                ),
-                TextSpan(
-                  text: '  ·  7 giorni',
-                  style: GoogleFonts.lato(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black54,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Chip Widget for Animal and City
-  Widget _buildChip(String label) {
-    return Chip(
-      label: Text(
-        label,
-        style: GoogleFonts.lato(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: Colors.blueAccent,
-        ),
-      ),
-      backgroundColor: Colors.white,
-      side: BorderSide(color: Colors.blueAccent),
-      elevation: 2,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    );
-  }
-
 }
-
-

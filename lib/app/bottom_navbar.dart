@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:happy_tails/UserManage/screens/profile_page.dart';
 import 'package:happy_tails/home.dart';
 import 'package:happy_tails/prenotazioni.dart';
-import 'package:happy_tails/profilo.dart';
 import 'package:happy_tails/ricerca.dart';
-import 'package:happy_tails/screens/ricerca/risultatiRicerca_pagina.dart';
+
 
 
 
