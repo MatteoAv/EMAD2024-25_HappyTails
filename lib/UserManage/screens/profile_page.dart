@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:happy_tails/UserManage/repositories/local_database.dart';
 import 'package:happy_tails/UserManage/widgets/expandable_button.dart';
 import 'package:happy_tails/app/routes.dart';
 import 'package:happy_tails/UserManage/providers/profile_providers.dart';
@@ -13,7 +14,9 @@ class UserProfilePage extends ConsumerWidget {
     final petsAsync = ref.watch(petsProvider);
     final bookingsAsync = ref.watch(bookingsProvider);
     final isPetsTabSelected = ref.watch(tabSelectionProvider);
+    final addPetsate = ref.watch(addPetProvider);
 
+    int user_id;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -95,7 +98,7 @@ class UserProfilePage extends ConsumerWidget {
                 ),
                 SizedBox(width: 30),
                 ExpandableButton(
-                  icon: Icons.calendar_today,
+                  icon: Icons.calendar_month,
                   label: 'Bookings',
                   isExpanded: !isPetsTabSelected,
                   onTap: () => ref.read(tabSelectionProvider.notifier).state = false,
@@ -224,6 +227,99 @@ class UserProfilePage extends ConsumerWidget {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+          context : context, 
+          builder : (context) => const AddPetDialog());
+          },
+        child: const Icon(Icons.add),
+        backgroundColor: Colors.deepOrange,
+      ),
+    );
+  }
+}
+class AddPetDialog extends ConsumerWidget {
+  const AddPetDialog({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final addPetState = ref.watch(addPetProvider);
+    final addPetNotifier = ref.read(addPetProvider.notifier);
+
+    final animalTypes = {
+      'Dog': Icons.pets,
+      'Cat': Icons.emoji_nature,
+      'Fish': Icons.water,
+      'Bird': Icons.airline_seat_flat,
+      'Giraffe': Icons.sailing,
+    };
+
+    return AlertDialog(
+      title: const Text('Add a Pet'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            decoration: const InputDecoration(
+              labelText: 'Pet Name',
+              prefixIcon: Icon(Icons.edit),
+            ),
+            onChanged: addPetNotifier.setName,
+          ),
+          const SizedBox(height: 16),
+          const Text('Select Animal Type:'),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children: animalTypes.entries.map((entry) {
+              final type = entry.key;
+              final icon = entry.value;
+
+              return GestureDetector(
+                onTap: () => addPetNotifier.selectType(type),
+                child: AnimatedScale(
+                  scale: addPetState.selectedType == type ? 1.2 : 1.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: CircleAvatar(
+                    backgroundColor: addPetState.selectedType == type
+                        ? Colors.deepOrange
+                        : Colors.grey[300],
+                    radius: 30,
+                    child: Icon(icon, 
+                    color: Colors.white, 
+                    size: 30,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: addPetState.selectedType != null &&
+                  addPetState.name.isNotEmpty
+              ? () {
+                  final petName = addPetState.name;
+                  final petType = addPetState.selectedType!;
+                  final user_id = ref.watch(userProvider).value?.id;
+                  if(user_id!=null){
+                  ref.read(petsProvider.notifier).AddPet(petName, petType,user_id);
+                  addPetNotifier.reset();
+                  Navigator.pop(context);
+                  }
+                }
+              : null,
+          child: const Text('Confirm'),
+        ),
+      ],
     );
   }
 }
