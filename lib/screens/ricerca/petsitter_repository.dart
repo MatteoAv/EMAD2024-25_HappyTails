@@ -1,3 +1,4 @@
+/*
 import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
 
 /// Repository per il recupero dei dati di PetSitter
@@ -37,3 +38,4 @@ class CardRepository {
     );
   }
 }
+*/

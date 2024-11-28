@@ -41,7 +41,7 @@ class VerticalCard extends StatelessWidget {
                     children: [
                       // City (above name)
                       Text(
-                        item.citta,
+                        item.provincia,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.grey[600],
                         ),
@@ -68,22 +68,11 @@ class VerticalCard extends StatelessWidget {
                       ),
                       
                       // Happy People Text
-                      Text(
-                        '10 people happy',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
+                      const SizedBox(height: 8),
+                      const Text("Migliaia di persone felici!"),
                     ],
                   ),
                 ),
-              ),
-              
-              // Right Arrow
-              Icon(
-                Icons.chevron_right,
-                color: Colors.grey[600],
-                size: 24,
               ),
             ],
           ),
