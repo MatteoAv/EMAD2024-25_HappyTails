@@ -184,7 +184,7 @@ class _AdvancedHeaderState extends State<_AdvancedHeader> {
                       child: DropdownButtonFormField<String>(
                         value: selectedAnimal,
                         decoration: InputDecoration(
-                          labelText: "Cane",
+                          labelText: "Pet",
                           border: OutlineInputBorder(),
                           prefixIcon: const Icon(Icons.pets),
                         ),
@@ -245,57 +245,58 @@ class _AdvancedHeaderState extends State<_AdvancedHeader> {
                 const SizedBox(height: 16.0),
                 // Date Range Selector
                 Row(
-                  children: [
-                    // Date Range Picker
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () async {
-                          final dateRange = await showDateRangePicker(
-                            context: context,
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2100),
-                            initialDateRange: selectedDateRange,
-                          );
-                          if (dateRange != null) {
-                            setState(() {
-                              selectedDateRange = dateRange;
-                            });
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8.0),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.3),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                            border: Border.all(color: Colors.grey),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
-                              const SizedBox(width: 8.0),
-                              Text(
-                                "${_dateFormat.format(selectedDateRange.start)} - ${_dateFormat.format(selectedDateRange.end)}",
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16.0),
-                    // Number of Days
-                    Text(
-                      "${selectedDateRange.duration.inDays} giorni",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
+  children: [
+    // Date Range Picker
+    Expanded(
+      child: GestureDetector(
+        onTap: () async {
+          final dateRange = await showDateRangePicker(
+            context: context,
+            firstDate: DateTime.now(), // Prevent past date selection
+            lastDate: DateTime(2100),
+            initialDateRange: selectedDateRange,
+          );
+          if (dateRange != null) {
+            setState(() {
+              selectedDateRange = dateRange;
+            });
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+            border: Border.all(color: Colors.grey),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
+              const SizedBox(width: 8.0),
+              Text(
+                "${_dateFormat.format(selectedDateRange.start)} - ${_dateFormat.format(selectedDateRange.end)}",
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+    const SizedBox(width: 16.0),
+    // Number of Days
+    Text(
+      "${selectedDateRange.duration.inDays} giorni",
+      style: const TextStyle(fontWeight: FontWeight.bold),
+    ),
+  ],
+),
+
               ],
             ),
           ),
