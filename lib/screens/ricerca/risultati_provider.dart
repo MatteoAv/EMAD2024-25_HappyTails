@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
-import 'package:happy_tails/screens/ricerca/petsitter_repository.dart';
-
+//import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
+//import 'package:happy_tails/screens/ricerca/petsitter_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+/*
 /// Documentazione del repository provider
 /// 
 /// Crea un'istanza singleton di [CardRepository] usando il Provider di Riverpod.
@@ -14,8 +15,6 @@ import 'package:happy_tails/screens/ricerca/petsitter_repository.dart';
 /// - Centralizza la logica dell'origine dei dati
 
 final cardRepositoryProvider = Provider<CardRepository>((ref) => CardRepository());
-
-
 
 /// FutureProvider per il recupero asincrono dei dati del card
 /// 
@@ -42,6 +41,19 @@ final cardListProvider = FutureProvider<List<PetSitter>>((ref) async {
 
 
 });
+*/
+final risultatiProvider = FutureProvider.autoDispose((ref) async {
+  final response = await Supabase.instance.client
+      .from('petsitter')
+      .select();
+
+  // Controllo e gestione degli errori
+  // TO DO
+
+  return response as List<dynamic>;
+});
+
+
 
 
 

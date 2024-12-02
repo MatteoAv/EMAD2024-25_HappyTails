@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:happy_tails/screens/ricerca/risultato_card.dart';
+//import 'package:happy_tails/screens/ricerca/risultato_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+//import 'package:happy_tails/app/routes.dart';
+import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
 import 'package:happy_tails/screens/ricerca/risultati_provider.dart';
+import 'package:happy_tails/screens/ricerca/risultato_card.dart';
 import 'package:intl/intl.dart';
 
 class RisultatiCercaPage extends ConsumerWidget {
@@ -14,7 +17,9 @@ class RisultatiCercaPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cardListAsyncValue = ref.watch(cardListProvider);
+    //final cardListAsyncValue = ref.watch(cardListProvider);
+    final risultatiAsyncValue = ref.watch(risultatiProvider);
+
 
     return Scaffold(
       appBar: AppBar(
@@ -36,16 +41,28 @@ class RisultatiCercaPage extends ConsumerWidget {
             DateEnd: DateEnd,
           ),
 
-          // Results Info Row
+          
+          // Risultati Info Row
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Left: Results count
-                const Text(
-                  "17 risultati",
-                  style: TextStyle(
+                Text(
+                  "${risultatiAsyncValue.when(
+                    data: (risultati) {
+                      final provinciaFiltro = provincia;
+                      final risultatiFiltrati = risultati.where((petSitter) {
+                        return petSitter['provincia'] == provinciaFiltro;
+                      }).toList();
+
+                      return risultatiFiltrati.length; // Numero di risultati filtrati
+                    },
+                    loading: () => 0, // Se i dati non sono ancora caricati, mostra 0
+                    error: (err, stack) => 0, // In caso di errore, mostra 0
+                  )} risultati",
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18, // Bigger text size
                   ),
@@ -93,7 +110,9 @@ class RisultatiCercaPage extends ConsumerWidget {
             ),
           ),
 
+
           // Results List
+          /* DA ERRORE ADESSO
           Expanded(
             child: cardListAsyncValue.when(
               data: (cards) {
@@ -113,12 +132,58 @@ class RisultatiCercaPage extends ConsumerWidget {
               error: (err, stack) => Center(child: Text('Error: $err')),
             ),
           ),
+          */
+
+
+          //AGGIUNTA RISULTATI QUERY
+          Expanded(
+            child: risultatiAsyncValue.when(
+              data: (risultati) {
+                // Filtro i risultati in base alla provincia passata alla pagina
+                final provinciaFiltro = provincia; // Provincia passata come parametro
+                final risultatiFiltrati = risultati.where((petSitter) {
+                  return petSitter['provincia'] == provinciaFiltro;
+                }).toList();
+
+                // Se non ci sono pet sitters nella provincia specificata
+                if (risultatiFiltrati.isEmpty) {
+                  return Center(child: Text('Nessun pet sitter trovato per questa provincia.'));
+                }
+
+                // Lista di risultati filtrati
+                return ListView.builder(
+                  itemCount: risultatiFiltrati.length,
+                  itemBuilder: (context, index) {
+                    final petSitterData = risultatiFiltrati[index];
+
+                    // Create a PetSitter instance
+                    final petSitter = PetSitter(
+                      nome: petSitterData['nome'] ?? 'Senza Nome',
+                      cognome: petSitterData['cognome'] ?? 'Senza Cognome',
+                      provincia: petSitterData['provincia'] ?? 'Provincia non disponibile',
+                      imageUrl: petSitterData['imageUrl'] ?? 'https://images.contentstack.io/v3/assets/blt6f84e20c72a89efa/blt2577cbc57a834982/6363df6833df8e693d1e44c7/img-pet-sitter-download-header.jpg', // Default image
+                      email: petSitterData['email']?? 'Senza email'
+                    );
+
+                    // Return the VerticalCard widget
+                    return VerticalCard(item: petSitter);
+                  },
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()), // Stato di caricamento
+              error: (err, stack) => Center(child: Text('Errore: $err')), // Stato di errore
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
+
+
+
+//INFORMAZIONI FILTRO
 class _AdvancedHeader extends StatefulWidget {
   const _AdvancedHeader({
     Key? key,
