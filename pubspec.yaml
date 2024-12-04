@@ -77,6 +77,8 @@ flutter:
     - assets/dog.png    
     - assets/dog1.png     
     - assets/profile-setting.png
+    - assets/IconPets/dog.png
+    - assets/IconPets/cat.png
 
 
 
