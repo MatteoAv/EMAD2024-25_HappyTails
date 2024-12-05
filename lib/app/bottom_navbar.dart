@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:happy_tails/UserManage/screens/profile_page.dart';
 import 'package:happy_tails/home.dart';
 import 'package:happy_tails/prenotazioni.dart';
-import 'package:happy_tails/ricerca.dart';
+import 'package:happy_tails/screens/ricerca/risultatiricerca_pagina.dart';
 
 
 
@@ -20,7 +20,7 @@ class _MainScaffoldState extends State<MainScaffold> {
   // Pages to display in the navigation
   final List<Widget> _pages = const [
     HomePage(),
-    CercaPage(),
+    RisultatiCercaPage(),
     PrenotazioniPage(),
     UserProfilePage(),
   ];
