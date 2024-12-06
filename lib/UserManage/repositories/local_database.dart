@@ -35,6 +35,7 @@ class LocalDatabase {
         id INTEGER PRIMARY KEY autoincrement,
         userName TEXT NOT NULL,
         imageUrl TEXT NOT NULL,
+        email TEXT NOT NULL,
         citta TEXT NOT NULL
       );
     ''');
@@ -112,30 +113,25 @@ Future<bool> updateUser(int ?userId, String ?userName, String ?citta) async {
     return maps.map((map) => Booking.fromMap(map)).toList();
   }
 
+
+  void insertUser(String userName, String email, String citta, String imageUrl) async{
+    final db = await instance.database;
+    await db.insert('users',{ 
+    'userName' : userName,
+    'citta' : citta,
+    'email' : email,
+    'imageUrl': imageUrl
+    }
+    );
+  }
+
+
   Future<User?> getUser() async {
     final db = await instance.database;
     final maps = await db.query('users', limit: 1);
-
     if (maps.isNotEmpty) {
       return User.fromMap(maps.first);
     }
     return null;
-  }
-
-  Future<void> initializeDummyData() async {
-  final db = await instance.database;
-  // Aggiungi un utente fittizio
-  await db.insert('users', {
-    'id': 1,
-    'userName': 'John Doe',
-    'citta': 'Springfield',
-    'imageUrl':'https://marketplace.canva.com/EAF-i9Rhbp4/1/0/1600w/canva-sfondo-neutro-cerchio-immagine-di-profilo-linkedin-3nYoZ1kUL0s.jpg'
-  });
-
-  // Aggiungi animali fittizi
-  await db.insert('pets', {'id': 1, 'name': 'Buddy', 'type': 'Dog', 'owner_id': 1});
-  await db.insert('pets', {'id': 2, 'name': 'Mittens', 'type': 'Cat', 'owner_id':1});
-  // Aggiungi prenotazioni fittizie
-  await db.insert('bookings', {'id': 1, 'dateBegin': '2024-11-25', 'id_trans': 10, 'dateEnd':'2024-12-02', 'price':10.20, 'state':'Confermata','state_Payment': 'Pagata','pet_id':1});
   }
 }

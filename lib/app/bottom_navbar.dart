@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:happy_tails/UserManage/screens/profile_page.dart';
 import 'package:happy_tails/home.dart';
 import 'package:happy_tails/prenotazioni.dart';
-import 'package:happy_tails/ricerca.dart';
-
-
+import 'package:happy_tails/screens/ricerca/risultatiricerca_pagina.dart';
+import 'package:happy_tails/Auth/auth_repository.dart';
+import 'package:happy_tails/Auth/registration.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 
 class MainScaffold extends StatefulWidget {
@@ -16,14 +18,32 @@ class MainScaffold extends StatefulWidget {
 
 class _MainScaffoldState extends State<MainScaffold> {
   int _selectedIndex = 0;
+  bool isLogged = LoginPage().logged;
+  final SupabaseClient supabase = Supabase.instance.client;
+  late List<Widget> _pages;
 
-  // Pages to display in the navigation
-  final List<Widget> _pages = const [
-    HomePage(),
-    CercaPage(),
-    PrenotazioniPage(),
-    UserProfilePage(),
-  ];
+
+   @override
+  void initState() {
+    super.initState();
+    _updatePages();
+  }
+
+  // Metodo per aggiornare la lista delle pagine
+  void _updatePages() {
+    final session = supabase.auth.currentSession;
+    setState(() {
+      _pages = [
+        const HomePage(),
+        const RisultatiCercaPage(),
+        const PrenotazioniPage(),
+        // Aggiungi LoginPage o ProfilePage in base alla sessione
+        if (session == null)  LoginPage(),
+        if (session != null) const UserProfilePage(),
+      ];
+    });
+  }
+
 
   // Handle navigation bar selection
   void _onItemTapped(int index) {
@@ -78,4 +98,6 @@ class _MainScaffoldState extends State<MainScaffold> {
       label: label,
     );
   }
+
+
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:happy_tails/app/routes.dart';
 
 class PrenotazioniPage extends StatelessWidget {
   const PrenotazioniPage({super.key});
@@ -74,7 +75,7 @@ class PrenotazioniPage extends StatelessWidget {
                             //const SizedBox(height: 12),
                             ElevatedButton(
                               onPressed: () {
-                                // Aggiungi logica per registrarsi
+                                Navigator.pushNamed(context, AppRoutes.registrationPage);
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color.fromARGB(255, 244, 132, 34),
