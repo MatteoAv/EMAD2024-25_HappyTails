@@ -188,42 +188,67 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                                 _isLoading = true;
                               });
 
-                              try {
-                                String animalColumn = '';
-                                switch (selectedAnimal) {
-                                  case 'Cane':
-                                    animalColumn = 'cani';
-                                    break;
-                                  case 'Gatto':
-                                    animalColumn = 'gatti';
-                                    break;
-                                  case 'Uccello':
-                                    animalColumn = 'uccelli';
-                                    break;
-                                  case 'Pesce':
-                                    animalColumn = 'pesci';
-                                    break;
-                                  case 'Rettile':
-                                    animalColumn = 'rettili';
-                                    break;
-                                  case 'Roditore':
-                                    animalColumn = 'roditori';
-                                    break;
-                                  default:
-                                    animalColumn = '';
-                                }
-                                if (animalColumn.isNotEmpty) {
-                                  final response = await Supabase.instance.client
-                                      .from('petsitter')
-                                      .select()
-                                      .eq('provincia', selectedProvince)
-                                      .eq(animalColumn, true);
 
-                                  setState(() {
-                                    _petSitters = List<Map<String, dynamic>>.from(response);
-                                  });
-                                }
-                              } catch (e) {
+    try {
+      String animalColumn = '';
+      switch (selectedAnimal) {
+        case 'Cane':
+          animalColumn = 'cani';
+          break;
+        case 'Gatto':
+          animalColumn = 'gatti';
+          break;
+        case 'Uccello':
+          animalColumn = 'uccelli';
+          break;
+        case 'Pesce':
+          animalColumn = 'pesci';
+          break;
+        case 'Rettile':
+          animalColumn = 'rettili';
+          break;
+        case 'Roditore':
+          animalColumn = 'roditori';
+          break;
+        default:
+          animalColumn = '';
+      }
+
+      if (animalColumn.isNotEmpty) {
+        // Query per ottenere i pet sitters
+        final response = await Supabase.instance.client
+            .from('petsitter')
+            .select(
+                '''
+                *,
+                disponibilita(id, data_inizio, data_fine)
+                ''')
+            .eq('provincia', selectedProvince)
+            .eq(animalColumn, true);
+
+        final filteredResults = (response as List).where((petSitter) {
+          final disponibilita = petSitter['disponibilita'] as List<dynamic>? ?? [];
+          for (final range in disponibilita) {
+            final DateTime start = DateTime.parse(range['data_inizio']);
+            final DateTime end = DateTime.parse(range['data_fine']);
+            if(
+                selectedDateRange.start.isBefore(end) && 
+                (selectedDateRange.start.isAfter(start) || selectedDateRange.start.isAtSameMomentAs(start)) && 
+                selectedDateRange.end.isAfter(start) && 
+                (selectedDateRange.end.isBefore(end) ||  selectedDateRange.end.isAtSameMomentAs(end))
+              )
+              {
+                return true; // Intersezione trovata
+              }
+          }
+          return false; // Nessuna disponibilità valida
+        }).toList();
+
+        setState(() {
+          _petSitters = List<Map<String, dynamic>>.from(filteredResults);
+        });
+      }
+    } catch (e) {
                                 print('Errore: $e');
                               } finally {
                                 setState(() {
