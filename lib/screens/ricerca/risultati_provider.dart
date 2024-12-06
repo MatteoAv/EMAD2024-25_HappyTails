@@ -1,8 +1,9 @@
+/*
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 //import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
 //import 'package:happy_tails/screens/ricerca/petsitter_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-/*
+
 /// Documentazione del repository provider
 /// 
 /// Crea un'istanza singleton di [CardRepository] usando il Provider di Riverpod.
@@ -37,22 +38,8 @@ final cardListProvider = FutureProvider<List<PetSitter>>((ref) async {
   // Correctly retrieve and await the result from the repository
   final repository = ref.watch(cardRepositoryProvider);
   return repository.fetchCards(); // Ensure this is awaited
-  
-
-
 });
 */
-final risultatiProvider = FutureProvider.autoDispose((ref) async {
-  final response = await Supabase.instance.client
-      .from('petsitter')
-      .select();
-
-  // Controllo e gestione degli errori
-  // TO DO
-
-  return response as List<dynamic>;
-});
-
 
 
 

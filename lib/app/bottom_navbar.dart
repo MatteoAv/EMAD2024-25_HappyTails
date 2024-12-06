@@ -3,8 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:happy_tails/UserManage/screens/profile_page.dart';
 import 'package:happy_tails/home.dart';
 import 'package:happy_tails/prenotazioni.dart';
-import 'package:happy_tails/profilo.dart';
-import 'package:happy_tails/ricerca.dart';
+import 'package:happy_tails/screens/ricerca/risultatiricerca_pagina.dart';
 import 'package:happy_tails/Auth/auth_repository.dart';
 import 'package:happy_tails/Auth/registration.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -36,7 +35,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     setState(() {
       _pages = [
         const HomePage(),
-        const CercaPage(),
+        const RisultatiCercaPage(),
         const PrenotazioniPage(),
         // Aggiungi LoginPage o ProfilePage in base alla sessione
         if (session == null)  LoginPage(),
