@@ -4,6 +4,36 @@ import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
 import 'package:happy_tails/screens/ricerca/risultato_card.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+// URL dell'API di GeoNames
+const String geonamesUrl = 'http://api.geonames.org/searchJSON?country=IT&maxRows=500&username=HappyTails';
+
+// Funzione per ottenere le città italiane
+Future<List<String>> fetchItalianCities() async {
+  try {
+    final response = await http.get(Uri.parse(geonamesUrl));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['geonames'] != null) {
+        final cities = (data['geonames'] as List)
+            .map((city) => city['name'] as String)
+            .toList();
+        return cities;
+      } else {
+        throw Exception('Nessuna città trovata');
+      }
+    } else {
+      throw Exception('Errore nella richiesta: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Errore nel caricamento delle città: $e');
+  }
+}
+
+
 
 // Definisci il provider per gestire la selezione delle date
 final selectedDateRangeProvider = StateProvider<DateTimeRange?>((ref) {
@@ -84,35 +114,48 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                           const SizedBox(width: 16.0),
                           // Location filter (Combobox/Autocomplete)
                           Expanded(
-                            child: Autocomplete<String>(
-                              initialValue: TextEditingValue(text: selectedProvince),
-                              optionsBuilder: (TextEditingValue textEditingValue) {
-                                final List<String> locations = ["Avellino", "Salerno", "Benevento"];
-                                if (textEditingValue.text.isEmpty) {
-                                  return const Iterable<String>.empty();
+                            child: FutureBuilder<List<String>>(
+                              future: fetchItalianCities(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return const CircularProgressIndicator();
+                                } else if (snapshot.hasError) {
+                                  return const Center(child: Text('Errore nel caricamento delle città'));} 
+                                  else if (snapshot.hasData) {
+                                  final cities = snapshot.data!;
+                                  return Autocomplete<String>(
+                                    initialValue: TextEditingValue(text: selectedProvince),
+                                    optionsBuilder: (TextEditingValue textEditingValue) {
+                                      if (textEditingValue.text.isEmpty) {
+                                        return const Iterable<String>.empty();
+                                      }
+                                      return cities.where((city) => city
+                                          .toLowerCase()
+                                          .contains(textEditingValue.text.toLowerCase()));
+                                    },
+                                    fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                                      return TextField(
+                                        controller: controller,
+                                        focusNode: focusNode,
+                                        decoration: InputDecoration(
+                                          labelText: "Città",
+                                          border: OutlineInputBorder(),
+                                          prefixIcon: const Icon(Icons.location_on),
+                                        ),
+                                      );
+                                    },
+                                    onSelected: (String selection) {
+                                      setState(() {
+                                        selectedProvince = selection;
+                                      });
+                                    },
+                                  );
+                                } else {
+                                  return const Center(child: Text('Nessuna città disponibile'));
                                 }
-                                return locations.where((location) => location
-                                    .toLowerCase()
-                                    .contains(textEditingValue.text.toLowerCase()));
-                              },
-                              fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-                                return TextField(
-                                  controller: controller,
-                                  focusNode: focusNode,
-                                  decoration: InputDecoration(
-                                    labelText: "Provincia",
-                                    border: OutlineInputBorder(),
-                                    prefixIcon: const Icon(Icons.location_on),
-                                  ),
-                                );
-                              },
-                              onSelected: (String selection) {
-                                setState(() {
-                                  selectedProvince = selection;
-                                });
                               },
                             ),
-                          ),
+                          )
                         ],
                       ),
                       const SizedBox(height: 16.0),
@@ -189,66 +232,66 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                               });
 
 
-    try {
-      String animalColumn = '';
-      switch (selectedAnimal) {
-        case 'Cane':
-          animalColumn = 'cani';
-          break;
-        case 'Gatto':
-          animalColumn = 'gatti';
-          break;
-        case 'Uccello':
-          animalColumn = 'uccelli';
-          break;
-        case 'Pesce':
-          animalColumn = 'pesci';
-          break;
-        case 'Rettile':
-          animalColumn = 'rettili';
-          break;
-        case 'Roditore':
-          animalColumn = 'roditori';
-          break;
-        default:
-          animalColumn = '';
-      }
+                              try {
+                                String animalColumn = '';
+                                switch (selectedAnimal) {
+                                  case 'Cane':
+                                    animalColumn = 'cani';
+                                    break;
+                                  case 'Gatto':
+                                    animalColumn = 'gatti';
+                                    break;
+                                  case 'Uccello':
+                                    animalColumn = 'uccelli';
+                                    break;
+                                  case 'Pesce':
+                                    animalColumn = 'pesci';
+                                    break;
+                                  case 'Rettile':
+                                    animalColumn = 'rettili';
+                                    break;
+                                  case 'Roditore':
+                                    animalColumn = 'roditori';
+                                    break;
+                                  default:
+                                    animalColumn = '';
+                                }
 
-      if (animalColumn.isNotEmpty) {
-        // Query per ottenere i pet sitters
-        final response = await Supabase.instance.client
-            .from('petsitter')
-            .select(
-                '''
-                *,
-                disponibilita(id, data_inizio, data_fine)
-                ''')
-            .eq('provincia', selectedProvince)
-            .eq(animalColumn, true);
+                                if (animalColumn.isNotEmpty) {
+                                  // Query per ottenere i pet sitters
+                                  final response = await Supabase.instance.client
+                                      .from('petsitter')
+                                      .select(
+                                          '''
+                                          *,
+                                          disponibilita(id, data_inizio, data_fine)
+                                          ''')
+                                      .eq('provincia', selectedProvince)
+                                      .eq(animalColumn, true);
 
-        final filteredResults = (response as List).where((petSitter) {
-          final disponibilita = petSitter['disponibilita'] as List<dynamic>? ?? [];
-          for (final range in disponibilita) {
-            final DateTime start = DateTime.parse(range['data_inizio']);
-            final DateTime end = DateTime.parse(range['data_fine']);
-            if(
-                selectedDateRange.start.isBefore(end) && 
-                (selectedDateRange.start.isAfter(start) || selectedDateRange.start.isAtSameMomentAs(start)) && 
-                selectedDateRange.end.isAfter(start) && 
-                (selectedDateRange.end.isBefore(end) ||  selectedDateRange.end.isAtSameMomentAs(end))
-              )
-              {
-                return true; // Intersezione trovata
-              }
-          }
-          return false; // Nessuna disponibilità valida
-        }).toList();
+                                  final filteredResults = (response as List).where((petSitter) {
+                                    final disponibilita = petSitter['disponibilita'] as List<dynamic>? ?? [];
+                                    for (final range in disponibilita) {
+                                      final DateTime start = DateTime.parse(range['data_inizio']);
+                                      final DateTime end = DateTime.parse(range['data_fine']);
+                                      if(
+                                          selectedDateRange.start.isBefore(end) && 
+                                          (selectedDateRange.start.isAfter(start) || selectedDateRange.start.isAtSameMomentAs(start)) && 
+                                          selectedDateRange.end.isAfter(start) && 
+                                          (selectedDateRange.end.isBefore(end) ||  selectedDateRange.end.isAtSameMomentAs(end))
+                                        )
+                                        {
+                                          return true; // Intersezione trovata
+                                        }
+                                    }
+                                    return false; // Nessuna disponibilità valida
+                                  }).toList();
 
-        setState(() {
-          _petSitters = List<Map<String, dynamic>>.from(filteredResults);
-        });
-      }
-    } catch (e) {
+                                  setState(() {
+                                    _petSitters = List<Map<String, dynamic>>.from(filteredResults);
+                                  });
+                                }
+                              } catch (e) {
                                 print('Errore: $e');
                               } finally {
                                 setState(() {
