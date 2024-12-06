@@ -11,7 +11,10 @@ class PetCard extends StatelessWidget{
 
   static const Map<String, String> petsIcons = {
     'Dog' : "$pathIcon/dog.png",
-    'Cat' : "$pathIcon/cat.png"
+    'Cat' : "$pathIcon/cat.png",
+    'Fish' : "$pathIcon/fish.png",
+    'Bird' : "$pathIcon/dove.png",
+    'Other' : "$pathIcon/hamster.png"
   };
 
   PetCard({

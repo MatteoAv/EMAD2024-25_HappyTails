@@ -10,20 +10,25 @@ bookingAsync usa il book provider per aggiornare le liste delle prenotazioni in 
 dall'utente, se l'utente effettua o cancella una prenotazione, il book provider notificherà le modifiche
 e di conseguenza bookAsync si aggiornerà
 
+Il widget è suddiviso in tre parti 
+1) Informazioni relative all'utente dove si effettua una chiamata a UserAsync che ritornerà le informazioni
+relative organizzate in righe e colonne: immagine di profilo, username dell'utente e città di residenza.
 
+2)Pulsanti a scorrimento per le liste di pet dell'utente e delle prenotazioni, organizzati in righe, i pulsanti
+fanno uso del widget Expandable Button organizzati in colonna che aggiorneranno il booleano IsPetsTabSelected.
+Se è true allora l'utente ha selezionato il pulsante dei pet, falso altrimenti.
+
+3) Lista delle prenotazioni e dei pet: in base a quale pulsante è selezionato il widget tramite ListBuilder
+costruirà una lista contenente delle Card interattive create con InkWell dei pet e delle prenotazioni,
+ogni Card rappresenta un risultato ritornato tramite petsAsync e bookAsync. Le informazioni relative ai pet
+sono : icona del pet in base al tipo, nome, tipo del pet e pulsante che riporta al libretto sanitario.
+Le informazioni relative alle prenotazioni sono: data inizio e data fine, stato, prezzo ed animale coinvolto.
+
+In fondo alla pagina è presente anche un bottone di tipo FloatingActionButton che permette di aggiungere un 
+nuovo pet. Tramite la funzione OnTap() aprirà un menù a pop up gestito dalla classe AddPetDialog che attraverso
+il notifier addPetProvider aggiungerà un pet al db locale ed esterno per poi notificare alla lista dei pet di 
+aggiornarsi. 
  */
-
-
-
-
-
-
-
-
-
-
-
-
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,8 +37,10 @@ import 'package:happy_tails/app/routes.dart';
 import 'package:happy_tails/UserManage/providers/profile_providers.dart';
 import 'package:happy_tails/UserManage/widgets/PetCard.dart';
 
+
 class UserProfilePage extends ConsumerWidget {
   const UserProfilePage({Key? key}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -233,6 +240,7 @@ class UserProfilePage extends ConsumerWidget {
 }
 class AddPetDialog extends ConsumerWidget {
   const AddPetDialog({Key? key}) : super(key: key);
+  final String iconPath = 'assets/IconPets';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -240,11 +248,11 @@ class AddPetDialog extends ConsumerWidget {
     final addPetNotifier = ref.read(addPetProvider.notifier);
 
     final animalTypes = {
-      'Dog': Icons.pets,
-      'Cat': Icons.emoji_nature,
-      'Fish': Icons.water,
-      'Bird': Icons.airline_seat_flat,
-      'Giraffe': Icons.sailing,
+      'Dog': "$iconPath/dog.png",
+      'Cat': "$iconPath/cat.png",
+      'Fish': "$iconPath/fish.png",
+      'Bird': "$iconPath/dove.png",
+      'Other': "$iconPath/hamster.png",
     };
 
     return AlertDialog(
@@ -279,10 +287,7 @@ class AddPetDialog extends ConsumerWidget {
                         ? Colors.deepOrange
                         : Colors.grey[300],
                     radius: 30,
-                    child: Icon(icon, 
-                    color: Colors.white, 
-                    size: 30,
-                    ),
+                    child: Image.asset(icon.toString(), width: 30, height: 30,)
                   ),
                 ),
               );
