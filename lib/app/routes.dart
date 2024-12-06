@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:happy_tails/Auth/auth_repository.dart';
 import 'package:happy_tails/Auth/registration.dart';
 import 'package:happy_tails/home.dart';
 import 'package:happy_tails/screens/ricerca/petsitter_page.dart';
@@ -12,30 +13,32 @@ class AppRoutes {
   static const String homePage = "/";
   static const String sitterpage = '/sitter_page';
   static const String registrationPage = "/registration";
+  static const String loginPage = "/login";
 
-  static Route<dynamic> generateRoute(RouteSettings settings) {
-    switch (settings.name) {
-      case "/":
+  static Route<dynamic> generateRoute(RouteSettings route) {
+    switch (route.name) {
+      case homePage:
       return MaterialPageRoute(builder: (_) => const HomePage()
       );
       case userProfile:
         return MaterialPageRoute(
           builder: (_) => const UserProfilePage(),
         );
-      case '/settings':
+      case settings:
         return MaterialPageRoute(
           builder: (_) => const SettingsPage(),
         );
-      case '/sitter_page':
+      case sitterpage:
         return MaterialPageRoute(
           builder: (_) => const ProfiloPetsitter(),
         );
-      case  '/registration':
+      case  registrationPage:
       return MaterialPageRoute(builder: (_) =>  SignUpPage());
-
+      case loginPage:
+      return MaterialPageRoute(builder: (_)=> LoginPage());
       default:
         return MaterialPageRoute(
-          builder: (_) => const UserProfilePage(),
+          builder: (_) => const HomePage(),
         );
     }
   }

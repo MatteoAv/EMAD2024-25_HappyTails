@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:happy_tails/UserManage/repositories/local_database.dart';
+import 'package:happy_tails/UserManage/providers/profile_providers.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:happy_tails/UserManage/model/user.dart' as model;
 
-class SignUpPage extends StatefulWidget {
+class SignUpPage extends ConsumerStatefulWidget {
   @override
   _SignUpPageState createState() => _SignUpPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
+class _SignUpPageState extends ConsumerState<SignUpPage> {
   final SupabaseClient supabase = Supabase.instance.client;
 
   final TextEditingController emailController = TextEditingController();
@@ -33,23 +37,42 @@ class _SignUpPageState extends State<SignUpPage> {
         email: email,
         password: password,
       );
-
       final user = response.user;
 
       if (user != null) {
         // Inserisce i dati aggiuntivi nella tabella profiles
         await supabase.from('profiles').insert({
           'id': user.id,
-          'email' : email,
+          'email': email,
           'userName': username,
           'city': city,
         });
 
+        // Inserisci i dati nel database locale se non esistono
+        if (await LocalDatabase.instance.getUser() == null) {
+          LocalDatabase.instance.insertUser(
+            username,
+            email,
+            city,
+            "niente",
+          );
+        }
+         final newUser = model.User(
+        id: 1,  
+        userName: username,
+        email: email,
+        citta: city,
+        imageUrl: 'niente'
+      );
+        // Aggiorna il provider con il nuovo utente
+        ref.read(userProvider.notifier).state = AsyncData(newUser);
+
+        // Mostra messaggio di successo
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registrazione completata!')),
         );
 
-        // Naviga alla pagina di login o home
+        // Naviga alla home page
         Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

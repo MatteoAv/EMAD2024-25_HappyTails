@@ -51,6 +51,7 @@ class UserNotifier extends AsyncNotifier<User?> {
     isLoading = false;
     return false;
   }
+
 }
 
 //Notifier dei Pet che è un Future di una Lista di Pet

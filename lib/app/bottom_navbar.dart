@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:happy_tails/UserManage/screens/profile_page.dart';
+import 'package:happy_tails/app/routes.dart';
 import 'package:happy_tails/home.dart';
 import 'package:happy_tails/prenotazioni.dart';
+import 'package:happy_tails/profilo.dart';
 import 'package:happy_tails/screens/ricerca/risultatiricerca_pagina.dart';
 import 'package:happy_tails/Auth/auth_repository.dart';
-import 'package:happy_tails/Auth/registration.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 
@@ -18,7 +20,6 @@ class MainScaffold extends StatefulWidget {
 
 class _MainScaffoldState extends State<MainScaffold> {
   int _selectedIndex = 0;
-  bool isLogged = LoginPage().logged;
   final SupabaseClient supabase = Supabase.instance.client;
   late List<Widget> _pages;
 
@@ -26,19 +27,29 @@ class _MainScaffoldState extends State<MainScaffold> {
    @override
   void initState() {
     super.initState();
-    _updatePages();
+    updatePages();
+
+    supabase.auth.onAuthStateChange.listen((data) {
+    final event = data.event;
+    if (event == AuthChangeEvent.signedIn || event == AuthChangeEvent.signedOut) {
+    updatePages();
+  }
+});
+
   }
 
+  
+
   // Metodo per aggiornare la lista delle pagine
-  void _updatePages() {
-    final session = supabase.auth.currentSession;
+  void updatePages() {
+    final session = supabase.auth.currentUser;
     setState(() {
       _pages = [
         const HomePage(),
         const RisultatiCercaPage(),
         const PrenotazioniPage(),
         // Aggiungi LoginPage o ProfilePage in base alla sessione
-        if (session == null)  LoginPage(),
+        if (session == null)  ProfiloPage(),
         if (session != null) const UserProfilePage(),
       ];
     });

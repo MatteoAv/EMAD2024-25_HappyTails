@@ -70,7 +70,7 @@ class UserProfilePage extends ConsumerWidget {
             children: [
               CircleAvatar(
                 radius: 60,
-                backgroundImage: NetworkImage(user?.imageUrl ?? ''),
+                backgroundImage: NetworkImage(user?.imageUrl ?? 'https://marketplace.canva.com/EAF-i9Rhbp4/1/0/1600w/canva-sfondo-neutro-cerchio-immagine-di-profilo-linkedin-3nYoZ1kUL0s.jpg'),
               ),
               const SizedBox(width: 16),
               Column(

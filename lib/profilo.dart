@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:happy_tails/app/routes.dart';
 //import 'header.dart'; // Importa il widget Header
 
 
@@ -55,7 +56,7 @@ class ProfiloPage extends StatelessWidget {
                           [
                             ElevatedButton(
                               onPressed: () {
-                                // Aggiungi logica per accedere
+                                Navigator.pushNamed(context, AppRoutes.loginPage);
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color.fromARGB(255, 244, 132, 34),
@@ -74,7 +75,7 @@ class ProfiloPage extends StatelessWidget {
                             //const SizedBox(height: 12),
                             ElevatedButton(
                               onPressed: () {
-                                // Aggiungi logica per registrarsi
+                                Navigator.pushNamed(context, AppRoutes.registrationPage);
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color.fromARGB(255, 244, 132, 34),
