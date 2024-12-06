@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:happy_tails/UserManage/providers/profile_providers.dart';
 import 'package:happy_tails/UserManage/repositories/local_database.dart';
+import 'package:happy_tails/app/routes.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:happy_tails/UserManage/model/user.dart' as model;
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends ConsumerWidget {
+
   final SupabaseClient supabase = Supabase.instance.client;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  bool logged = false;
-  Future<void> signIn(BuildContext context) async {
+
+
+  Future<void> signIn(BuildContext context, WidgetRef ref) async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
+
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -28,25 +35,21 @@ class LoginPage extends StatelessWidget {
       if (response.user != null) {
         final user = response.user;
         if (user != null) {
-          print('Login effettuato con successo: ${response.user!.email}');
-          logged = true;
-          // Recupera i dettagli del profilo
           final profile = await supabase
-              .from('profiles')
-              .select()
-              .eq('id', user.id)
-              .single();
-          if(await LocalDatabase.instance.getUser()==null){
-          // Inserisci i dati nel database locale
-          LocalDatabase.instance.insertUser(
-            profile['userName'],
-            profile['email'],
-            profile['city'],
-            "niente",
-          );
+            .from('profiles')
+            .select()
+            .eq('id', user.id)
+            .single();
+          print('Login effettuato con successo: ${response.user!.email}');
+
+          //Salva i dati nel db locale se non presenti
+          if(await LocalDatabase.instance.getUser() == null){
+            LocalDatabase.instance.insertUser(profile['userName'], email, profile['city'], profile['imageUrl']);
           }
-          // Naviga alla home o dashboard
-          Navigator.pushReplacementNamed(context, '/');
+          
+          ref.watch(userProvider.notifier).state = AsyncData(model.User(id:1, userName: profile['userName'], email: email, 
+          citta: profile['city'], imageUrl: profile['imageUrl']));
+          Navigator.pushNamed(context, AppRoutes.homePage);
         }
       } else {
         throw Exception('Credenziali non valide');
@@ -60,7 +63,8 @@ class LoginPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
       body: Padding(
@@ -86,7 +90,7 @@ class LoginPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => signIn(context),
+              onPressed: () => signIn(context, ref),
               child: const Text('Login'),
             ),
           ],

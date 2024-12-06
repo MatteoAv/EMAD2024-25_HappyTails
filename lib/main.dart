@@ -12,7 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 Future<void> main() async{
 
   WidgetsFlutterBinding.ensureInitialized();
-  
+  //await LocalDatabase.instance.deleteDatabaseFile();
   await LocalDatabase.instance.database;
   await Supabase.initialize(
     url: 'https://nopqmogzpjhqntzristy.supabase.co',

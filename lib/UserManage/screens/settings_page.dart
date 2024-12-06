@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../providers/profile_providers.dart';
+import 'package:happy_tails/UserManage/providers/profile_providers.dart';
+
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -118,8 +119,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     onPressed: () {
                         Supabase.instance.client.auth.signOut();
                         print('Logout effettuato');
-                        
-
+                        Navigator.pushNamed(context, "/");
                     },
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 50),
