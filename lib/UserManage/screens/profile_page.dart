@@ -48,8 +48,8 @@ class UserProfilePage extends ConsumerWidget {
     final petsAsync = ref.watch(petsProvider);
     final bookingsAsync = ref.watch(bookingsProvider);
     final isPetsTabSelected = ref.watch(tabSelectionProvider);
-    
 
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text(

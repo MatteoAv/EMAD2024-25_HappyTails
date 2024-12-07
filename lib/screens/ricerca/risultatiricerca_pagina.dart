@@ -21,7 +21,7 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
   List<Map<String, dynamic>> _petSitters = [];
   bool _isLoading = false;
   String selectedAnimal = "";
-  String selectedProvince = "";
+  String selectedLocation = "";
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +69,7 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                                 border: OutlineInputBorder(),
                                 prefixIcon: const Icon(Icons.pets),
                               ),
-                              items: ["Cane", "Gatto", "Uccello","Pesce","Rettile","Roditore"]
+                              items: ["Cane", "Gatto", "Uccello", "Pesce", "Rettile", "Roditore"]
                                   .map((animal) => DropdownMenuItem<String>(value: animal, child: Text(animal)))
                                   .toList(),
                               onChanged: (value) {
@@ -85,7 +85,7 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                           // Location filter (Combobox/Autocomplete)
                           Expanded(
                             child: Autocomplete<String>(
-                              initialValue: TextEditingValue(text: selectedProvince),
+                              initialValue: TextEditingValue(text: selectedLocation),
                               optionsBuilder: (TextEditingValue textEditingValue) {
                                 final List<String> locations = ["Avellino", "Salerno", "Benevento"];
                                 if (textEditingValue.text.isEmpty) {
@@ -108,7 +108,7 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                               },
                               onSelected: (String selection) {
                                 setState(() {
-                                  selectedProvince = selection;
+                                  selectedLocation = selection;
                                 });
                               },
                             ),
@@ -176,7 +176,7 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                       Center(
                         child: ElevatedButton(
                           onPressed: () async {
-                            if (selectedAnimal.isEmpty || selectedProvince.isEmpty || selectedDateRange == null) {
+                            if (selectedAnimal.isEmpty || selectedLocation.isEmpty || selectedDateRange == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text("Per favore, compila tutti i campi prima di proseguire."),
@@ -188,67 +188,89 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                                 _isLoading = true;
                               });
 
+                              try {
+                                String animalColumn = '';
+                                switch (selectedAnimal) {
+                                  case 'Cane':
+                                    animalColumn = 'cani';
+                                    break;
+                                  case 'Gatto':
+                                    animalColumn = 'gatti';
+                                    break;
+                                  case 'Uccello':
+                                    animalColumn = 'uccelli';
+                                    break;
+                                  case 'Pesce':
+                                    animalColumn = 'pesci';
+                                    break;
+                                  case 'Rettile':
+                                    animalColumn = 'rettili';
+                                    break;
+                                  case 'Roditore':
+                                    animalColumn = 'roditori';
+                                    break;
+                                  default:
+                                    animalColumn = '';
+                                }
 
-    try {
-      String animalColumn = '';
-      switch (selectedAnimal) {
-        case 'Cane':
-          animalColumn = 'cani';
-          break;
-        case 'Gatto':
-          animalColumn = 'gatti';
-          break;
-        case 'Uccello':
-          animalColumn = 'uccelli';
-          break;
-        case 'Pesce':
-          animalColumn = 'pesci';
-          break;
-        case 'Rettile':
-          animalColumn = 'rettili';
-          break;
-        case 'Roditore':
-          animalColumn = 'roditori';
-          break;
-        default:
-          animalColumn = '';
-      }
+                                if (animalColumn.isNotEmpty) {
+                                  // The selected `Comune` sent from Flutter
+                                  // Step 1: Fetch coordinates for the selected `Comune`
+                                  final comuneResponse = await Supabase.instance.client.rpc(
+                                    'get_comune_coordinates',
+                                    params: {
+                                      'comune_name': selectedLocation, // Pass the parameter
+                                    },
+                                  );
 
-      if (animalColumn.isNotEmpty) {
-        // Query per ottenere i pet sitters
-        final response = await Supabase.instance.client
-            .from('petsitter')
-            .select(
-                '''
-                *,
-                disponibilita(id, data_inizio, data_fine)
-                ''')
-            .eq('provincia', selectedProvince)
-            .eq(animalColumn, true);
+                                  if (comuneResponse == null) {
+                                    print("Error: RPC call returned null.");
+                                  } else if (comuneResponse is List && comuneResponse.isNotEmpty) {
+                                    print("RPC Response: $comuneResponse");
+                                    print("Selected Location: $selectedLocation");
+                                    print("RPC Response: $comuneResponse");
+                                  }
 
-        final filteredResults = (response as List).where((petSitter) {
-          final disponibilita = petSitter['disponibilita'] as List<dynamic>? ?? [];
-          for (final range in disponibilita) {
-            final DateTime start = DateTime.parse(range['data_inizio']);
-            final DateTime end = DateTime.parse(range['data_fine']);
-            if(
-                selectedDateRange.start.isBefore(end) && 
-                (selectedDateRange.start.isAfter(start) || selectedDateRange.start.isAtSameMomentAs(start)) && 
-                selectedDateRange.end.isAfter(start) && 
-                (selectedDateRange.end.isBefore(end) ||  selectedDateRange.end.isAtSameMomentAs(end))
-              )
-              {
-                return true; // Intersezione trovata
-              }
-          }
-          return false; // Nessuna disponibilità valida
-        }).toList();
+                                  print(comuneResponse);
 
-        setState(() {
-          _petSitters = List<Map<String, dynamic>>.from(filteredResults);
-        });
-      }
-    } catch (e) {
+                                  // Then extract coordinates
+                                  final double comuneLongitude = comuneResponse[0]['longitude'] as double;
+                                  final double comuneLatitude = comuneResponse[0]['latitude'] as double;
+                                  print("Comune Longitude: $comuneLongitude, Comune Latitude: $comuneLatitude");
+
+                                  // Step 2: Query the nearest pet sitters
+                                  final petsitterResponse = await Supabase.instance.client.rpc(
+                                    'get_nearest_petsitters',
+                                    params: {
+                                      'input_longitude': comuneLongitude,
+                                      'input_latitude': comuneLatitude,
+                                      'animal_column': animalColumn
+                                    },
+                                  );
+                                  print(petsitterResponse);
+
+                                  final filteredResults = (petsitterResponse as List).where((petSitter) {
+                                    final disponibilita = petSitter['disponibilita'] as List? ?? [];
+
+                                    // If no availability, return true
+                                    if (disponibilita.isEmpty) return true;
+
+                                    return disponibilita.any((range) {
+                                      final DateTime start = DateTime.parse(range['data_inizio']);
+                                      final DateTime end = DateTime.parse(range['data_fine']);
+
+                                      // Check if the selected date range overlaps with the availability
+                                      return (selectedDateRange.end.isBefore(start) ||
+                                          selectedDateRange.start.isAfter(end));
+                                    });
+                                  }).toList();
+                                  print(filteredResults);
+
+                                  setState(() {
+                                    _petSitters = List<Map<String, dynamic>>.from(filteredResults);
+                                  });
+                                }
+                              } catch (e) {
                                 print('Errore: $e');
                               } finally {
                                 setState(() {
