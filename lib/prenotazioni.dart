@@ -56,7 +56,8 @@ class PrenotazioniPage extends StatelessWidget {
                           [
                             ElevatedButton(
                               onPressed: () {
-                                // Aggiungi logica per accedere
+                                Navigator.pushNamed(
+                                  context, AppRoutes.loginPage); 
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color.fromARGB(255, 244, 132, 34),
