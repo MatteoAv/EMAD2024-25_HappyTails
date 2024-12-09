@@ -270,43 +270,45 @@ class AddPetDialog extends ConsumerWidget {
 
     return AlertDialog(
       title: const Text('Add a Pet'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            decoration: const InputDecoration(
-              labelText: 'Pet Name',
-              prefixIcon: Icon(Icons.edit),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              decoration: const InputDecoration(
+                labelText: 'Pet Name',
+                prefixIcon: Icon(Icons.edit),
+              ),
+              onChanged: addPetNotifier.setName,
             ),
-            onChanged: addPetNotifier.setName,
-          ),
-          const SizedBox(height: 16),
-          const Text('Select Animal Type:'),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 16,
-            runSpacing: 16,
-            children: animalTypes.entries.map((entry) {
-              final type = entry.key;
-              final icon = entry.value;
+            const SizedBox(height: 16),
+            const Text('Select Animal Type:'),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: animalTypes.entries.map((entry) {
+                final type = entry.key;
+                final icon = entry.value;
 
-              return GestureDetector(
-                onTap: () => addPetNotifier.selectType(type),
-                child: AnimatedScale(
-                  scale: addPetState.selectedType == type ? 1.2 : 1.0,
-                  duration: const Duration(milliseconds: 200),
-                  child: CircleAvatar(
-                    backgroundColor: addPetState.selectedType == type
-                        ? Colors.deepOrange
-                        : Colors.grey[300],
-                    radius: 30,
-                    child: Image.asset(icon.toString(), width: 30, height: 30,)
+                return GestureDetector(
+                  onTap: () => addPetNotifier.selectType(type),
+                  child: AnimatedScale(
+                    scale: addPetState.selectedType == type ? 1.2 : 1.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: CircleAvatar(
+                      backgroundColor: addPetState.selectedType == type
+                          ? Colors.deepOrange
+                          : Colors.grey[300],
+                      radius: 30,
+                      child: Image.asset(icon.toString(), width: 30, height: 30),
+                    ),
                   ),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
+                );
+              }).toList(),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -314,16 +316,15 @@ class AddPetDialog extends ConsumerWidget {
           child: const Text('Cancel'),
         ),
         ElevatedButton(
-          onPressed: addPetState.selectedType != null &&
-                  addPetState.name.isNotEmpty
+          onPressed: addPetState.selectedType != null && addPetState.name.isNotEmpty
               ? () {
                   final petName = addPetState.name;
                   final petType = addPetState.selectedType!;
                   final user_id = ref.watch(userProvider).value?.id;
-                  if(user_id!=null){
-                  ref.read(petsProvider.notifier).AddPet(petName, petType,user_id);
-                  addPetNotifier.reset();
-                  Navigator.pop(context);
+                  if (user_id != null) {
+                    ref.read(petsProvider.notifier).AddPet(petName, petType, user_id);
+                    addPetNotifier.reset();
+                    Navigator.pop(context);
                   }
                 }
               : null,
