@@ -49,20 +49,20 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         });
 
         // Inserisci i dati nel database locale se non esistono
-        if (await LocalDatabase.instance.getUser() == null) {
+        if (await LocalDatabase.instance.getUser(user.id) == null) {
           LocalDatabase.instance.insertUser(
+            user.id,
             username,
             email,
-            city,
-            "niente",
+            city
           );
         }
          final newUser = model.User(
-        id: 1,  
+        id: user.id,  
         userName: username,
         email: email,
         citta: city,
-        imageUrl: 'niente'
+        imageUrl: ""
       );
         // Aggiorna il provider con il nuovo utente
         ref.read(userProvider.notifier).state = AsyncData(newUser);

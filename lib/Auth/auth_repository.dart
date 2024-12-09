@@ -4,10 +4,11 @@ import 'package:happy_tails/UserManage/providers/profile_providers.dart';
 import 'package:happy_tails/UserManage/repositories/local_database.dart';
 import 'package:happy_tails/app/routes.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:logger/logger.dart';
 import 'package:happy_tails/UserManage/model/user.dart' as model;
 
 class LoginPage extends ConsumerWidget {
-
+  final logger = Logger();
   final SupabaseClient supabase = Supabase.instance.client;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -40,22 +41,23 @@ class LoginPage extends ConsumerWidget {
             .select()
             .eq('id', user.id)
             .single();
-          print('Login effettuato con successo: ${response.user!.email}');
+          logger.d('Login effettuato con successo: ${profile['email']}');
 
           //Salva i dati nel db locale se non presenti
-          if(await LocalDatabase.instance.getUser() == null){
-            LocalDatabase.instance.insertUser(profile['userName'], email, profile['city'], profile['imageUrl']);
+          if(await LocalDatabase.instance.getUser(user.id) == null){
+            LocalDatabase.instance.insertUser(user.id, profile['userName'], email, profile['city']);
           }
           
-          ref.watch(userProvider.notifier).state = AsyncData(model.User(id:1, userName: profile['userName'], email: email, 
+          ref.read(userProvider.notifier).state = AsyncData(model.User(id: user.id, userName: profile['userName'], email: email, 
           citta: profile['city'], imageUrl: profile['imageUrl']));
+          print("mannaggia");
           Navigator.pushNamed(context, AppRoutes.homePage);
         }
       } else {
         throw Exception('Credenziali non valide');
       }
-    } catch (e) {
-      print('Errore: $e');
+    } catch (e,stackTrace) {
+      logger.d('Errore: $e, $stackTrace');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Errore durante il login: $e')),
       );

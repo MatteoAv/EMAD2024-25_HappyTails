@@ -12,13 +12,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 Future<void> main() async{
 
   WidgetsFlutterBinding.ensureInitialized();
-  //await LocalDatabase.instance.deleteDatabaseFile();
-  await LocalDatabase.instance.database;
+ 
   await Supabase.initialize(
     url: 'https://nopqmogzpjhqntzristy.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vcHFtb2d6cGpocW50enJpc3R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI4MDY4MzAsImV4cCI6MjA0ODM4MjgzMH0.tgm20B3Xgq26fgGBdK0Xy-Yz5_qVy0yW83fHcuqucb8',
   );
-
+  //await LocalDatabase.instance.deleteDatabaseFile();
+  await LocalDatabase.instance.database;
   runApp(const ProviderScope(child: MyApp()));
 }
 

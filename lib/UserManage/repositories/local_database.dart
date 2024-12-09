@@ -1,13 +1,14 @@
 //import 'package:happy_tails/UserManage/providers/profile_providers.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:happy_tails/UserManage/model/user.dart';
+import 'package:happy_tails/UserManage/model/user.dart' as model;
 import 'package:happy_tails/UserManage/model/pet.dart';
 import 'package:happy_tails/UserManage/model/booking.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LocalDatabase {
   static final LocalDatabase instance = LocalDatabase._init();
-
+  final supabase = Supabase.instance.client;
   static Database? _database;
 
   LocalDatabase._init();
@@ -32,9 +33,9 @@ class LocalDatabase {
   Future<void> _createDB(Database db, int version) async {
     await db.execute('''
       CREATE TABLE users (
-        id INTEGER PRIMARY KEY autoincrement,
+        id TEXT PRIMARY KEY,
         userName TEXT NOT NULL,
-        imageUrl TEXT NOT NULL,
+        imageUrl TEXT NOT NULL DEFAULT 'https://images.rawpixel.com/image_png_social_square/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTAxL3JtNjA5LXNvbGlkaWNvbi13LTAwMi1wLnBuZw.png',
         email TEXT NOT NULL,
         citta TEXT NOT NULL
       );
@@ -44,7 +45,7 @@ class LocalDatabase {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         type TEXT NOT NULL,
-        owner_id INTEGER NOT NULL,
+        owner_id TEXT NOT NULL,
         FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
       );
     ''');
@@ -61,7 +62,9 @@ class LocalDatabase {
         vote INTEGER ,
         summary TEXT,
         pet_id INTEGER NOT NULL,
-        FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE
+        owner_id TEXT NOT NULL,
+        FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE,
+        FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
       );
     ''');
   }
@@ -74,7 +77,7 @@ class LocalDatabase {
 }
 
 // Aggiungi una funzione per aggiornare i dati dell'utente nel database
-Future<bool> updateUser(int ?userId, String ?userName, String ?citta) async {
+Future<bool> updateUser(String ?userId, String ?userName, String ?citta) async {
   final db = await database;
   int res = await db.update(
     'users',
@@ -89,15 +92,24 @@ Future<bool> updateUser(int ?userId, String ?userName, String ?citta) async {
 
 
 
-  Future<List<Pet>> getPets() async {
+  Future<List<Pet>> getPets(String userId) async {
     final db = await instance.database;
-    final maps = await db.query('pets');
-
+    var maps = await db.query('pets',
+    where : 'owner_id = ?',
+    whereArgs: [userId],
+    );
+    if(maps.isEmpty){
+      /* chiedi al db principale*/
+      maps = await supabase.from('pets')
+      .select()
+      .eq('owner_id', userId);
+    }
+    print(maps);
     return maps.map((map) => Pet.fromMap(map)).toList();
   }
 
 
-  Future <Pet?> AddPets(String name, String type, int owner_id) async{
+  Future <Pet?> AddPets(String name, String type, String owner_id) async{
     final db = await database;
     int res = 0;
     res = await db.insert('pets', {'name': name, 'type': type, 'owner_id': owner_id} );
@@ -107,31 +119,44 @@ Future<bool> updateUser(int ?userId, String ?userName, String ?citta) async {
     return null;
   }
 
-  Future<List<Booking>> getBookings() async {
+  Future<List<Booking>> getBookings(String user_id) async {
     final db = await instance.database;
-    final maps = await db.query('bookings');
+    var maps = await db.query('bookings',
+    where: 'owner_id = ?',
+    whereArgs: [user_id],
+    );
+    if(maps.isEmpty){
+      //Chiedi al database principale
+      maps = await supabase.from('bookings')
+      .select()
+      .eq('owner_id', user_id);
+    }
+    print(maps);
     return maps.map((map) => Booking.fromMap(map)).toList();
   }
 
 
-  void insertUser(String userName, String email, String citta, String imageUrl) async{
+  void insertUser(String userId,String userName, String email, String citta) async{
     final db = await instance.database;
     await db.insert('users',{ 
+    'id' : userId, 
     'userName' : userName,
     'citta' : citta,
-    'email' : email,
-    'imageUrl': imageUrl
+    'email' : email
     }
     );
   }
 
 
-  Future<User?> getUser() async {
+  Future<model.User?> getUser(String userId) async {
     final db = await instance.database;
-    final maps = await db.query('users', limit: 1);
+    final maps = await db.query('users',
+    where: 'id = ?',
+    whereArgs: [userId]);
     if (maps.isNotEmpty) {
-      return User.fromMap(maps.first);
+      return model.User.fromMap(maps.first);
     }
+    print(maps);
     return null;
   }
 }

@@ -175,56 +175,69 @@ class UserProfilePage extends ConsumerWidget {
             )
           : bookingsAsync.when(
               data: (bookings) => ListView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.only(top: 16.0),
-                itemCount: bookings.length,
-                itemBuilder: (context, index) {
-                  final booking = bookings[index];
-                  return Container(
-                    height: 135,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: Card(
-                      elevation: 20,
-                      color: Colors.deepOrange[50],
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Book from ${booking.dateBegin} to ${booking.dateEnd}',
-                              style: const TextStyle(
-                                fontSize: 19,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Price: ${booking.price.toStringAsFixed(2)}€',
-                              style: const TextStyle(fontSize: 18),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Status: ${booking.state}',
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: booking.state == 'Confermata'
-                                    ? Colors.green
-                                    : Colors.red,
-                              ),
-                            ),
-                          ],
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(top: 16.0),
+              itemCount: bookings.length,
+              itemBuilder: (context, index) {
+                final booking = bookings[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 9),
+
+                  child: Material(
+                    elevation: 20,
+                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.deepOrange[50],
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        splashColor: Colors.deepOrange[100],
+                        onTap: () {
+                        // Gestisci l'interazione (es. dettagli della prenotazione)
+                        print('Tapped on booking: ${booking.id}');
+                        },
+                          child: ListTile(
+                          contentPadding: const EdgeInsets.all(8.0),
+                          title: Text(
+                            'Book from ${booking.dateBegin} to ${booking.dateEnd}',
+                          style: const TextStyle(
+                          fontSize: 19,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
+                        subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 4),
+                        Text(
+                        'Price: ${booking.price.toStringAsFixed(2)}€',
+                        style: const TextStyle(fontSize: 18),
+                        ),
+                      const SizedBox(height: 4),
+                      Text(
+                      'Status: ${booking.state}',
+                        style: TextStyle(
+                        fontSize: 20,
+                        color: booking.state == 'Confermata'
+                          ? Colors.green
+                          : Colors.red,
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, _) => Center(child: Text('Error: $err')),
+              trailing: Icon(
+                Icons.chevron_right,
+                color: Colors.grey[700],
+              ),
             ),
-    ),
-  ],
+          ),
+        ),
+      );
+    },
+  ),
+    loading: () => const Center(child: CircularProgressIndicator()),
+    error: (error, stackTrace) => Center(child: Text('Errore: $error, $stackTrace')),
+  )
+),
+],
 ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

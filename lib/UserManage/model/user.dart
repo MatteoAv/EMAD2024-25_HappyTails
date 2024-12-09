@@ -1,5 +1,5 @@
 class User{
-  final int id;
+  final String id;
   String userName;
   String email;
   String imageUrl;
@@ -9,8 +9,8 @@ class User{
   User({
     required this.id,
     required this.email,
-    required this.userName,
     required this.imageUrl,
+    required this.userName,
     required this.citta
   });
 

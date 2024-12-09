@@ -12,6 +12,7 @@ class Booking {
   final int? vote;
   final String? summary;
   final int pet_id;
+  final String owner_id;
 
   Booking({
     required this.id,
@@ -24,7 +25,8 @@ class Booking {
     required this.vote,
     required this.summary,
     required this.state_Payment,
-    required this.pet_id
+    required this.pet_id,
+    required this.owner_id
   });
 
   factory Booking.fromMap(Map<String, dynamic> map) {
@@ -33,13 +35,16 @@ class Booking {
       id_trans: map['id_trans'],
       dateBegin: map['dateBegin'],
       dateEnd: map ['dateEnd'],
-      price: map ['price'],
+      price: (map['price'] is int)
+          ? (map['price'] as int).toDouble()
+          : map['price'] as double,
       state : map ['state'],
       state_Payment: map ['state_Payment'],
       metaPayment: map ['metaPayment'],
       vote : map ['vote'],
       summary: map ['summary'],
-      pet_id: map ['pet_id']
+      pet_id: map ['pet_id'],
+      owner_id: map['owner_id']
     );
   }
 
@@ -55,7 +60,8 @@ class Booking {
       'state_Payment' : state_Payment,
       'vote' : vote,
       'summary' : summary,
-      'pet_id' : pet_id
+      'pet_id' : pet_id,
+      'owner_id' : owner_id
     };
   }
 }

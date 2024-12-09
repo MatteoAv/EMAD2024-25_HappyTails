@@ -33,7 +33,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final userAsync = ref.watch(userProvider);
-    final isLoading = ref.watch(userProvider.notifier).isLoading;
 
     return Scaffold(
       appBar: AppBar(
@@ -73,12 +72,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
                   // Pulsante per confermare le modifiche
                   ElevatedButton(
-                    onPressed: isLoading
+                    onPressed: userAsync.isLoading
                         ? null
                         : () async {
                             final success = await ref
                                 .read(userProvider.notifier)
                                 .updateUser(
+                                  user!.id,
                                   _nickController.text.trim(),
                                   _cittaController.text.trim(),
                                 );
@@ -98,7 +98,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                               );
                             }
                           },
-                    child: isLoading
+                    child: userAsync.isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
                         : const Text("Conferma modifiche"),
                   ),
@@ -118,6 +118,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ElevatedButton(
                     onPressed: () {
                         Supabase.instance.client.auth.signOut();
+                        ref.read(userProvider.notifier).state = const AsyncData(null);
+                        ref.invalidate(petsProvider);
+                        ref.invalidate(bookingsProvider);
                         print('Logout effettuato');
                         Navigator.pushNamed(context, "/");
                     },
