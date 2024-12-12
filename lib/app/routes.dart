@@ -33,9 +33,13 @@ class AppRoutes {
           builder: (_) => const ProfiloPetsitter(),
         );
       case  registrationPage:
-      return MaterialPageRoute(builder: (_) =>  SignUpPage());
+        return MaterialPageRoute(
+          builder: (_) =>  SignUpPage()
+        );
       case loginPage:
-      return MaterialPageRoute(builder: (_)=> LoginPage());
+        return MaterialPageRoute(
+          builder: (_)=> LoginPage()
+        );
       default:
         return MaterialPageRoute(
           builder: (_) => const HomePage(),

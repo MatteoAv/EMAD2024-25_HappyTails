@@ -1,4 +1,5 @@
 class PetSitter {
+  final int id;
   final String nome;
   final String cognome;
   final String email;
@@ -6,6 +7,7 @@ class PetSitter {
   final String imageUrl;
 
   PetSitter({
+    required this.id,
     required this.nome,
     required this.cognome,
     required this.email,
@@ -15,6 +17,7 @@ class PetSitter {
 
   factory PetSitter.fromMap(Map<String, dynamic> map) {
     return PetSitter(
+      id: map['id'],
       nome: map['nome'],
       cognome: map['cognome'],
       email: map['provincia'],

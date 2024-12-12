@@ -17,7 +17,19 @@ class VerticalCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 3,
       child: InkWell(
-        onTap: () {Navigator.pushNamed(context, AppRoutes.sitterpage);},
+        onTap: () {
+          //Qui l'id viene stampato correttamente
+          print('ID del petsitter RISULTATO_CARD: ${item.id}');
+          Navigator.pushNamed(
+            context, 
+            AppRoutes.sitterpage, 
+            arguments: item // Passa il petsitter
+            
+          );
+          
+          
+          
+        },
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
