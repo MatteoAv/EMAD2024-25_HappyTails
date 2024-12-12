@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:happy_tails/Auth/auth_repository.dart';
 import 'package:happy_tails/Auth/registration.dart';
 import 'package:happy_tails/home.dart';
+import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
 import 'package:happy_tails/screens/ricerca/petsitter_page.dart';
 import '../UserManage/screens/profile_page.dart';
 import '../UserManage/screens/settings_page.dart'; // La tua pagina delle impostazioni
@@ -29,9 +30,10 @@ class AppRoutes {
           builder: (_) => const SettingsPage(),
         );
       case sitterpage:
+        final PetSitter petsitter = route.arguments as PetSitter; // Extract arguments
         return MaterialPageRoute(
-          builder: (_) => const ProfiloPetsitter(),
-        );
+          builder: (_) => ProfiloPetsitter(petsitter: petsitter),
+      );
       case  registrationPage:
         return MaterialPageRoute(
           builder: (_) =>  SignUpPage()

@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
 
 class ProfiloPetsitter extends StatefulWidget {
-  const ProfiloPetsitter({super.key});
+    final PetSitter petsitter;
+
+
+    const ProfiloPetsitter({Key? key, required this.petsitter}) : super(key: key);
+
 
   @override
   _ProfiloPetsitterState createState() => _ProfiloPetsitterState();
@@ -90,7 +94,7 @@ class _ProfiloPetsitterState extends State<ProfiloPetsitter> {
   @override
   Widget build(BuildContext context) {
 
-    final PetSitter petsitter = ModalRoute.of(context)!.settings.arguments as PetSitter;
+    final PetSitter petsitter = widget.petsitter;
     final int petsitterId = petsitter.id;
 
     /*
