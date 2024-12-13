@@ -80,11 +80,21 @@ class VerticalCard extends StatelessWidget {
                       ),
                       
                       // Happy People Text
-                      const SizedBox(height: 8),
-                      const Text("Migliaia di persone felici!"),
+                      Text(
+                        '10 persone felici',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                      ),
                     ],
                   ),
                 ),
+              ),
+              // Right Arrow
+              Icon(
+                Icons.chevron_right,
+                color: Colors.grey[600],
+                size: 24,
               ),
             ],
           ),

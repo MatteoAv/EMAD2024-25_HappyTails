@@ -300,44 +300,88 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
             ),
           ),
           // Risultati Info Row
+          
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // Left: Results count
                 Text(
                   "${_petSitters.length} risultati",
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 18, // Bigger text size
+                  ),
+                ),
+                // Right: Sort dropdown
+                Container(
+                  constraints: const BoxConstraints(
+                    minWidth: 80, // Minimum width to fit the "Ordina" text
+                    maxWidth: 100, // Slightly restrict the maximum width
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0), // Compact padding
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20.0), // Rounded corners
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      isDense: true, // Reduce the height of the dropdown
+                      isExpanded: true, // Allow text and icon to fit within the container
+                      hint: const Text(
+                        "Ordina",
+                        style: TextStyle(fontSize: 14), // Text size is good
+                      ),
+                      icon: const Icon(Icons.arrow_drop_down, size: 16), // Smaller dropdown icon
+                      items: <String>["Alphabetical", "Date", "Popularity"]
+                          .map((String value) => DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              ))
+                          .toList(),
+                      onChanged: (String? newValue) {
+                        // Handle sorting logic here
+                        print("Selected sorting method: $newValue");
+                      },
+                    ),
                   ),
                 ),
               ],
             ),
           ),
           // List of Results
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Expanded(
-                  child: ListView.builder(
-                    itemCount: _petSitters.length,
-                    itemBuilder: (context, index) {
-                      final petSitter = _petSitters[index];
+          Expanded(
+  child: _isLoading
+      ? const Center(child: CircularProgressIndicator())
+      : ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              itemCount: _petSitters.length,
+              itemBuilder: (context, index) {
+                final petSitter = _petSitters[index];
 
-                      final petSitterItem = PetSitter(
-                        id: petSitter['id'] as int,
-                        nome: petSitter['nome'],
-                        cognome: petSitter['cognome'],
-                        email: petSitter['email'],
-                        provincia: petSitter['provincia'],
-                        imageUrl: petSitter['image_url'] ??
-                            'https://images.contentstack.io/v3/assets/blt6f84e20c72a89efa/blt2577cbc57a834982/6363df6833df8e693d1e44c7/img-pet-sitter-download-header.jpg',
-                      );
+                // Convert data to a PetSitter object
+                final petSitterItem = PetSitter(
+                  id: petSitter['id'] as int,
+                  nome: petSitter['nome'],
+                  cognome: petSitter['cognome'],
+                  email: petSitter['email'],
+                  provincia: petSitter['provincia'],
+                  imageUrl: petSitter['image_url'] ??
+                      'https://images.contentstack.io/v3/assets/blt6f84e20c72a89efa/blt2577cbc57a834982/6363df6833df8e693d1e44c7/img-pet-sitter-download-header.jpg',
+                );
 
-                      return VerticalCard(item: petSitterItem);
-                    },
-                  ),
-                ),
+                return VerticalCard(item: petSitterItem);
+              },
+            ),
+),
         ],
       ),
     );
