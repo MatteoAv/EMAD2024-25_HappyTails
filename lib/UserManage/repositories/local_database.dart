@@ -1,4 +1,7 @@
-//import 'package:happy_tails/UserManage/providers/profile_providers.dart';
+
+import 'dart:ffi';
+
+import 'package:logger/logger.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:happy_tails/UserManage/model/user.dart' as model;
@@ -10,6 +13,7 @@ class LocalDatabase {
   static final LocalDatabase instance = LocalDatabase._init();
   final supabase = Supabase.instance.client;
   static Database? _database;
+  final logger = Logger();
 
   LocalDatabase._init();
 
@@ -46,9 +50,30 @@ class LocalDatabase {
         name TEXT NOT NULL,
         type TEXT NOT NULL,
         owner_id TEXT NOT NULL,
-        FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
+        FOREIGN KEY (owner_id) REFERENCES users(id) ON UPDATE CASCADE
       );
     ''');
+
+    await db.execute('''
+      CREATE TABLE petsitter (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome VARCHAR (30) NOT NULL,
+        cognome VARCHAR (30) NOT NULL,
+        email VARCHAR(50) NOT NULL,
+        provincia VARCHAR(40) NOT NULL,
+        imageUrl TEXT,
+        cani BOOLEAN NOT NULL,
+        gatti BOOLEAN NOT NULL,
+        uccelli BOOLEAN NOT NULL,
+        pesci BOOLEAN NOT NULL,
+        rettili BOOLEAN NOT NULL,
+        roditori BOOLEAN NOT NULL,
+        Comune VARCHAT (50) NOT NULL,
+        Posizione TEXT NOT NULL
+      );
+    '''
+      );
+
     await db.execute('''
       CREATE TABLE bookings (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,13 +85,18 @@ class LocalDatabase {
         state_Payment TEXT NOT NULL DEFAULT 'In Attesa',
         metaPayment TEXT,
         vote INTEGER ,
-        summary TEXT,
+        review TEXT,
         pet_id INTEGER NOT NULL,
         owner_id TEXT NOT NULL,
-        FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE,
-        FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
+        petsitter_id INTEGER NOT NULL,
+        FOREIGN KEY (pet_id) REFERENCES pets(id) ON UPDATE CASCADE,
+        FOREIGN KEY (owner_id) REFERENCES users(id) ON UPDATE CASCADE,
+        FOREIGN KEY (petSitter_id) REFERENCES petsitter(id) ON UPDATE CASCADE
       );
     ''');
+
+    db.insert('petsitter', {'id':1, 'nome': 'Giulia', 'cognome' : 'Rossi', 'email' : 'giuliarossi@example.com', 'provincia' : 'Avellino', 'cani' : 1, 'gatti' : 1, 'uccelli' : 0,
+    'pesci' : 1, 'rettili': 0, 'roditori' : 1, 'Comune': 'Avellino', 'Posizione' : '0101000020E6100000F9ACDF0A30972D40C50DCF7DFF744440'});
   }
 
   Future<void> deleteDatabaseFile() async {
@@ -76,8 +106,55 @@ class LocalDatabase {
   print("Database eliminato con successo!");
 }
 
+
+Future<List<Map<String, dynamic>>> fetchRemoteData(String tableName, String nameColumn, String valueColumn) async {
+  final response = await Supabase.instance.client
+      .from(tableName)
+      .select('*').eq(nameColumn, valueColumn);
+
+  if (response.isEmpty) {
+    throw Exception('Errore durante il recupero dei dati');
+  }
+
+  return List<Map<String, dynamic>>.from(response as List);
+}
+
+
+Future<void> insertDataIntoLocalDatabase(Database db, String tableName, List<Map<String, dynamic>> data) async {
+  final batch = db.batch();
+
+  for (final row in data) {
+    batch.insert(
+      tableName,
+      row,
+      conflictAlgorithm: ConflictAlgorithm.replace, // Sostituisci se esiste già
+    );
+  }
+
+  await batch.commit(noResult: true); // Commit in batch senza risultati
+}
+
+Future<void> syncData(String tableName,String columnName, String columnValue, Database localDb) async {
+  try {
+    // Recupera i dati dal database principale
+    final remoteData = await fetchRemoteData(tableName,columnName,columnValue);
+
+    if (remoteData.isNotEmpty) {
+      logger.d("Inzio sincronizzazione Database");
+      // Inserisci i dati nel database locale
+      await insertDataIntoLocalDatabase(localDb, tableName, remoteData);
+      logger.d("Sincronizzazione completata con successo");
+    } else {
+      logger.d("Sincronizzazione dei dati fallita");
+    }
+  } catch (e) {
+    logger.d("Errore nella sincronizzazione dei dati $e");
+  }
+}
+
+
 // Aggiungi una funzione per aggiornare i dati dell'utente nel database
-Future<bool> updateUser(String ?userId, String ?userName, String ?citta) async {
+Future<bool> updateUser(String userId, String userName, String citta) async {
   final db = await database;
   int res = await db.update(
     'users',
@@ -85,6 +162,9 @@ Future<bool> updateUser(String ?userId, String ?userName, String ?citta) async {
     where: 'id = ?',
     whereArgs: [userId],
   );
+  await supabase.from('profiles').update({'userName': userName.trim(), 'city' : citta.trim(),})
+  .eq('id', userId);
+
   if(res==1) return true;
   
   return false;
@@ -94,17 +174,17 @@ Future<bool> updateUser(String ?userId, String ?userName, String ?citta) async {
 
   Future<List<Pet>> getPets(String userId) async {
     final db = await instance.database;
-    var maps = await db.query('pets',
+    List<Map<String, dynamic>>maps; 
+    maps = await db.query('pets',
     where : 'owner_id = ?',
     whereArgs: [userId],
     );
     if(maps.isEmpty){
       /* chiedi al db principale*/
-      maps = await supabase.from('pets')
-      .select()
-      .eq('owner_id', userId);
+      maps = await supabase.rpc("get_pets_by_user", params: {'_user_id':userId});
+      syncData('pets', 'owner_id', userId, db);
     }
-    print(maps);
+
     return maps.map((map) => Pet.fromMap(map)).toList();
   }
 
@@ -112,9 +192,18 @@ Future<bool> updateUser(String ?userId, String ?userName, String ?citta) async {
   Future <Pet?> AddPets(String name, String type, String owner_id) async{
     final db = await database;
     int res = 0;
+    bool resSupa;
+    final isPresent = await db.query('pets',
+    where: 'name = ? AND type = ?',
+    whereArgs: [name,type]);;
+
+    if(isPresent.isEmpty){
+    resSupa = await supabase.rpc('add_pet', params:{'_name': name, '_type': type, '_user_id': owner_id}); 
     res = await db.insert('pets', {'name': name, 'type': type, 'owner_id': owner_id} );
-    if(res!=0){
+    
+    if(res!=0 && resSupa){
       return Pet(id: res, name: name, type: type);
+    }
     }
     return null;
   }
@@ -130,6 +219,7 @@ Future<bool> updateUser(String ?userId, String ?userName, String ?citta) async {
       maps = await supabase.from('bookings')
       .select()
       .eq('owner_id', user_id);
+      syncData("bookings", "owner_id", user_id, db);
     }
     print(maps);
     return maps.map((map) => Booking.fromMap(map)).toList();
@@ -156,7 +246,6 @@ Future<bool> updateUser(String ?userId, String ?userName, String ?citta) async {
     if (maps.isNotEmpty) {
       return model.User.fromMap(maps.first);
     }
-    print(maps);
     return null;
   }
 }

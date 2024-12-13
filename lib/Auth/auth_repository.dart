@@ -50,7 +50,6 @@ class LoginPage extends ConsumerWidget {
           
           ref.read(userProvider.notifier).state = AsyncData(model.User(id: user.id, userName: profile['userName'], email: email, 
           citta: profile['city'], imageUrl: profile['imageUrl']));
-          print("mannaggia");
           Navigator.pushNamed(context, AppRoutes.homePage);
         }
       } else {

@@ -21,17 +21,7 @@ e che si occuperà di gestire inserimento, cancellazione dal db locale tramite n
 */
 final petsProvider = AsyncNotifierProvider<PetNotifier,List<Pet>>(PetNotifier.new);
 
-final bookingsProvider = FutureProvider<List<Booking>>((ref) async {
-  final user = ref.watch(userProvider).value;
-  if(user != null){
-   final bookings = await LocalDatabase.instance.getBookings(user.id);
-   if(bookings.isEmpty){
-    return [];
-   }
-   return bookings;
-  }
-  return [];
-});
+final bookingsProvider = AsyncNotifierProvider<BookNotifier, List<Booking>>(BookNotifier.new);
 
 final addPetProvider = NotifierProvider<AddPetStateNotifier, AddPetState>( () => AddPetStateNotifier());
 
@@ -120,6 +110,23 @@ class AddPetState {
       selectedType: selectedType ?? this.selectedType,
       name: name ?? this.name,
     );
+  }
+}
+
+
+class BookNotifier extends AsyncNotifier<List<Booking>>{
+  
+  @override
+  Future<List<Booking>> build() async{
+    final user = ref.watch(userProvider).value;
+    if(user != null){
+      final bookList = await LocalDatabase.instance.getBookings(user.id);
+      if(bookList.isEmpty){
+        return [];
+      }
+      return bookList;
+    }
+    return [];
   }
 }
 
