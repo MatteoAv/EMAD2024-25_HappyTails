@@ -53,7 +53,7 @@ class VerticalCard extends StatelessWidget {
                     children: [
                       // City (above name)
                       Text(
-                        item.provincia,
+                        item.provincia+", "+formatDistance(item.distanza),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.grey[600],
                         ),
@@ -101,5 +101,21 @@ class VerticalCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+String formatDistance(int distanceInMeters) {
+  // Convert meters to kilometers
+  double distanceInKm = distanceInMeters / 1000;
+
+  // Determine the appropriate format based on the distance
+  if (distanceInKm < 1) {
+    return "<1 km";
+  } else if (distanceInKm < 10) {
+    // Use one decimal place for distances less than 10 km
+    return "${distanceInKm.toStringAsFixed(1).replaceAll('.', ',')} km";
+  } else {
+    // Round to the nearest whole number for distances 10 km or more
+    return "${distanceInKm.round()} km";
   }
 }

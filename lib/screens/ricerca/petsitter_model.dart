@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 class PetSitter {
   final int id;
   final String nome;
@@ -5,6 +7,7 @@ class PetSitter {
   final String email;
   final String provincia;
   final String imageUrl;
+  final int distanza;
 
   PetSitter({
     required this.id,
@@ -13,6 +16,8 @@ class PetSitter {
     required this.email,
     required this.provincia,
     required this.imageUrl,
+    required this.distanza,
+
   });
 
   factory PetSitter.fromMap(Map<String, dynamic> map) {
@@ -23,6 +28,8 @@ class PetSitter {
       email: map['provincia'],
       provincia: map['provincia'],
       imageUrl: map['imageUrl'],
+      distanza: map['distanza'],
+
     );
   }
 }
