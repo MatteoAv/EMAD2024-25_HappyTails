@@ -32,6 +32,7 @@ aggiornarsi.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:happy_tails/UserManage/widgets/bookingCard.dart';
 import 'package:happy_tails/UserManage/widgets/expandable_button.dart';
 import 'package:happy_tails/app/routes.dart';
 import 'package:happy_tails/UserManage/providers/profile_providers.dart';
@@ -180,62 +181,15 @@ class UserProfilePage extends ConsumerWidget {
               itemCount: bookings.length,
               itemBuilder: (context, index) {
                 final booking = bookings[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 9),
-
-                  child: Material(
-                    elevation: 20,
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.deepOrange[50],
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(20),
-                        splashColor: Colors.deepOrange[100],
-                        onTap: () {
-                        // Gestisci l'interazione (es. dettagli della prenotazione)
-                        print('Tapped on booking: ${booking.id}');
-                        },
-                          child: ListTile(
-                          contentPadding: const EdgeInsets.all(8.0),
-                          title: Text(
-                            'Book from ${booking.dateBegin} to ${booking.dateEnd}',
-                          style: const TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                        subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 4),
-                        Text(
-                        'Price: ${booking.price.toStringAsFixed(2)}€',
-                        style: const TextStyle(fontSize: 18),
-                        ),
-                      const SizedBox(height: 4),
-                      Text(
-                      'Status: ${booking.state}',
-                        style: TextStyle(
-                        fontSize: 20,
-                        color: booking.state == 'Confermata'
-                          ? Colors.green
-                          : Colors.red,
-                    ),
-                  ),
-                ],
-              ),
-              trailing: Icon(
-                Icons.chevron_right,
-                color: Colors.grey[700],
-              ),
-            ),
-          ),
-        ),
-      );
+                return bookingCard(id: booking.id, bookingBegin: booking.dateBegin, bookingEnd: booking.dateEnd, 
+                bookPrice: booking.price, bookState: booking.state);
+                
     },
   ),
-    loading: () => const Center(child: CircularProgressIndicator()),
-    error: (error, stackTrace) => Center(child: Text('Errore: $error, $stackTrace')),
-  )
+  loading: () => const Center(child: CircularProgressIndicator()),
+  error: (error, stackTrace) =>
+      Center(child: Text('Errore: $error, $stackTrace')),
+),
 ),
 ],
 ),
@@ -317,14 +271,28 @@ class AddPetDialog extends ConsumerWidget {
         ),
         ElevatedButton(
           onPressed: addPetState.selectedType != null && addPetState.name.isNotEmpty
-              ? () {
+              ? () async{
                   final petName = addPetState.name;
                   final petType = addPetState.selectedType!;
                   final user_id = ref.watch(userProvider).value?.id;
                   if (user_id != null) {
-                    ref.read(petsProvider.notifier).AddPet(petName, petType, user_id);
+                    bool res = await ref.read(petsProvider.notifier).AddPet(petName, petType, user_id);
+                    if(res){
                     addPetNotifier.reset();
                     Navigator.pop(context);
+                    }
+                    else{
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                          "Animale già presente, riprova l'inserimento",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      backgroundColor: Colors.red,
+                      duration: Duration(seconds: 2),
+                    ),
+                    );
+                    }
                   }
                 }
               : null,
