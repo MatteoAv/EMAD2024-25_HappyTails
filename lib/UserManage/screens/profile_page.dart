@@ -53,8 +53,9 @@ class UserProfilePage extends ConsumerWidget {
     
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
-          'Profile',
+          'Profilo',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.deepOrange[50],
@@ -78,7 +79,7 @@ class UserProfilePage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Welcome',
+                    'Benvenuto/a',
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
@@ -86,7 +87,7 @@ class UserProfilePage extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    user?.userName ?? 'Guest',
+                    user?.userName ?? 'Ospite',
                     style: const TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
@@ -95,7 +96,7 @@ class UserProfilePage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'City: ${user?.citta ?? 'Unknown City'}',
+                    'Città: ${user?.citta ?? 'Città mancante'}',
                     style: const TextStyle(
                       fontSize: 20,
                       color: Colors.black54,
@@ -132,9 +133,10 @@ class UserProfilePage extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
+                const SizedBox(width: 15,),
                 ExpandableButton(
                   icon: Icons.pets,
-                  label: 'Pets',
+                  label: 'Animali',
                   isExpanded: isPetsTabSelected,
                   onTap: () =>
                       ref.read(tabSelectionProvider.notifier).state = true,
@@ -142,7 +144,7 @@ class UserProfilePage extends ConsumerWidget {
                 const SizedBox(width: 30),
                 ExpandableButton(
                   icon: Icons.calendar_month,
-                  label: 'Book',
+                  label: 'Prenotazioni',
                   isExpanded: !isPetsTabSelected,
                   onTap: () =>
                       ref.read(tabSelectionProvider.notifier).state = false,
@@ -162,46 +164,103 @@ class UserProfilePage extends ConsumerWidget {
     SliverFillRemaining(
       child: isPetsTabSelected
           ? petsAsync.when(
-              data: (pets) => ListView.builder(
+              data: (pets) {
+               if(pets.isNotEmpty){
+               return ListView.builder(
                 physics: NeverScrollableScrollPhysics(),
                 padding: const EdgeInsets.only(top: 16.0),
                 itemCount: pets.length,
                 itemBuilder: (context, index) {
                   final pet = pets[index];
+                  
                   return PetCard(petName: pet.name, petType: pet.type);
                 },
-              ),
+              );
+              }else{
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        "assets/IconPets/sadcat.png",
+                        width: 100,
+                        height: 100,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                      "Nessun animale registrato, aggiungine uno",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
+            }
+              
+            },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, _) => Center(child: Text('Error: $err')),
             )
           : bookingsAsync.when(
-              data: (bookings) => ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(top: 16.0),
-              itemCount: bookings.length,
-              itemBuilder: (context, index) {
-                final booking = bookings[index];
-                return bookingCard(id: booking.id, bookingBegin: booking.dateBegin, bookingEnd: booking.dateEnd, 
-                bookPrice: booking.price, bookState: booking.state);
+              data: (bookings) { 
+                if(bookings.isNotEmpty){
+                return ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.only(top: 16.0),
+                itemCount: bookings.length,
+                itemBuilder: (context, index) {
+                  final booking = bookings[index];
+                  return bookingCard(id: booking.id, bookingBegin: booking.dateBegin, bookingEnd: booking.dateEnd, 
+                  bookPrice: booking.price, bookState: booking.state);
+                },
+              );
+              }else{
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        "assets/IconPets/petsitter.png",
+                        width: 100,
+                        height: 100,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                      "Nessun prenotazione effettuata, trova qualche PetSitter",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
+              }
                 
-    },
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) =>
+          Center(child: Text('Errore: $error, $stackTrace')),
+        ),
+      ),
+    ],
   ),
-  loading: () => const Center(child: CircularProgressIndicator()),
-  error: (error, stackTrace) =>
-      Center(child: Text('Errore: $error, $stackTrace')),
-),
-),
-],
-),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: Visibility(
+        visible: isPetsTabSelected,
+        child: FloatingActionButton(
         onPressed: () {
           showDialog(
           context : context, 
           builder : (context) => const AddPetDialog());
           },
-        child: const Icon(Icons.add),
         backgroundColor: Colors.orange,
+        child: const Icon(Icons.add),
       ),
+    ),
     );
   }
 }

@@ -45,12 +45,12 @@ class LoginPage extends ConsumerWidget {
 
           //Salva i dati nel db locale se non presenti
           if(await LocalDatabase.instance.getUser(user.id) == null){
-            LocalDatabase.instance.insertUser(user.id, profile['userName'], email, profile['city']);
+            LocalDatabase.instance.insertUser(user.id, profile['userName'], email, profile['city'], profile ['isPetSitter']);
           }
           
           ref.read(userProvider.notifier).state = AsyncData(model.User(id: user.id, userName: profile['userName'], email: email, 
-          citta: profile['city'], imageUrl: profile['imageUrl']));
-          Navigator.pushNamed(context, AppRoutes.homePage);
+          citta: profile['city'], imageUrl: profile['imageUrl'], isPetSitter: profile ['isPetSitter']));
+          Navigator.pushReplacementNamed(context, AppRoutes.homePage);
         }
       } else {
         throw Exception('Credenziali non valide');

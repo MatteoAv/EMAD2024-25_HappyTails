@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:happy_tails/app/routes.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:happy_tails/UserManage/providers/profile_providers.dart';
 
@@ -36,7 +37,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: const Text('Impostazioni'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -63,7 +64,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   // Modifica Città
                   TextFormField(
                     decoration: const InputDecoration(
-                      labelText: 'City',
+                      labelText: 'Città',
                       prefixIcon: Icon(Icons.location_city),
                     ),
                     controller: _cittaController,
@@ -122,7 +123,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         ref.invalidate(petsProvider);
                         ref.invalidate(bookingsProvider);
                         print('Logout effettuato');
-                        Navigator.pushNamed(context, "/");
+                        Navigator.popUntil(context, ModalRoute.withName(AppRoutes.homePage));
                     },
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 50),
