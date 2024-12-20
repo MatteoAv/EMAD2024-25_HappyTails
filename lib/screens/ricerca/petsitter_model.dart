@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 class PetSitter {
   final int id;
   final String nome;
@@ -6,6 +8,7 @@ class PetSitter {
   final String provincia;
   final String imageUrl;
   final int distanza;
+  final double prezzo;
 
   PetSitter({
     required this.id,
@@ -15,6 +18,7 @@ class PetSitter {
     required this.provincia,
     required this.imageUrl,
     required this.distanza,
+    required this.prezzo,
 
   });
 
@@ -23,10 +27,11 @@ class PetSitter {
       id: map['id'],
       nome: map['nome'],
       cognome: map['cognome'],
-      email: map['provincia'],
+      email: map['email'],
       provincia: map['provincia'],
       imageUrl: map['imageUrl'],
       distanza: map['distanza'],
+      prezzo: map['prezzo'],
 
     );
   }

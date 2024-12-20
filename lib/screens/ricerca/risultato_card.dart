@@ -93,7 +93,7 @@ class VerticalCard extends StatelessWidget {
               children: [
                 // Price Text
                 Text(
-                  '26\$/d',
+                  '${item.prezzo}\€/g',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.grey[700],
                         fontWeight: FontWeight.bold,
