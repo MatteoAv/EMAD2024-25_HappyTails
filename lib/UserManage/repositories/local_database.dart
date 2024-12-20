@@ -41,7 +41,8 @@ class LocalDatabase {
         userName TEXT NOT NULL,
         imageUrl TEXT NOT NULL DEFAULT 'https://images.rawpixel.com/image_png_social_square/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTAxL3JtNjA5LXNvbGlkaWNvbi13LTAwMi1wLnBuZw.png',
         email TEXT NOT NULL,
-        citta TEXT NOT NULL
+        citta TEXT NOT NULL,
+        isPetSitter BOOL NOT NULL
       );
     ''');
     await db.execute('''
@@ -184,7 +185,7 @@ Future<bool> updateUser(String userId, String userName, String citta) async {
       maps = await supabase.rpc("get_pets_by_user", params: {'_user_id':userId});
       syncData('pets', 'owner_id', userId, db);
     }
-
+  
     return maps.map((map) => Pet.fromMap(map)).toList();
   }
 
@@ -226,13 +227,14 @@ Future<bool> updateUser(String userId, String userName, String citta) async {
   }
 
 
-  void insertUser(String userId,String userName, String email, String citta) async{
+  void insertUser(String userId,String userName, String email, String citta, bool isPetSitter) async{
     final db = await instance.database;
     await db.insert('users',{ 
     'id' : userId, 
     'userName' : userName,
     'citta' : citta,
-    'email' : email
+    'email' : email,
+    'isPetSitter' : isPetSitter 
     }
     );
   }

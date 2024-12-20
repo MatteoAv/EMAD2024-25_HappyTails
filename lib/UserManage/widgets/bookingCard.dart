@@ -21,7 +21,7 @@ class bookingCard extends StatelessWidget{
   @override
   Widget build (BuildContext context){
     return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 30),
                   child: Material(
                     elevation: 8,
                     borderRadius: BorderRadius.circular(16),

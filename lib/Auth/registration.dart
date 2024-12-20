@@ -54,7 +54,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
             user.id,
             username,
             email,
-            city
+            city,
+            false
           );
         }
          final newUser = model.User(
@@ -62,7 +63,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         userName: username,
         email: email,
         citta: city,
-        imageUrl: ""
+        imageUrl: "",
+        isPetSitter: false
       );
         // Aggiorna il provider con il nuovo utente
         ref.read(userProvider.notifier).state = AsyncData(newUser);

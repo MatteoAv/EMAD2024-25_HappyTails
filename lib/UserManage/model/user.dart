@@ -4,6 +4,7 @@ class User{
   String email;
   String imageUrl;
   String citta;
+  bool isPetSitter;
 
 
   User({
@@ -11,7 +12,8 @@ class User{
     required this.email,
     required this.imageUrl,
     required this.userName,
-    required this.citta
+    required this.citta,
+    required this.isPetSitter
   });
 
 
@@ -22,7 +24,8 @@ class User{
      email: map['email'],
      userName: map ['userName'],
      imageUrl: map ['imageUrl'],
-     citta: map ['citta']
+     citta: map ['citta'],
+     isPetSitter: map ['isPetSitter'] == 0 ? false : true
     
     );
   }
@@ -33,7 +36,8 @@ class User{
       'email' : email,
       'userName': userName,
       'imageUrl': imageUrl,
-      'citta': citta
+      'citta': citta,
+      'isPetSitter': isPetSitter == 0 ? false : true
     };
   }
 

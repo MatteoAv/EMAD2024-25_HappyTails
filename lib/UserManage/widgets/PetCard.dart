@@ -31,7 +31,7 @@ class PetCard extends StatelessWidget{
   @override
   Widget build(BuildContext context){
     return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 9),
+        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 30),
         child: Material(
               elevation: 20,
               borderRadius: BorderRadius.circular(20),
