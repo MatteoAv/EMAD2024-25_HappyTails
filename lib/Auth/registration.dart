@@ -18,6 +18,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController cityController = TextEditingController();
 
+  bool isPetSitter = false;
+
   Future<void> signUp() async {
     final email = emailController.text;
     final password = passwordController.text;
@@ -46,6 +48,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           'email': email,
           'userName': username,
           'city': city,
+          'isPetSitter': isPetSitter,
         });
 
         // Inserisci i dati nel database locale se non esistono
@@ -55,17 +58,18 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
             username,
             email,
             city,
-            false
+            isPetSitter,
           );
         }
-         final newUser = model.User(
-        id: user.id,  
-        userName: username,
-        email: email,
-        citta: city,
-        imageUrl: "",
-        isPetSitter: false
-      );
+
+        final newUser = model.User(
+          id: user.id,
+          userName: username,
+          email: email,
+          citta: city,
+          imageUrl: "",
+          isPetSitter: isPetSitter,
+        );
         // Aggiorna il provider con il nuovo utente
         ref.read(userProvider.notifier).state = AsyncData(newUser);
 
@@ -97,7 +101,26 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // Immagine in alto
+                Image.asset(
+                  'assets/IconPets/dogRegistration.png', // Inserisci il percorso della tua immagine
+                  height: 150,
+                  fit: BoxFit.cover,
+                ),
+                const SizedBox(height: 16),
+                // Titolo
+                const Text(
+                  'Crea il tuo account',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepOrange,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Campi di input
                 TextField(
                   controller: emailController,
                   decoration: const InputDecoration(
@@ -132,9 +155,37 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                // Switch per PetSitter
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Vuoi registrarti come PetSitter?',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    Switch(
+                      value: isPetSitter,
+                      onChanged: (value) {
+                        setState(() {
+                          isPetSitter = value;
+                        });
+                      },
+                      activeColor: Colors.deepOrange,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // Bottone di registrazione
                 ElevatedButton(
                   onPressed: signUp,
-                  child: const Text('Registrati'),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                    backgroundColor: Colors.deepOrange,
+                  ),
+                  child: const Text(
+                    'Registrati',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
                 ),
               ],
             ),
