@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
       title: 'HappyTails',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orangeAccent),
         textTheme: GoogleFonts.latoTextTheme(
           Theme.of(context).textTheme,
         ),
