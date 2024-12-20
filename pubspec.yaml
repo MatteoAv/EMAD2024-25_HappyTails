@@ -36,6 +36,8 @@ dependencies:
   google_sign_in : ^6.0.0
   flutter_secure_storage: ^8.0.0
   animated_text_kit: ^ 4.2.2
+  image_picker : ^0.8.6
+  path: ^1.8.3
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -88,6 +90,8 @@ flutter:
     - assets/IconPets/hamster.png
     - assets/IconPets/sadcat.png
     - assets/IconPets/petsitter.png
+    - assets/IconPets/dogRegistration.png
+    - assets/IconPets/catLogin.png
 
 
 

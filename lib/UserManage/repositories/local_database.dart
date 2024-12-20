@@ -1,5 +1,4 @@
 
-import 'dart:ffi';
 
 import 'package:logger/logger.dart';
 import 'package:sqflite/sqflite.dart';
@@ -222,7 +221,6 @@ Future<bool> updateUser(String userId, String userName, String citta) async {
       .eq('owner_id', user_id);
       syncData("bookings", "owner_id", user_id, db);
     }
-    print(maps);
     return maps.map((map) => Booking.fromMap(map)).toList();
   }
 
