@@ -29,13 +29,11 @@ class _VetBookPageState extends State<VetBookPage> {
           'prescription': 'Antibiotico',
           'visitDate': '01/01/2024',
           'notes': 'Somministrare ogni 8 ore per 7 giorni',
-          'vetName': 'Dr. Rossi'
         },
         {
           'prescription': 'Vaccino',
           'visitDate': '15/02/2024',
           'notes': 'Richiamo annuale',
-          'vetName': 'Dr. Verdi'
         },
       ];
     } else if (petId == '2') {
@@ -44,13 +42,11 @@ class _VetBookPageState extends State<VetBookPage> {
           'prescription': 'Antinfiammatorio',
           'visitDate': '05/03/2024',
           'notes': 'Solo in caso di dolore',
-          'vetName': 'Dr. Bianchi'
         },
         {
           'prescription': 'Sverminazione',
           'visitDate': '20/03/2024',
           'notes': 'Ripetere ogni 3 mesi',
-          'vetName': 'Dr. Neri'
         },
       ];
     } else {
@@ -58,26 +54,23 @@ class _VetBookPageState extends State<VetBookPage> {
     }
   }
 
-  void _addRecord(
-      String prescription, String visitDate, String notes, String vetName) {
+  void _addRecord(String prescription, String visitDate, String notes) {
     setState(() {
       records.add({
         'prescription': prescription,
         'visitDate': visitDate,
-        'notes': notes,
-        'vetName': vetName
+        'notes': notes
       });
     });
   }
 
-  void _updateRecord(int index, String prescription, String visitDate,
-      String notes, String vetName) {
+  void _updateRecord(
+      int index, String prescription, String visitDate, String notes) {
     setState(() {
       records[index] = {
         'prescription': prescription,
         'visitDate': visitDate,
-        'notes': notes,
-        'vetName': vetName
+        'notes': notes
       };
     });
   }
@@ -126,7 +119,6 @@ class _VetBookPageState extends State<VetBookPage> {
               const SizedBox(height: 8),
               Text('Note: ${record['notes'] ?? 'Nessuna nota'}'),
               const SizedBox(height: 8),
-              Text('Veterinario: ${record['vetName'] ?? 'Non specificato'}'),
             ],
           ),
           actions: [
@@ -151,64 +143,85 @@ class _VetBookPageState extends State<VetBookPage> {
 
   void _showAddRecordDialog(BuildContext context) {
     String prescription = "";
-    String visitDate = "";
+    DateTime? selectedDate;
     String notes = "";
-    String vetName = "";
 
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Aggiungi Prescrizione/Visita'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  decoration: const InputDecoration(labelText: 'Prescrizione'),
-                  onChanged: (value) {
-                    prescription = value;
-                  },
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Aggiungi Prescrizione/Visita'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      decoration:
+                          const InputDecoration(labelText: 'Prescrizione'),
+                      onChanged: (value) {
+                        prescription = value;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Text(
+                          selectedDate == null
+                              ? 'Seleziona una data'
+                              : 'Data: ${selectedDate!.toLocal().toString().split(' ')[0]}',
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.calendar_today),
+                          onPressed: () async {
+                            final pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (pickedDate != null) {
+                              setState(() {
+                                selectedDate = pickedDate;
+                              });
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    TextField(
+                      decoration: const InputDecoration(labelText: 'Note'),
+                      onChanged: (value) {
+                        notes = value;
+                      },
+                    ),
+                  ],
                 ),
-                TextField(
-                  decoration: const InputDecoration(
-                      labelText: 'Data visita (es. 08/12/2024)'),
-                  onChanged: (value) {
-                    visitDate = value;
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
                   },
+                  child: const Text('Annulla'),
                 ),
-                TextField(
-                  decoration: const InputDecoration(labelText: 'Note'),
-                  onChanged: (value) {
-                    notes = value;
+                ElevatedButton(
+                  onPressed: () {
+                    if (prescription.isNotEmpty && selectedDate != null) {
+                      _addRecord(
+                        prescription,
+                        selectedDate!.toLocal().toString().split(' ')[0],
+                        notes,
+                      );
+                      Navigator.of(context).pop();
+                    }
                   },
-                ),
-                TextField(
-                  decoration: const InputDecoration(labelText: 'Veterinario'),
-                  onChanged: (value) {
-                    vetName = value;
-                  },
+                  child: const Text('Salva'),
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Annulla'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (prescription.isNotEmpty && visitDate.isNotEmpty) {
-                  _addRecord(prescription, visitDate, notes, vetName);
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Salva'),
-            ),
-          ],
+            );
+          },
         );
       },
     );
@@ -217,68 +230,87 @@ class _VetBookPageState extends State<VetBookPage> {
   void _showEditRecordDialog(
       BuildContext context, Map<String, String> record, int index) {
     String prescription = record['prescription']!;
-    String visitDate = record['visitDate']!;
+    DateTime selectedDate =
+        DateTime.parse(record['visitDate']!.split('/').reversed.join('-'));
     String notes = record['notes'] ?? "";
-    String vetName = record['vetName'] ?? "";
 
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Modifica Prescrizione/Visita'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  decoration: const InputDecoration(labelText: 'Prescrizione'),
-                  controller: TextEditingController(text: prescription),
-                  onChanged: (value) {
-                    prescription = value;
-                  },
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Modifica Prescrizione/Visita'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      decoration:
+                          const InputDecoration(labelText: 'Prescrizione'),
+                      controller: TextEditingController(text: prescription),
+                      onChanged: (value) {
+                        prescription = value;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Text(
+                          'Data: ${selectedDate.toLocal().toString().split(' ')[0]}',
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.calendar_today),
+                          onPressed: () async {
+                            final pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: selectedDate,
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (pickedDate != null) {
+                              setState(() {
+                                selectedDate = pickedDate;
+                              });
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    TextField(
+                      decoration: const InputDecoration(labelText: 'Note'),
+                      controller: TextEditingController(text: notes),
+                      onChanged: (value) {
+                        notes = value;
+                      },
+                    ),
+                  ],
                 ),
-                TextField(
-                  decoration: const InputDecoration(
-                      labelText: 'Data visita (es. 08/12/2024)'),
-                  controller: TextEditingController(text: visitDate),
-                  onChanged: (value) {
-                    visitDate = value;
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
                   },
+                  child: const Text('Annulla'),
                 ),
-                TextField(
-                  decoration: const InputDecoration(labelText: 'Note'),
-                  controller: TextEditingController(text: notes),
-                  onChanged: (value) {
-                    notes = value;
+                ElevatedButton(
+                  onPressed: () {
+                    if (prescription.isNotEmpty) {
+                      _updateRecord(
+                        index,
+                        prescription,
+                        selectedDate.toLocal().toString().split(' ')[0],
+                        notes,
+                      );
+                      Navigator.of(context).pop();
+                    }
                   },
-                ),
-                TextField(
-                  decoration: const InputDecoration(labelText: 'Veterinario'),
-                  controller: TextEditingController(text: vetName),
-                  onChanged: (value) {
-                    vetName = value;
-                  },
+                  child: const Text('Salva'),
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Annulla'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (prescription.isNotEmpty && visitDate.isNotEmpty) {
-                  _updateRecord(index, prescription, visitDate, notes, vetName);
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Salva'),
-            ),
-          ],
+            );
+          },
         );
       },
     );
