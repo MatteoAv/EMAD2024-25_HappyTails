@@ -372,11 +372,18 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                   nome: petSitter['nome'],
                   cognome: petSitter['cognome'],
                   email: petSitter['email'],
-                  prezzo: petSitter['prezzo'],
                   provincia: petSitter['provincia'],
+                  comune: petSitter['comune'],
                   imageUrl: petSitter['image_url'] ??
                       'https://images.contentstack.io/v3/assets/blt6f84e20c72a89efa/blt2577cbc57a834982/6363df6833df8e693d1e44c7/img-pet-sitter-download-header.jpg',
+                  cani: petSitter['cani'],
+                  gatti: petSitter['gatti'],
+                  uccelli: petSitter['uccelli'],
+                  pesci: petSitter['pesci'],
+                  rettili: petSitter['rettili'],
+                  roditori: petSitter['roditori'],
                   distanza: petSitter['distance'].toInt(),
+                  prezzo: petSitter['prezzo'],
 
                 );
 
