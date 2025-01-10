@@ -430,8 +430,8 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
 
                               else {
 
-                                final logged =  isUserLoggedIn; 
-                                if(logged == true){
+                                //final logged =  isUserLoggedIn; 
+                                //if(logged == true){
                     
                                   final alreadyPrenotato = await checkPrenotazione(petID, selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0]);
 
@@ -480,8 +480,9 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
                                     );
                                   }
 
-                                }
+                                //}
 
+                                /*
                                 else{
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
@@ -489,7 +490,7 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
                                       backgroundColor: Colors.red,
                                     ),
                                   );
-                                  }
+                                }*/
                               }
 
                           },
