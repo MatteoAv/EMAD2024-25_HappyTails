@@ -227,77 +227,77 @@ final user = Supabase.instance.client.auth.currentUser;
 
                       const SizedBox(height: 20),
 
-Column(
-  mainAxisSize: MainAxisSize.min,
-  children: [
-    const SizedBox(height: 16),
-    const Text('Scegli il pet per cui prenotare:'),
-    const SizedBox(height: 8),
-    Wrap(
-      spacing: 16,
-      runSpacing: 16,
-      children: animalTypes.entries.map((entry) {
-        final type = entry.key;
-        final icon = entry.value;
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(height: 16),
+                          const Text('Scegli il pet per cui prenotare:'),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 16,
+                            runSpacing: 16,
+                            children: animalTypes.entries.map((entry) {
+                              final type = entry.key;
+                              final icon = entry.value;
 
-        return Column(
-          children: [
-            GestureDetector(
-              onTap: () async {
-                setState(() {
-                  selectedType = type; // Aggiorna la selezione
-                });
-                await fetchPets(type, user!.id); // Fetch pets for selected type
-              },
-              child: AnimatedScale(
-                scale: selectedType == type ? 1.2 : 1.0,
-                duration: const Duration(milliseconds: 200),
-                child: CircleAvatar(
-                  backgroundColor: selectedType == type
-                      ? Colors.deepOrange // Colore di sfondo selezionato
-                      : Colors.grey[300], // Colore di sfondo non selezionato
-                  radius: 30,
-                  child: Image.asset(icon, width: 30, height: 30),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Mostra la lista dei nomi solo se il tipo è selezionato
-            if (selectedType == type)
-              Column(
-                children: pets.map((pet) {
-                   bool isSelected = selectedPet == pet.name;
-                   //petID = pet.id;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          selectedPet = pet.name; // Imposta il pet selezionato
-                          petID = pet.id;
-                          print('PetID: $petID');
-                        });
-                        selectedPet =pet.name;
-                        print('Cliccato su: $selectedPet');
-                        //petID = pet.id;
-                      },
-                      child: Text(
-                        pet.name,
-                        style: TextStyle(
-                          color: isSelected ? Colors.orange : Colors.black,
-                        ),
-                        ),
-                       // Usa il campo appropriato del tuo modello Pet
-                    ),
-                  );
-                }).toList(),
-              ),
-          ],
-        );
-      }).toList(),
-    ),
-  ],
-),
+                              return Column(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () async {
+                                      setState(() {
+                                        selectedType = type; // Aggiorna la selezione
+                                      });
+                                      await fetchPets(type, user!.id); // Fetch pets for selected type
+                                    },
+                                    child: AnimatedScale(
+                                      scale: selectedType == type ? 1.2 : 1.0,
+                                      duration: const Duration(milliseconds: 200),
+                                      child: CircleAvatar(
+                                        backgroundColor: selectedType == type
+                                            ? Colors.deepOrange // Colore di sfondo selezionato
+                                            : Colors.grey[300], // Colore di sfondo non selezionato
+                                        radius: 30,
+                                        child: Image.asset(icon, width: 30, height: 30),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  // Mostra la lista dei nomi solo se il tipo è selezionato
+                                  if (selectedType == type)
+                                    Column(
+                                      children: pets.map((pet) {
+                                        bool isSelected = selectedPet == pet.name;
+                                        //petID = pet.id;
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                          child: InkWell(
+                                            onTap: () {
+                                              setState(() {
+                                                selectedPet = pet.name; // Imposta il pet selezionato
+                                                petID = pet.id;
+                                                print('PetID: $petID');
+                                              });
+                                              selectedPet =pet.name;
+                                              print('Cliccato su: $selectedPet');
+                                              //petID = pet.id;
+                                            },
+                                            child: Text(
+                                              pet.name,
+                                              style: TextStyle(
+                                                color: isSelected ? Colors.orange : Colors.black,
+                                              ),
+                                              ),
+                                            // Usa il campo appropriato del tuo modello Pet
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
 
                       
 
