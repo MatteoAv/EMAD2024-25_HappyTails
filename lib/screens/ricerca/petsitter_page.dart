@@ -55,7 +55,7 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
   }
 
   Future<void> prenota(String inizio, String fine, double prezzo, int pet_id, String owner_id, int petsitter_id) async {
-    final bookingResponse = await Supabase.instance.client.rpc(
+     await Supabase.instance.client.rpc(
       'create_booking', 
       params: {
           'data_inizio': inizio, 
@@ -85,13 +85,13 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
         );
 
         // Stampa la risposta della query per verificarne il formato
-        print('Risposta della query: $reviewsResponse');
+        //print('Risposta della query: $reviewsResponse');
 
         // Assicurati che la risposta sia una lista
         if (reviewsResponse is List) {
           List<Map<String, dynamic>> reviewsList = (reviewsResponse).map((review) {
             // Aggiungi il controllo per verificare se i campi sono corretti
-            print('Review data: $review');
+            //print('Review data: $review');
             return {
               'data': review['date_end'] ?? 'Sconosciuto',
               'recensione': review['review'] ?? 'Sconosciuto',
@@ -129,7 +129,7 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
   }
 
 
-final user = Supabase.instance.client.auth.currentUser;
+  final user = Supabase.instance.client.auth.currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -146,12 +146,12 @@ final user = Supabase.instance.client.auth.currentUser;
 
     final String iconPath = 'assets/IconPets';
     final animalTypes = {
-      if (petsitter.cani) 'Dog': "$iconPath/dog.png",
-      if (petsitter.gatti) 'Cat': "$iconPath/cat.png",
-      if (petsitter.pesci) 'Fish': "$iconPath/fish.png",
-      if (petsitter.uccelli) 'Bird': "$iconPath/dove.png",
+      if (petsitter.cani) 'Cane': "$iconPath/dog.png",
+      if (petsitter.gatti) 'Gatto': "$iconPath/cat.png",
+      if (petsitter.pesci) 'Pesce': "$iconPath/fish.png",
+      if (petsitter.uccelli) 'Uccello': "$iconPath/dove.png",
       //icona rettili
-      if (petsitter.roditori) 'Other': "$iconPath/hamster.png",
+      if (petsitter.roditori) 'Altro': "$iconPath/hamster.png",
     };
 
     // Calcoliamo il numero di stelle piene, metà stelle e stelle vuote
