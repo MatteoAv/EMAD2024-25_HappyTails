@@ -494,7 +494,7 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
-                          minimumSize: const Size(double.infinity, 50),
+                          minimumSize: const Size(double.infinity, 45),
                         ),
                         child: const Text(
                           'Prenota',
