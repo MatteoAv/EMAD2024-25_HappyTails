@@ -155,6 +155,7 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
     final String nome = petsitter.nome;
     final String cognome = petsitter.cognome;
     final String provincia = petsitter.provincia;
+    final double prezzo = petsitter.prezzo;
     final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
     final selectedDateRange = ref.watch(selectedDateRangeProvider);    
 
@@ -206,38 +207,64 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children:[
-                        Text(
-                          'Nome: $nome $cognome',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Città: $provincia',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
+
+                            Text(
+                              '$nome $cognome',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            
+
+                        SizedBox(height: 5),
+                        Row(
+                          children: [
+
+                            Icon(
+                              Icons.location_on, // Icona per la posizione
+                              color: Colors.red, // Colore dell'icona
+                              size: 20, // Dimensione dell'icona
+                            ),
+
+                            Text(
+                              '$provincia',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            SizedBox(width: 15),
+                            Text(
+                              '${NumberFormat('0.00').format(prezzo)}€/giorno',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+
+                          ],
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+
+              const SizedBox(height: 10),
 
 
               // Form di prenotazione
-              Card(
-                elevation: 5,
+              /*Card(
+                
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Padding(
+                child: */
+                Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
@@ -247,9 +274,19 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const SizedBox(height: 16),
-                          const Text('Scegli il pet per cui prenotare:'),
-                          const SizedBox(height: 8),
+
+                          const Text(
+                            'Scegli il tipo di pet per cui prenotare:',
+                            style: TextStyle(
+                              fontSize: 15.0,         // Dimensione del testo
+                              fontWeight: FontWeight.bold,  // Peso del font (es. bold, normal)
+                              //color: Colors.black,         // Colore del testo
+                              //letterSpacing: 1.0,        // Spaziatura tra le lettere
+                              height: 1,              // Altezza della riga (distanza tra linee multiple)
+                              //fontFamily: 'Roboto',     // Font personalizzato (opzionale)
+                            ),
+                          ),
+                          const SizedBox(height: 15),
                           Wrap(
                             spacing: 16,
                             runSpacing: 16,
@@ -316,14 +353,14 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
                         ],
                       ),
 
-                      
-
                       const SizedBox(height: 20),
 
                       Row(
                         children: [
+                          const SizedBox(width: 10),
                           // Date Range Picker
                           Expanded(
+                            
                             child: GestureDetector(
                               onTap: () async {
                                 final dateRange = await showDateRangePicker(
@@ -336,6 +373,8 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
                                   ref.read(selectedDateRangeProvider.notifier).state = dateRange;
                                 }
                               },
+
+                              
                               child: Container(
                                 padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
                                 decoration: BoxDecoration(
@@ -462,12 +501,18 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
                           ),
                           minimumSize: const Size(double.infinity, 50),
                         ),
-                        child: const Text('Prenota'),
+                        child: const Text(
+                          'Prenota',
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
+              //),
 
 
 
