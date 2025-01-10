@@ -183,7 +183,7 @@ class _ChatBubble extends StatelessWidget {
       const SizedBox(width: 12),
       Text(format(message.timestamp, locale: 'en_short')),
       const SizedBox(width: 60),
-      if (isMine && message.status != null) Text(message.status!), // Show status
+      //if (isMine && message.status != null) Text(message.status!), // Show status
     ];
     if (isMine) chatContents = chatContents.reversed.toList();
     return Padding(

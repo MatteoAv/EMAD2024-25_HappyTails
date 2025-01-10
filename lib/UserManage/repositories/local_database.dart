@@ -311,6 +311,7 @@ Future<bool> updateUser(String userId, String userName, String citta) async {
       // Update local database with Supabase-generated ID
       final supabaseId = response['id'];
       await updateMessageKey(message.id, supabaseId);
+      await updateMessageStatus(message.id, "synced");
     } catch (error) {
       // Handle sync error (e.g., retry later)
       print('Error syncing message: $error');
