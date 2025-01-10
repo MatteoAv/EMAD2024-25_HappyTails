@@ -167,7 +167,7 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                           // Number of Days
                           Text(
                             selectedDateRange?.duration.inDays != null
-                                ? "${selectedDateRange!.duration.inDays} giorni"
+                                ? "${selectedDateRange!.duration.inDays} ${selectedDateRange.duration.inDays == 1 ? 'giorno' : 'giorni'}"
                                 : "",
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),

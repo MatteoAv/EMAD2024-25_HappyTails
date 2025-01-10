@@ -351,7 +351,7 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
                           // Number of Days
                           Text(
                             selectedDateRange?.duration.inDays != null
-                                ? "${selectedDateRange!.duration.inDays + 1} giorni"
+                                ? "${selectedDateRange!.duration.inDays} ${selectedDateRange.duration.inDays == 1 ? 'giorno' : 'giorni'}"
                                 : "",
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
@@ -369,7 +369,7 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
                                 ),
                               );
                             } else {
-                                int durationDays = selectedDateRange.end.difference(selectedDateRange.start).inDays + 1;
+                                int durationDays = selectedDateRange.end.difference(selectedDateRange.start).inDays;
                                 print('Durata:  $durationDays');
                                 double totalPrice = petsitter.prezzo * durationDays;
                                 prenota(selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0], totalPrice, petID ,user!.id, petsitterId);
