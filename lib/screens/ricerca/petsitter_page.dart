@@ -37,7 +37,6 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
     _loadReviews(); // Call _loadReviews here
   }
 
-
   Future<void> fetchPets(String type, String userId) async {
     final petResponse = await Supabase.instance.client.rpc(
       'get_pets_by_user_and_type', // Nome della funzione RPC in Supabase
@@ -54,8 +53,26 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
 
   }
 
+    Future<int> checkPrenotazione(int petid, String inizio, String fine) async {
+    final prenotazioneResponse = await Supabase.instance.client.rpc(
+      'check_booking_overlap', // Nome della funzione RPC in Supabase
+      params: {
+        'pet_id_input': petid, // Id dell'utente petsitter
+        'datainizio_input': inizio, // Tipo di animale selezionato
+        'datafine_input': fine
+      },
+    );
+
+    if(prenotazioneResponse ==1){
+      return 1;
+    } 
+    else{
+      return 0;
+    } 
+  }
+
   Future<void> prenota(String inizio, String fine, double prezzo, int pet_id, String owner_id, int petsitter_id) async {
-    final bookingResponse = await Supabase.instance.client.rpc(
+     await Supabase.instance.client.rpc(
       'create_booking', 
       params: {
           'data_inizio': inizio, 
@@ -85,13 +102,13 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
         );
 
         // Stampa la risposta della query per verificarne il formato
-        print('Risposta della query: $reviewsResponse');
+        //print('Risposta della query: $reviewsResponse');
 
         // Assicurati che la risposta sia una lista
         if (reviewsResponse is List) {
           List<Map<String, dynamic>> reviewsList = (reviewsResponse).map((review) {
             // Aggiungi il controllo per verificare se i campi sono corretti
-            print('Review data: $review');
+            //print('Review data: $review');
             return {
               'data': review['date_end'] ?? 'Sconosciuto',
               'recensione': review['review'] ?? 'Sconosciuto',
@@ -129,7 +146,7 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
   }
 
 
-final user = Supabase.instance.client.auth.currentUser;
+  final user = Supabase.instance.client.auth.currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -146,12 +163,12 @@ final user = Supabase.instance.client.auth.currentUser;
 
     final String iconPath = 'assets/IconPets';
     final animalTypes = {
-      if (petsitter.cani) 'Dog': "$iconPath/dog.png",
-      if (petsitter.gatti) 'Cat': "$iconPath/cat.png",
-      if (petsitter.pesci) 'Fish': "$iconPath/fish.png",
-      if (petsitter.uccelli) 'Bird': "$iconPath/dove.png",
+      if (petsitter.cani) 'Cane': "$iconPath/dog.png",
+      if (petsitter.gatti) 'Gatto': "$iconPath/cat.png",
+      if (petsitter.pesci) 'Pesce': "$iconPath/fish.png",
+      if (petsitter.uccelli) 'Uccello': "$iconPath/dove.png",
       //icona rettili
-      if (petsitter.roditori) 'Other': "$iconPath/hamster.png",
+      if (petsitter.roditori) 'Altro': "$iconPath/hamster.png",
     };
 
     // Calcoliamo il numero di stelle piene, metà stelle e stelle vuote
@@ -351,7 +368,7 @@ final user = Supabase.instance.client.auth.currentUser;
                           // Number of Days
                           Text(
                             selectedDateRange?.duration.inDays != null
-                                ? "${selectedDateRange!.duration.inDays + 1} giorni"
+                                ? "${selectedDateRange!.duration.inDays} ${selectedDateRange.duration.inDays == 1 ? 'giorno' : 'giorni'}"
                                 : "",
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
@@ -360,20 +377,82 @@ final user = Supabase.instance.client.auth.currentUser;
                       const SizedBox(height: 20),
 
                       ElevatedButton(
+
                           onPressed: () async {
-                            if (selectedDateRange == null || selectedType == null || selectedPet == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Per favore, compila tutti i campi prima di proseguire."),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                            } else {
-                                int durationDays = selectedDateRange.end.difference(selectedDateRange.start).inDays + 1;
-                                print('Durata:  $durationDays');
-                                double totalPrice = petsitter.prezzo * durationDays;
-                                prenota(selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0], totalPrice, petID ,user!.id, petsitterId);
-                            }
+
+                              if (selectedDateRange == null || selectedType == null || selectedPet == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Per favore, compila tutti i campi prima di proseguire."),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              } 
+
+                              else {
+
+                                final logged =  isUserLoggedIn; 
+                                if(logged == true){
+                    
+                                  final alreadyPrenotato = await checkPrenotazione(petID, selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0]);
+
+                                  if(alreadyPrenotato == 1){
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Text("Prenotazione Fallita"),
+                                            content: const Text("L'intervallo di date selezionato è già prenotato per questo pet."),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: const Text("OK"),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                  }
+
+                                  else{
+                                    int durationDays = selectedDateRange.end.difference(selectedDateRange.start).inDays;
+                                    print('Durata:  $durationDays');
+                                    double totalPrice = petsitter.prezzo * durationDays;
+                                    await prenota(selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0], totalPrice, petID ,user!.id, petsitterId);
+
+                                    showDialog(
+                                      context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Text("Prenotazione Avvenuta"),
+                                            content: const Text("La tua prenotazione è stata effettuata con successo."),
+                                            actions: <Widget>[
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop(); // Chiude l'alert box
+                                              },
+                                              child: const Text("OK"),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  }
+
+                                }
+
+                                else{
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Per effettuare una prenotazione devi essere registrato sulla piattaforma."),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  }
+                              }
+
                           },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange,
