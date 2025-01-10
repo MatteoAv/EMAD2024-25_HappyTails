@@ -377,62 +377,82 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
                       const SizedBox(height: 20),
 
                       ElevatedButton(
+
                           onPressed: () async {
-                            if (selectedDateRange == null || selectedType == null || selectedPet == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Per favore, compila tutti i campi prima di proseguire."),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                            } else {
-                              final alreadyPrenotato = await checkPrenotazione(petID, selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0]);
 
-                              if(alreadyPrenotato == 1){
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: const Text("Prenotazione Fallita"),
-                                        content: const Text("L'intervallo di date selezionato è già prenotato per questo pet."),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: const Text("OK"),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                              }
-
-                              else{
-                                int durationDays = selectedDateRange.end.difference(selectedDateRange.start).inDays;
-                                print('Durata:  $durationDays');
-                                double totalPrice = petsitter.prezzo * durationDays;
-                                await prenota(selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0], totalPrice, petID ,user!.id, petsitterId);
-
-                                showDialog(
-                                  context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: const Text("Prenotazione Avvenuta"),
-                                        content: const Text("La tua prenotazione è stata effettuata con successo."),
-                                        actions: <Widget>[
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop(); // Chiude l'alert box
-                                          },
-                                          child: const Text("OK"),
-                                        ),
-                                      ],
-                                    );
-                                  },
+                              if (selectedDateRange == null || selectedType == null || selectedPet == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Per favore, compila tutti i campi prima di proseguire."),
+                                    backgroundColor: Colors.red,
+                                  ),
                                 );
+                              } 
+
+                              else {
+
+                                final logged =  isUserLoggedIn; 
+                                if(logged == true){
+                    
+                                  final alreadyPrenotato = await checkPrenotazione(petID, selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0]);
+
+                                  if(alreadyPrenotato == 1){
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Text("Prenotazione Fallita"),
+                                            content: const Text("L'intervallo di date selezionato è già prenotato per questo pet."),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: const Text("OK"),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                  }
+
+                                  else{
+                                    int durationDays = selectedDateRange.end.difference(selectedDateRange.start).inDays;
+                                    print('Durata:  $durationDays');
+                                    double totalPrice = petsitter.prezzo * durationDays;
+                                    await prenota(selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0], totalPrice, petID ,user!.id, petsitterId);
+
+                                    showDialog(
+                                      context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Text("Prenotazione Avvenuta"),
+                                            content: const Text("La tua prenotazione è stata effettuata con successo."),
+                                            actions: <Widget>[
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop(); // Chiude l'alert box
+                                              },
+                                              child: const Text("OK"),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  }
+
+                                }
+
+                                else{
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Per effettuare una prenotazione devi essere registrato sulla piattaforma."),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  }
                               }
-                            }
+
                           },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange,
