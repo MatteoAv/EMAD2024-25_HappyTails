@@ -21,7 +21,7 @@ class ExpandableButton extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOutQuad,
+        curve: Curves.fastEaseInToSlowEaseOut,
         width: isExpanded ? 150 : 80, // Larghezza dinamica
         height: 50,
         decoration: BoxDecoration(
@@ -33,7 +33,7 @@ class ExpandableButton extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isExpanded ? Colors.white : Colors.black,
+              color: isExpanded ? Colors.white : Colors.grey[600],
               size: 25
             ),
             if (isExpanded)

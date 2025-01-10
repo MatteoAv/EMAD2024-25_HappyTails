@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:happy_tails/UserManage/screens/profile_page.dart';
+import 'package:happy_tails/chat/petSitterList.dart';
+import 'package:happy_tails/chat/chat.dart';
 import 'package:happy_tails/home.dart';
 import 'package:happy_tails/prenotazioni.dart';
 import 'package:happy_tails/profilo.dart';
@@ -43,7 +45,8 @@ class _MainScaffoldState extends State<MainScaffold> {
       _pages = [
         const HomePage(),
         const RisultatiCercaPage(),
-        const PrenotazioniPage(),
+        const UserListPage(),
+
         // Aggiungi LoginPage o ProfilePage in base alla sessione
         if (session == null)  ProfiloPage(),
         if (session != null) const UserProfilePage(),

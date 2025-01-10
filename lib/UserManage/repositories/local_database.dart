@@ -1,5 +1,6 @@
 
 
+import 'package:happy_tails/chat/message_model.dart';
 import 'package:logger/logger.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -94,6 +95,16 @@ class LocalDatabase {
         FOREIGN KEY (petSitter_id) REFERENCES petsitter(id) ON UPDATE CASCADE
       );
     ''');
+    await db.execute('''
+    CREATE TABLE messages (
+      id TEXT PRIMARY KEY,
+      sender_id TEXT NOT NULL,
+      receiver_id TEXT NOT NULL,
+      content TEXT NOT NULL,
+      timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      status TEXT DEFAULT 'unsynced' 
+    );
+  ''');
 
     db.insert('petsitter', {'id':1, 'nome': 'Giulia', 'cognome' : 'Rossi', 'email' : 'giuliarossi@example.com', 'provincia' : 'Avellino', 'cani' : 1, 'gatti' : 1, 'uccelli' : 0,
     'pesci' : 1, 'rettili': 0, 'roditori' : 1, 'Comune': 'Avellino', 'Posizione' : '0101000020E6100000F9ACDF0A30972D40C50DCF7DFF744440'});
@@ -248,4 +259,126 @@ Future<bool> updateUser(String userId, String userName, String citta) async {
     }
     return null;
   }
+
+  Future<void> addMessage(Message message) async {
+    final db = await database;
+    await db.insert('messages', message.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+ Future<List<Message>> getUnsyncedMessages(String userId) async {
+    final db = await database;
+    final maps = await db.query(
+      'messages',
+      where: 'sender_id = ? AND status = ?',
+      whereArgs: [userId, 'unsynced'],
+    );
+    return maps.map((map) => Message.fromMap(map, userId)).toList();
+  }
+   Future<void> updateMessageStatus(String messageId, String status) async {
+    final db = await database;
+    await db.update(
+      'messages',
+      {'status': status},
+      where: 'id = ?',
+      whereArgs: [messageId],
+    );
+  }
+  Future<void> updateMessageKey(String messageId, int id) async {
+    final db = await database;
+    await db.update(
+      'messages',
+      {'id': id},
+      where: 'id = ?',
+      whereArgs: [messageId],
+    );
+  }
+   Future<void> syncUnsyncedMessages(String userId) async {
+  final unsyncedMessages = await getUnsyncedMessages(userId);
+
+  for (final message in unsyncedMessages) {
+    try {
+      // Insert into Supabase
+      final response = await supabase
+          .from('messages')
+          .insert({
+            'sender_id': message.sender_id,
+            'receiver_id': message.receiver_id,
+            'content': message.content,
+            'created_at': message.timestamp.toIso8601String(),
+          })
+          .select('id')
+          .single();
+
+      // Update local database with Supabase-generated ID
+      final supabaseId = response['id'];
+      await updateMessageKey(message.id, supabaseId);
+    } catch (error) {
+      // Handle sync error (e.g., retry later)
+      print('Error syncing message: $error');
+    }
+  }
 }
+  Future<List<Message>> fetchMessagesForConversation(String userId, String otherUserId) async {
+    final db = await database;
+    final localMessages = await db.query(
+      'messages',
+      where: '(sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)',
+      whereArgs: [userId, otherUserId, otherUserId, userId],
+      orderBy: 'timestamp DESC',
+    );
+
+    try {
+      if (await _isOnline()) {
+        final remoteMessages = await supabase
+            .from('messages')
+            .select('*')
+            .or('sender_id.eq.$userId.and.receiver_id.eq.$otherUserId,sender_id.eq.$otherUserId.and.receiver_id.eq.$userId')
+            .order('timestamp', ascending: false);
+
+        if (remoteMessages.isNotEmpty) {
+           await syncMessages(List<Map<String, dynamic>>.from(remoteMessages));
+        }
+      }
+    } catch (e) {
+      // Handle network or Supabase errors gracefully. Log the error
+      print('Error fetching remote messages: $e');
+      // Optionally, you could show a snackbar to the user or take other actions.
+    }
+    return localMessages.map((map) => Message.fromMap(map, userId)).toList();
+  }
+
+  Future<void> syncMessages(List<Map<String, dynamic>> messages) async {
+    final db = await database;
+    final batch = db.batch();
+    for (final message in messages) {
+      batch.insert(
+        'messages',
+        message,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+    await batch.commit(noResult: true);
+  }
+
+  Future<bool> _isOnline() async {
+    try {
+      final response = await supabase.rpc('ping');
+      return response == 'ok';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<List<Message>> getMessagesFromLocalDb(String userId, String otherUserId) async {
+    final db = await database;
+    final localMessages = await db.query(
+      'messages',
+      where: '(sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)',
+      whereArgs: [userId, otherUserId, otherUserId, userId],
+      orderBy: 'timestamp DESC',
+    );
+    return localMessages.map((map) => Message.fromMap(map, userId)).toList();
+  }
+  
+}
+
+

@@ -95,8 +95,9 @@ class VerticalCard extends StatelessWidget {
                 Text(
                   '${item.prezzo}\€/g',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[700],
+                        color: Colors.grey[800],
                         fontWeight: FontWeight.bold,
+                        fontSize: 13,
                       ),
                 ),
                 const SizedBox(height: 8), // Space between text and icon
@@ -105,7 +106,7 @@ class VerticalCard extends StatelessWidget {
                 Icon(
                   Icons.chevron_right,
                   color: Colors.orange[600],
-                  size: 27,
+                  size: 37,
                 ),
               ],
             ),
