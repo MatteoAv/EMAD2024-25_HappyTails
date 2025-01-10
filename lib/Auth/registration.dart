@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happy_tails/UserManage/repositories/local_database.dart';
 import 'package:happy_tails/UserManage/providers/profile_providers.dart';
+import 'package:happy_tails/app/routes.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:happy_tails/UserManage/model/user.dart' as model;
 
@@ -73,13 +74,17 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         // Aggiorna il provider con il nuovo utente
         ref.read(userProvider.notifier).state = AsyncData(newUser);
 
+        if(isPetSitter){
+          _showPetSitterAlert(context);
+        }
+        else{
         // Mostra messaggio di successo
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registrazione completata!')),
         );
-
         // Naviga alla home page
         Navigator.pop(context);
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Errore durante la registrazione')),
@@ -91,6 +96,32 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
       );
     }
   }
+
+  void _showPetSitterAlert(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Completa la registrazione'),
+      content: const Text(
+          'Hai scelto di registrarti come PetSitter. Completa la tua registrazione andando nelle impostazioni.'),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Chiudi'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context); // Chiude il dialog
+            Navigator.pushNamed(context, AppRoutes.settings); // Naviga alla pagina delle impostazioni
+          },
+          child: const Text('Vai alle Impostazioni'),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {

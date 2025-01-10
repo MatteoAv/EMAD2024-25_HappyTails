@@ -30,6 +30,8 @@ il notifier addPetProvider aggiungerà un pet al db locale ed esterno per poi no
 aggiornarsi. 
  */
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happy_tails/UserManage/widgets/bookingCard.dart';
@@ -49,7 +51,6 @@ class UserProfilePage extends ConsumerWidget {
     final petsAsync = ref.watch(petsProvider);
     final bookingsAsync = ref.watch(bookingsProvider);
     final isPetsTabSelected = ref.watch(tabSelectionProvider);
-
     
     return Scaffold(
       appBar: AppBar(
@@ -72,7 +73,10 @@ class UserProfilePage extends ConsumerWidget {
             children: [
               CircleAvatar(
                 radius: 60,
-                backgroundImage: NetworkImage(user?.imageUrl ?? 'https://marketplace.canva.com/EAF-i9Rhbp4/1/0/1600w/canva-sfondo-neutro-cerchio-immagine-di-profilo-linkedin-3nYoZ1kUL0s.jpg'),
+                key: ValueKey(user?.imageUrl),
+                backgroundImage: user != null && user.imageUrl!= null ? FileImage(File(user.imageUrl!)) : null,
+                child : user?.imageUrl == null ? const Icon(Icons.person, size: 50)
+                : null,
               ),
               const SizedBox(width: 16),
               Column(
@@ -274,28 +278,28 @@ class AddPetDialog extends ConsumerWidget {
     final addPetNotifier = ref.read(addPetProvider.notifier);
 
     final animalTypes = {
-      'Dog': "$iconPath/dog.png",
-      'Cat': "$iconPath/cat.png",
-      'Fish': "$iconPath/fish.png",
-      'Bird': "$iconPath/dove.png",
-      'Other': "$iconPath/hamster.png",
+      'Cane': "$iconPath/dog.png",
+      'Gatto': "$iconPath/cat.png",
+      'Pesce': "$iconPath/fish.png",
+      'Uccello': "$iconPath/dove.png",
+      'Altro': "$iconPath/hamster.png",
     };
 
     return AlertDialog(
-      title: const Text('Add a Pet'),
+      title: const Text('Aggiungi un animale'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               decoration: const InputDecoration(
-                labelText: 'Pet Name',
+                labelText: 'Nome animale',
                 prefixIcon: Icon(Icons.edit),
               ),
               onChanged: addPetNotifier.setName,
             ),
             const SizedBox(height: 16),
-            const Text('Select Animal Type:'),
+            const Text('Tipo animale:'),
             const SizedBox(height: 8),
             Wrap(
               spacing: 16,

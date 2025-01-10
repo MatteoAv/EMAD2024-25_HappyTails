@@ -33,7 +33,7 @@ class ExpandableButton extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isExpanded ? Colors.white : Colors.black,
+              color: isExpanded ? Colors.white : Colors.grey[700],
               size: 25
             ),
             if (isExpanded)

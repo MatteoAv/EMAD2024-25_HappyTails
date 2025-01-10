@@ -17,12 +17,30 @@ class ManagePetsState {
 class ManagePetsNotifier extends StateNotifier<ManagePetsState> {
   ManagePetsNotifier() : super(ManagePetsState(selectedPets: {}));
 
+  static const List<String> allPetTypes = [
+    'Dog',
+    'Cat',
+    'Fish',
+    'Bird',
+    'Other'
+  ];
+
   void togglePet(String petType) {
     final updatedPets = Map<String, bool>.from(state.selectedPets);
     if (updatedPets.containsKey(petType)) {
-      updatedPets.remove(petType);
+      updatedPets[petType] = !updatedPets[petType]!;
     } else {
       updatedPets[petType] = true;
+    }
+    state = state.copyWith(selectedPets: updatedPets);
+  }
+
+  void confirmSelection() {
+    final updatedPets = Map<String, bool>.from(state.selectedPets);
+    for (final petType in allPetTypes) {
+      if (!updatedPets.containsKey(petType)) {
+        updatedPets[petType] = false;
+      }
     }
     state = state.copyWith(selectedPets: updatedPets);
   }

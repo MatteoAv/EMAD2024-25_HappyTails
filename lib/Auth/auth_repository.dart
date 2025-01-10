@@ -50,17 +50,8 @@ class LoginPage extends ConsumerWidget {
                 profile['city'],
                 profile['isPetSitter']);
           }
-
-          ref.read(userProvider.notifier).state = AsyncData(
-            model.User(
-              id: user.id,
-              userName: profile['userName'],
-              email: email,
-              citta: profile['city'],
-              imageUrl: profile['imageUrl'],
-              isPetSitter: profile['isPetSitter'],
-            ),
-          );
+          model.User? logged = await LocalDatabase.instance.getUser(user.id);
+          ref.read(userProvider.notifier).state = AsyncData(logged!);
           Navigator.pushReplacementNamed(context, AppRoutes.homePage);
         }
       } else {

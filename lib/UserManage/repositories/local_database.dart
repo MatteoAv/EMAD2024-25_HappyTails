@@ -38,7 +38,7 @@ class LocalDatabase {
       CREATE TABLE users (
         id TEXT PRIMARY KEY,
         userName TEXT NOT NULL,
-        imageUrl TEXT NOT NULL DEFAULT 'https://images.rawpixel.com/image_png_social_square/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTAxL3JtNjA5LXNvbGlkaWNvbi13LTAwMi1wLnBuZw.png',
+        imageUrl TEXT ,
         email TEXT NOT NULL,
         citta TEXT NOT NULL,
         isPetSitter BOOL NOT NULL
@@ -154,11 +154,11 @@ Future<void> syncData(String tableName,String columnName, String columnValue, Da
 
 
 // Aggiungi una funzione per aggiornare i dati dell'utente nel database
-Future<bool> updateUser(String userId, String userName, String citta) async {
+Future<bool> updateUser(String userId, String userName, String citta, String imageUrl) async {
   final db = await database;
   int res = await db.update(
     'users',
-    {'userName': userName, 'citta': citta},
+    {'userName': userName, 'citta': citta, 'imageUrl' : imageUrl},
     where: 'id = ?',
     whereArgs: [userId],
   );
@@ -170,6 +170,18 @@ Future<bool> updateUser(String userId, String userName, String citta) async {
   return false;
 }
 
+Future<bool> updateImage(String userId, String? imageUrl)async{
+  if(imageUrl != null){
+  final db = await database;
+  int res = await db.update("users", {'imageUrl': imageUrl},
+  where: 'id = ?',
+  whereArgs: [userId]);
+  if(res == 1){
+    return true;
+  }
+  }
+  return false;
+}
 
 
   Future<List<Pet>> getPets(String userId) async {
@@ -227,12 +239,18 @@ Future<bool> updateUser(String userId, String userName, String citta) async {
 
   void insertUser(String userId,String userName, String email, String citta, bool isPetSitter) async{
     final db = await instance.database;
+    final int petSitter;
+    if(isPetSitter){
+      petSitter = 1;
+    }else{
+      petSitter = 0;
+    }
     await db.insert('users',{ 
     'id' : userId, 
     'userName' : userName,
     'citta' : citta,
     'email' : email,
-    'isPetSitter' : isPetSitter 
+    'isPetSitter' : petSitter 
     }
     );
   }
