@@ -37,13 +37,14 @@ class UserNotifier extends AsyncNotifier<model.User?> {
     return LocalDatabase.instance.getUser(currentUser!.id);
   }
 
-  Future<bool> updateUser(String userId, String newNickname, String newCity) async {
+  Future<bool> updateUser(String userId, String newNickname, String newCity, String imageUrl) async {
     isLoading = true;
     // Esegui l'aggiornamento nel database
-    bool res= await LocalDatabase.instance.updateUser(userId,newNickname, newCity);
+    bool res= await LocalDatabase.instance.updateUser(userId,newNickname, newCity, imageUrl);
     if(res){
     // Aggiorna lo stato interno
-    state = AsyncData(state.value?.copyWith(newNickname, newCity));
+    state = AsyncData(state.value?.copyWith(newNickname, newCity, imageUrl));
+    
     isLoading = false;
     return true;
     }

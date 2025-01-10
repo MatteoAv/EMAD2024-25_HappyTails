@@ -2,7 +2,7 @@ class User{
   final String id;
   String userName;
   String email;
-  String imageUrl;
+  String? imageUrl;
   String citta;
   bool isPetSitter;
 
@@ -41,9 +41,10 @@ class User{
     };
   }
 
-  User copyWith(String newUsername, String newCity){
+  User copyWith(String newUsername, String newCity, String newImageUrl){
     citta = newCity;
     userName = newUsername;
+    imageUrl = newImageUrl;
     return this;
   }
 }

@@ -1,11 +1,14 @@
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happy_tails/UserManage/providers/managePetSitter.dart';
+import 'package:happy_tails/UserManage/repositories/local_database.dart';
 import 'package:happy_tails/app/routes.dart';
 import 'package:happy_tails/screens/ricerca/risultatiricerca_pagina.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:happy_tails/UserManage/providers/profile_providers.dart';
 
@@ -24,15 +27,27 @@ class SettingsPage extends ConsumerStatefulWidget {
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   late final TextEditingController _nickController;
   late final TextEditingController _cittaController;
+    TextEditingController? _nameController;
+    TextEditingController? _surnameController;
+    TextEditingController? _provinciaController;
+    TextEditingController? _priceController;
+  Map<String,dynamic>? petSitter;
   File? _selected_image;
+  double prezzo = 10.0 ;
 
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
     final user = ref.read(userProvider).valueOrNull;
     _nickController = TextEditingController(text: user?.userName);
     _cittaController = TextEditingController(text: user?.citta);
+    if(user!.imageUrl!=null){
+    _selected_image = File(user.imageUrl!);
+    }
+    if(user.isPetSitter){
+      checkPetSitter();
+    }
   }
 
   @override
@@ -42,67 +57,162 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     super.dispose();
   }
 
-  //Seleziona l'immagine dalla galleria foto
-  Future <void> _pickImage() async{
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if(pickedFile != null){
-      setState(() {
-        _selected_image = File(pickedFile.path);
-      });
+  void checkPetSitter ()async{
+    final user = ref.read(userProvider).valueOrNull;
+    if(user!=null && user.isPetSitter){
+      final result = await get_petsitter_by_email(user.email);
+      if(result != null){
+       petSitter = result.first;
+       Map<String, bool> pets ={
+        'Dog' : petSitter!['cani'],
+        'Cat' : petSitter!['gatti'],
+        'Fish': petSitter!['pesci'],
+        'Bird': petSitter!['uccelli'],
+        'Other': petSitter!['roditori'] || petSitter!['rettili']
+       };
+      _nameController = TextEditingController(text: petSitter!['nome']);
+      _surnameController = TextEditingController(text: petSitter!['cognome']);
+      _provinciaController = TextEditingController(text: petSitter!['provincia']);
+      _priceController = TextEditingController(text: petSitter!['prezzo_giornaliero'].toString());
+      ref.read(managePetsNotifierProvider).copyWith(selectedPets: pets);
+      prezzo = petSitter!['prezzo_giornaliero'] is int ? (petSitter!['prezzo_giornaliero'] as int).toDouble() 
+      : petSitter!['prezzo_giornaliero'] ;
+      
+            }else{
+              _nameController = TextEditingController(text: "Nome");
+      _surnameController = TextEditingController(text: "cognome");
+      _provinciaController = TextEditingController(text: "provincia");
+        petSitter = null;
+        
+      }
+      return;
     }
   }
 
-  Future<String?> _uploadImage(String user_id) async{
+  Future<List<dynamic>?> get_petsitter_by_email(String email)async{
+    final supabase = Supabase.instance.client;
+    
+    final response = await supabase.rpc("get_petsitter_by_email", params: {'email_input': email});
+    if(response.length != 0){
 
-    if(_selected_image == null) return null;
+      return response;
 
-    try{
-      final fileName = '${user_id}_${basename(_selected_image!.path)}';
-      await Supabase.instance.client.storage
-      .from('imageProfile').
-      upload(fileName, _selected_image!, fileOptions: const FileOptions(upsert:true));
-
-      final publicUrl = Supabase.instance.client.storage
-      .from('imageProfile').getPublicUrl(fileName);
-
-      return publicUrl;                
-
-    }catch(e){
-        print(e);
     }
     return null;
   }
 
+  //Seleziona l'immagine dalla galleria foto
+  Future <void> _pickImage() async{
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    
+    if(pickedFile != null){
+      final directory = await getApplicationDocumentsDirectory();
+      final joinPath = join(directory.path, 'profile_image.png');
+
+      final previousFile = File(joinPath);
+      if (await previousFile.exists()) {
+      await previousFile.delete();
+      }
+
+      File localFile = await File(pickedFile.path).copy(joinPath);
+
+      await FileImage(localFile).evict();
+
+      setState(() {
+        _selected_image = localFile;
+      });
+
+
+      await ref.read(userProvider.notifier).updateUser(
+        ref.read(userProvider).value!.id, 
+      _nickController.text.trim(), _cittaController.text.trim(), _selected_image!.path);
+    }
+  }
+
+
   Future<void> _updateImageProfile(String user_id)async{
-      final publicUrl = await _uploadImage(user_id);
-      if(publicUrl == null) return;
-
       try{
-
-        final response = await Supabase.instance.client
-          .from('profiles')
-          .update({'imageUrl': publicUrl})
-          .eq('id', user_id).select();
-
-        if(response.isEmpty){
-          throw Exception("Errore nel salvare la foto profilo");
+        final response = await LocalDatabase.instance.updateImage(user_id, _selected_image?.path);
+        if(response){
+          
         }
-
-        ScaffoldMessenger.of(context as BuildContext).showSnackBar(
-          const SnackBar(content: Text("Immagine profilo salvata con successo"))
-        );  
       }catch(e){
             print(e);
       }
   }
 
 
+  void _showPriceSliderDialog(BuildContext context) {
+    double _tempPrezzo = prezzo;
+    showDialog(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setStateDialog) {
+          return AlertDialog(
+            title: const Text('Imposta Prezzo Giornaliero'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: _priceController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: "Prezzo (€)"),
+                  onChanged: (value){
+                    double? newValue = double.tryParse(value);
+                    if(newValue != null && newValue >= 5 && newValue <= 100){
+                      setStateDialog((){
+                        _tempPrezzo = newValue;
+                      });
+                    }
+                  },
+                ),
+                Slider(
+                  value: _tempPrezzo,
+                  min: 5,
+                  max: 100,
+                  divisions: 1000,
+                  label: _tempPrezzo.toStringAsFixed(2),
+                  onChanged: (value) {
+                    setStateDialog(() {
+                      
+                      _priceController!.text = value.toStringAsFixed(2);
+                      _tempPrezzo = value; // Aggiorna il valore dello slider
+                    });
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Chiudi'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    prezzo = _tempPrezzo; // Salva il valore definitivo
+                  });
+                  Navigator.pop(context);
+                },
+                child: const Text('Conferma'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+    
+
+
   @override
   Widget build(BuildContext context) {
     final userAsync = ref.watch(userProvider);
     final selectedRange = ref.watch(selectedDateRangeProvider);
+    final managePets = ref.watch(managePetsNotifierProvider).selectedPets;
 
     return Scaffold(
       appBar: AppBar(
@@ -121,12 +231,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               child: ListView(
                 children: [
                   CircleAvatar(
-                    radius : 60,
+                    radius : 100,
                     backgroundImage: _selected_image != null ?
                      FileImage(_selected_image!)
-                     : (user?.imageUrl != null ?
-                      NetworkImage(user!.imageUrl,):
-                      null),
+                     : null,
                   ),
                   const SizedBox(height: 16,),
                   ElevatedButton(
@@ -157,6 +265,31 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                   const SizedBox(height: 16),
 
+                  //Modifica nome
+                  if(user != null && user.isPetSitter)
+                  TextFormField(
+                    decoration : const InputDecoration(
+                      labelText: 'Nome',
+                      prefixIcon: Icon(Icons.person_2_sharp),
+                    ),
+                    controller: _nameController,
+                    
+                  ),
+
+                  const SizedBox(height:16),
+
+                  //Modifica cognome
+                  if(user != null && user.isPetSitter)
+                  TextFormField(
+                    decoration : const InputDecoration(
+                      labelText: "Cognome",
+                    ),
+                    controller: _surnameController,
+                    
+                  ),
+
+                  const SizedBox(height: 16,),
+
                   // Modifica Città
                   TextFormField(
                     decoration: const InputDecoration(
@@ -166,6 +299,19 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     controller: _cittaController,
                   ),
                   const SizedBox(height: 24),
+                  
+                  //Modifica Provincia
+                  if(user != null && user.isPetSitter)
+                  TextFormField(
+                    decoration : const InputDecoration(
+                      labelText: "Provincia",
+                      prefixIcon: Icon(Icons.location_on),
+                    ),
+                    controller : _provinciaController
+                    
+                  ),
+
+                  const SizedBox(height: 16,),
 
                   // Pulsante per confermare le modifiche
                   ElevatedButton(
@@ -178,8 +324,21 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                   user!.id,
                                   _nickController.text.trim(),
                                   _cittaController.text.trim(),
+                                  _selected_image!.path,
                                 );
+                                if(user.isPetSitter){
+                                  final supabase = Supabase.instance.client;
+                                  var comune = await supabase.rpc('get_comune_coordinates', params: {'comune_name' : 'Airasca'});
+                                  final double latitudine = comune.first['latitude'];
+                                  final double longitude = comune.first['longitude'];
+                                  final String formatPoint = 'POINT($longitude $latitudine)';
+                                  await supabase
+                                  .rpc('insert_or_update_petsitter', params: {'_nome' : _nameController!.text, '_cognome' : _surnameController!.text,
+                                  '_email' : user.email, '_provincia': _provinciaController!.text, '_imageurl' : 'Empty', '_cani' : managePets['Dog'],
+                                  '_gatti': managePets['Cat'], '_pesci': managePets['Fish'], '_uccelli' : managePets['Bird'], '_rettili': managePets['Other']
+                                  , '_roditori': managePets['Other'], '_comune' : user.citta.trim(), '_posizione' : formatPoint, '_prezzo_giornaliero' : prezzo, '_idd': user.id});
 
+                                }
                             if (success) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -238,6 +397,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           context: context, builder: (context) => const AddPetDialog());
                       }
                     ),
+                    ListTile(
+                      leading: const Icon(Icons.money),
+                      title: const Text("Prezzo giornaliero"),
+                      subtitle: Text('€${prezzo.toStringAsFixed(2)}'),
+                      onTap: () => _showPriceSliderDialog(context)
+                    ),
                   ],
                   ),
                   
@@ -292,7 +457,7 @@ class AddPetDialog extends ConsumerWidget {
     };
 
     return AlertDialog(
-      title: const Text('Che Pet Gestici'),
+      title: const Text('Che Pet Gestisci'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -309,10 +474,11 @@ class AddPetDialog extends ConsumerWidget {
                     managePetNotifier.togglePet(type);
                   },
                   child: AnimatedScale(
-                    scale: managePetState.selectedPets.containsKey(type) ? 1.2 : 1.0,
+                    scale: managePetState.selectedPets[type]!=null && managePetState.selectedPets[type]! ? 1.2 : 1.0 ,
                     duration: const Duration(milliseconds: 200),
                     child: CircleAvatar(
                       backgroundColor: managePetState.selectedPets.containsKey(type)
+                      && managePetState.selectedPets[type]!
                           ? Colors.deepOrange
                           : Colors.grey[300],
                       radius: 30,
@@ -331,7 +497,10 @@ class AddPetDialog extends ConsumerWidget {
           child: const Text('Cancel'),
         ),
         ElevatedButton(
-          onPressed: null,
+          onPressed: () {
+            managePetNotifier.confirmSelection();
+            Navigator.pop(context);
+          },
           child: const Text('Confirm'),
         ),
       ],
