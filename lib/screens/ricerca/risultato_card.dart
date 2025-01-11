@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
 import 'package:happy_tails/app/routes.dart';
+import 'package:intl/intl.dart';
 
 
 //Il widget del singolo risultato di ricerca
@@ -93,7 +94,7 @@ class VerticalCard extends StatelessWidget {
               children: [
                 // Price Text
                 Text(
-                  '${item.prezzo}\€/g',
+                  '${NumberFormat('0.00').format(item.prezzo)}€/g',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.grey[800],
                         fontWeight: FontWeight.bold,

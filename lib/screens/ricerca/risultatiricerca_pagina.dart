@@ -358,9 +358,9 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
           ),
           // List of Results
           Expanded(
-  child: _isLoading
-      ? const Center(child: CircularProgressIndicator())
-      : ListView.builder(
+            child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               itemCount: _petSitters.length,
               itemBuilder: (context, index) {
@@ -383,7 +383,7 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                   rettili: petSitter['rettili'],
                   roditori: petSitter['roditori'],
                   distanza: petSitter['distance'].toInt(),
-                  prezzo: petSitter['prezzo'],
+                  prezzo: petSitter['prezzo'].toDouble(),
 
                 );
 
