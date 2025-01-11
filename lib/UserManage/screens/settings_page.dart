@@ -42,10 +42,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final user = ref.read(userProvider).valueOrNull;
     _nickController = TextEditingController(text: user?.userName);
     _cittaController = TextEditingController(text: user?.citta);
-    if(user!.imageUrl!=null){
+    if(user != null && user!.imageUrl!=null){
     _selected_image = File(user.imageUrl!);
     }
-    if(user.isPetSitter){
+    if(user != null && user.isPetSitter){
       checkPetSitter();
     }
   }

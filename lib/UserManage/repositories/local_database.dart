@@ -280,17 +280,26 @@ Future<bool> updateImage(String userId, String? imageUrl)async{
 
   Future<void> addMessage(Message message) async {
     final db = await database;
+    print("addMessage");
+    print(message.id);
+    print("1111111111111");
+
+    print(message.toMap());
+    print("sdjkgjajrghjrs");
+        print("1111111111");
+
     await db.insert('messages', message.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
- Future<List<Message>> getUnsyncedMessages(String userId) async {
+ Future<List<Message>> getUnsyncedMessages() async {
     final db = await database;
     final maps = await db.query(
       'messages',
-      where: 'sender_id = ? AND status = ?',
-      whereArgs: [userId, 'unsynced'],
+      where: 'status = ?',
+      whereArgs: ['unsynced'],
     );
-    return maps.map((map) => Message.fromMap(map, userId)).toList();
+    return maps.map((map) => Message.fromMap(map)).toList();
   }
+
    Future<void> updateMessageStatus(String messageId, String status) async {
     final db = await database;
     await db.update(
@@ -310,7 +319,11 @@ Future<bool> updateImage(String userId, String? imageUrl)async{
     );
   }
    Future<void> syncUnsyncedMessages(String userId) async {
-  final unsyncedMessages = await getUnsyncedMessages(userId);
+  final unsyncedMessages = await getUnsyncedMessages();
+  print("SyncUnsincedMessages");
+
+  print(unsyncedMessages.toString());
+
 
   for (final message in unsyncedMessages) {
     try {
@@ -321,15 +334,17 @@ Future<bool> updateImage(String userId, String? imageUrl)async{
             'sender_id': message.sender_id,
             'receiver_id': message.receiver_id,
             'content': message.content,
-            'created_at': message.timestamp.toIso8601String(),
+
           })
           .select('id')
           .single();
 
       // Update local database with Supabase-generated ID
       final supabaseId = response['id'];
+      print("here is the id");
+      print(supabaseId);
       await updateMessageKey(message.id, supabaseId);
-      await updateMessageStatus(message.id, "synced");
+      await updateMessageStatus(supabaseId.toString(), "synced");
     } catch (error) {
       // Handle sync error (e.g., retry later)
       print('Error syncing message: $error');
@@ -337,46 +352,60 @@ Future<bool> updateImage(String userId, String? imageUrl)async{
   }
 }
   Future<List<Message>> fetchMessagesForConversation(String userId, String otherUserId) async {
-    final db = await database;
-    final localMessages = await db.query(
-      'messages',
-      where: '(sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)',
-      whereArgs: [userId, otherUserId, otherUserId, userId],
-      orderBy: 'timestamp DESC',
-    );
+  final db = await database;
 
-    try {
-      if (await _isOnline()) {
-        final remoteMessages = await supabase
-            .from('messages')
-            .select('*')
-            .or('sender_id.eq.$userId.and.receiver_id.eq.$otherUserId,sender_id.eq.$otherUserId.and.receiver_id.eq.$userId')
-            .order('timestamp', ascending: false);
+  // Step 1: Fetch local messages
+  final localMessages = await db.query(
+    'messages',
+    where: '(sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)',
+    whereArgs: [userId, otherUserId, otherUserId, userId],
+    orderBy: 'timestamp DESC',
+  );
 
-        if (remoteMessages.isNotEmpty) {
-           await syncMessages(List<Map<String, dynamic>>.from(remoteMessages));
-        }
-      }
-    } catch (e) {
-      // Handle network or Supabase errors gracefully. Log the error
-      print('Error fetching remote messages: $e');
-      // Optionally, you could show a snackbar to the user or take other actions.
-    }
-    return localMessages.map((map) => Message.fromMap(map, userId)).toList();
+  // Step 2: Fetch remote unsynced messages for the receiver
+  final remoteMessages = await supabase
+      .from('messages')
+      .select('*')
+      .eq('receiver_id', userId) // Fetch only messages meant for the receiver
+      .eq('sender_id', otherUserId) // From the other user
+      .eq('status', 'unsynced') // Only unsynced messages
+      .order('timestamp', ascending: false);
+
+  if (remoteMessages.isNotEmpty) {
+    final messageList = List<Map<String, dynamic>>.from(remoteMessages);
+
+    // Step 3: Store remote messages locally
+    await syncMessages(messageList);
+    final messageIds = messageList.map((message) => message['id']).toList();
+
+     await supabase
+    .from('messages')
+    .delete()
+    .filter('id', 'in', messageIds);
   }
+
+  // Step 5: Combine and return local messages
+  return localMessages.map((map) => Message.fromMap(map)).toList();
+}
 
   Future<void> syncMessages(List<Map<String, dynamic>> messages) async {
-    final db = await database;
-    final batch = db.batch();
-    for (final message in messages) {
-      batch.insert(
-        'messages',
-        message,
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    }
-    await batch.commit(noResult: true);
+  final db = await database;
+
+
+  // Use batch operation for efficient insertion
+  final batch = db.batch();
+  for (final message in messages) {
+    batch.insert(
+      'messages',
+      {
+        ...message,
+        'status': 'synced', // Mark as synced when inserting locally
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace, // Avoid duplicates
+    );
   }
+  await batch.commit(noResult: true);
+}
 
   Future<bool> _isOnline() async {
     try {
@@ -395,7 +424,7 @@ Future<bool> updateImage(String userId, String? imageUrl)async{
       whereArgs: [userId, otherUserId, otherUserId, userId],
       orderBy: 'timestamp DESC',
     );
-    return localMessages.map((map) => Message.fromMap(map, userId)).toList();
+    return localMessages.map((map) => Message.fromMap(map)).toList();
   }
   
 }

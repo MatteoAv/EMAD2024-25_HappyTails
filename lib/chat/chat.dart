@@ -92,8 +92,10 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _sendMessage(String text) async {
+    Random rnd = new Random();
+
     final message = Message(
-      id: Random().toString(),
+      id: rnd.nextInt(199).toString(),
       sender_id: myUserId,
       receiver_id: widget.otherUserId,
       content: text,

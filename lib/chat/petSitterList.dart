@@ -31,11 +31,11 @@ class UserListPage extends StatelessWidget {
               itemBuilder: (context, index) {
                 final user = users[index];
                 return ListTile(
-                  title: Text(user['userName']),
+                  title: Text("Chat tra andrea e mario"),
                   onTap: () {
                     Navigator.push(
                       context,
-                      ChatPage.route(user['id']),
+                      ChatPage.route(user['id']=="69946294-e811-4748-a9a3-70b287f27024"? "b17ee17c-f8f2-4855-bfdd-0c0266ecbe03": "69946294-e811-4748-a9a3-70b287f27024" ),
                     );
                   },
                 );

@@ -18,23 +18,32 @@ class Message {
     this.status,
   });
 
-  factory Message.fromMap(Map<String, dynamic> map, String myUserId) {
+  factory Message.fromMap(Map<String, dynamic> map) {
+    print("FromMap");
+    print('Map: $map');
+print('ID Type: ${map['id'].runtimeType}');
+print('Timestamp: ${map['timestamp']}');
+    print("111111111");
+        print("11111111111");
+
+
     return Message(
-      id: map['id'] ?? '',
+      id: map['id']?.toString() ?? '',
       sender_id: map['sender_id'],
       receiver_id: map['receiver_id'],
       content: map['content'],
-      timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp']),
+      timestamp: DateTime.parse(map['timestamp']),
       //isMine: map['sender_id'] == User.id,
       status: map['status'],
     );
   }
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'sender_id': sender_id,
       'receiver_id': receiver_id,
       'content': content,
-      'timestamp': timestamp.millisecondsSinceEpoch,
+      'timestamp':  timestamp.toIso8601String(),
       'status': status, // Optional status inclusion
     };
   }
