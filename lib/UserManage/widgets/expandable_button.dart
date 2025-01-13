@@ -20,7 +20,7 @@ class ExpandableButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 10),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.fastEaseInToSlowEaseOut,
         width: isExpanded ? 150 : 80, // Larghezza dinamica
         height: 50,
@@ -45,7 +45,7 @@ class ExpandableButton extends StatelessWidget {
                     textStyle: TextStyle(
                       fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white
                     ),
-                    speed: const Duration(milliseconds: 15),
+                    speed: const Duration(milliseconds: 10),
                     
                     ),
                 ],

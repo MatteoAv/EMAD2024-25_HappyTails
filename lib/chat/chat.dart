@@ -46,11 +46,14 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Stream<List<Message>> _getMessagesStream() {
-    return Stream.periodic(const Duration(seconds: 2)).asyncMap((_) async {
-      // Fetch updated messages every 2 seconds
-      return _chatRepository.getConversation(myUserId, widget.otherUserId);
-    });
-  }
+  return Stream.periodic(const Duration(seconds: 2)).asyncMap((_) async {
+    // Fetch updated messages every 2 seconds
+    final messages = await _chatRepository.getConversation(myUserId, widget.otherUserId);
+    // Sort messages by timestamp in descending order
+    messages.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    return messages;
+  });
+}
 
   @override
   Widget build(BuildContext context) {
