@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:happy_tails/UserManage/screens/profile_page.dart';
 import 'package:happy_tails/chat/petSitterList.dart';
-import 'package:happy_tails/chat/chat.dart';
 import 'package:happy_tails/home.dart';
-import 'package:happy_tails/prenotazioni.dart';
 import 'package:happy_tails/profilo.dart';
 import 'package:happy_tails/screens/ricerca/risultatiricerca_pagina.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
