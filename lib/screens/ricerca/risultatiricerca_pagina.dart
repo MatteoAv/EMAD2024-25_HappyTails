@@ -300,62 +300,95 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
           ),
           // Risultati Info Row
           
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Left: Results count
-                Text(
-                  "${_petSitters.length} risultati",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18, // Bigger text size
-                  ),
-                ),
-                // Right: Sort dropdown
-                Container(
-                  constraints: const BoxConstraints(
-                    minWidth: 80, // Minimum width to fit the "Ordina" text
-                    maxWidth: 100, // Slightly restrict the maximum width
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0), // Compact padding
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20.0), // Rounded corners
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      isDense: true, // Reduce the height of the dropdown
-                      isExpanded: true, // Allow text and icon to fit within the container
-                      hint: const Text(
-                        "Ordina",
-                        style: TextStyle(fontSize: 14), // Text size is good
-                      ),
-                      icon: const Icon(Icons.arrow_drop_down, size: 16), // Smaller dropdown icon
-                      items: <String>["Alphabetical", "Date", "Popularity"]
-                          .map((String value) => DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              ))
-                          .toList(),
-                      onChanged: (String? newValue) {
-                        // Handle sorting logic here
-                        print("Selected sorting method: $newValue");
-                      },
-                    ),
-                  ),
-                ),
-              ],
+Padding(
+  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      // Results count
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "${_petSitters.length} ${_petSitters.length == 1 ? 'risultato' : 'risultati'}",
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18, // Bigger text size
             ),
           ),
+          if (_petSitters.isNotEmpty)
+            Container(
+              constraints: const BoxConstraints(
+                minWidth: 80, // Minimum width to fit the "Ordina" text
+                maxWidth: 100, // Slightly restrict the maximum width
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0), // Compact padding
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20.0), // Rounded corners
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  isDense: true, // Reduce the height of the dropdown
+                  isExpanded: true, // Allow text and icon to fit within the container
+                  hint: const Text(
+                    "Ordina",
+                    style: TextStyle(fontSize: 14), // Text size is good
+                  ),
+                  icon: const Icon(Icons.arrow_drop_down, size: 16), // Smaller dropdown icon
+                  items: <String>["Alphabetical", "Date", "Popularity"]
+                      .map((String value) => DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          ))
+                      .toList(),
+                  onChanged: (String? newValue) {
+                    // Handle sorting logic here
+                    print("Selected sorting method: $newValue");
+                  },
+                ),
+              ),
+            ),
+        ],
+      ),
+
+      // Error message if no results
+      if (_petSitters.isEmpty)
+
+        SizedBox(height: 80),
+
+        Container(
+          height: 100, // Adjust height as needed
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(Icons.sentiment_dissatisfied, color: Colors.red),
+              SizedBox(height: 8),
+              Text(
+                "Nessun risultato trovato",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18, // Text size
+                  color: Colors.red,
+                ),
+              ),
+            ],
+          ),
+        ),
+    ],
+  ),
+),
+
+
+
           // List of Results
           Expanded(
             child: _isLoading

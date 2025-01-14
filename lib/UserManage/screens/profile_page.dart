@@ -64,68 +64,69 @@ class UserProfilePage extends ConsumerWidget {
       body: CustomScrollView(
   slivers: [
     // Sliver: Intestazione (Informazioni sull'utente)
-    SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: userAsync.when(
-          data: (user) => Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 60,
-                key: ValueKey(user?.imageUrl),
-                backgroundImage: user != null && user.imageUrl!= null ? FileImage(File(user.imageUrl!)) : null,
-                child : user?.imageUrl == null ? const Icon(Icons.person, size: 50)
-                : null,
-              ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Benvenuto/a',
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepOrange,
-                    ),
-                  ),
-                  Text(
-                    user?.userName ?? 'Ospite',
-                    style: const TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepOrange,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Città: ${user?.citta ?? 'Città mancante'}',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              InkWell(
-                onTap: () {
-                  Navigator.pushNamed(context, AppRoutes.settings);
-                },
-                child: const Icon(
-                  Icons.settings,
-                  color: Colors.black,
-                  size: 30,
-                ),
-              ),
-            ],
+SliverToBoxAdapter(
+  child: Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: userAsync.when(
+      data: (user) => Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CircleAvatar(
+            radius: 60,
+            key: ValueKey(user?.imageUrl),
+            backgroundImage: user != null && user.imageUrl != null ? FileImage(File(user.imageUrl!)) : null,
+            child: user?.imageUrl == null ? const Icon(Icons.person, size: 50) : null,
           ),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => Text('Error: $err'),
-        ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Benvenuto/a',
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepOrange,
+                  ),
+                ),
+                Text(
+                  user?.userName ?? 'Ospite',
+                  style: const TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepOrange,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Città: ${user?.citta ?? 'Città mancante'}',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    color: Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              Navigator.pushNamed(context, AppRoutes.settings);
+            },
+            child: const Icon(
+              Icons.settings,
+              color: Colors.black,
+              size: 30,
+            ),
+          ),
+        ],
       ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, _) => Text('Error: $err'),
     ),
+  ),
+),
+
     // Sliver: Pulsanti di navigazione (Pets e Book)
     SliverToBoxAdapter(
       child: Padding(

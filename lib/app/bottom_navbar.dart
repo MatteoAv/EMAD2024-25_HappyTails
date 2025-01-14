@@ -88,7 +88,7 @@ class _MainScaffoldState extends State<MainScaffold> {
           destinations: [
             _buildNavDestination(Icons.home, 'Home', 0),
             _buildNavDestination(Icons.search, 'Cerca', 1),
-            _buildNavDestination(Icons.book, 'Prenotazioni', 2),
+            _buildNavDestination(Icons.message, 'Conversazioni', 2),
             _buildNavDestination(Icons.person, 'Profilo', 3),
           ],
         ),
