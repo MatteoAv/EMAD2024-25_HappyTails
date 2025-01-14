@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happy_tails/UserManage/providers/managePetSitter.dart';
 import 'package:happy_tails/UserManage/repositories/local_database.dart';
 import 'package:happy_tails/app/routes.dart';
+import 'package:happy_tails/chat/chat_provider.dart';
 import 'package:happy_tails/screens/ricerca/risultatiricerca_pagina.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
@@ -415,6 +416,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         ref.read(userProvider.notifier).state = const AsyncData(null);
                         ref.invalidate(petsProvider);
                         ref.invalidate(bookingsProvider);
+                        ref.invalidate(chatProvider);
                         print('Logout effettuato');
                         Navigator.popUntil(context, ModalRoute.withName(AppRoutes.homePage));
                     },

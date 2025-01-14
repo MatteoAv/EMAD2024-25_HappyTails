@@ -385,7 +385,9 @@ Future<bool> updateImage(String userId, String? imageUrl)async{
   }
 
   // Step 5: Combine and return local messages
-  return localMessages.map((map) => Message.fromMap(map)).toList();
+  final messages= localMessages.map((map) => Message.fromMap(map)).toList();
+  messages.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+  return messages;
 }
 
   Future<void> syncMessages(List<Map<String, dynamic>> messages) async {
