@@ -1,5 +1,4 @@
 
-
 import 'package:happy_tails/chat/message_model.dart';
 import 'package:logger/logger.dart';
 import 'package:sqflite/sqflite.dart';
@@ -91,8 +90,7 @@ class LocalDatabase {
         owner_id TEXT NOT NULL,
         petsitter_id INTEGER NOT NULL,
         FOREIGN KEY (pet_id) REFERENCES pets(id) ON UPDATE CASCADE,
-        FOREIGN KEY (owner_id) REFERENCES users(id) ON UPDATE CASCADE,
-        FOREIGN KEY (petSitter_id) REFERENCES petsitter(id) ON UPDATE CASCADE
+        FOREIGN KEY (owner_id) REFERENCES users(id) ON UPDATE CASCADE
       );
     ''');
     await db.execute('''
@@ -106,8 +104,6 @@ class LocalDatabase {
     );
   ''');
 
-    db.insert('petsitter', {'id':1, 'nome': 'Giulia', 'cognome' : 'Rossi', 'email' : 'giuliarossi@example.com', 'provincia' : 'Avellino', 'cani' : 1, 'gatti' : 1, 'uccelli' : 0,
-    'pesci' : 1, 'rettili': 0, 'roditori' : 1, 'Comune': 'Avellino', 'Posizione' : '0101000020E6100000F9ACDF0A30972D40C50DCF7DFF744440'});
   }
 
   Future<void> deleteDatabaseFile() async {
@@ -133,7 +129,7 @@ Future<List<Map<String, dynamic>>> fetchRemoteData(String tableName, String name
 
 Future<void> insertDataIntoLocalDatabase(Database db, String tableName, List<Map<String, dynamic>> data) async {
   final batch = db.batch();
-
+  try{
   for (final row in data) {
     batch.insert(
       tableName,
@@ -143,6 +139,9 @@ Future<void> insertDataIntoLocalDatabase(Database db, String tableName, List<Map
   }
 
   await batch.commit(noResult: true); // Commit in batch senza risultati
+  }catch(e){
+    logger.d(e);
+  }
 }
 
 Future<void> syncData(String tableName,String columnName, String columnValue, Database localDb) async {
@@ -154,7 +153,7 @@ Future<void> syncData(String tableName,String columnName, String columnValue, Da
       logger.d("Inzio sincronizzazione Database");
       // Inserisci i dati nel database locale
       await insertDataIntoLocalDatabase(localDb, tableName, remoteData);
-      logger.d("Sincronizzazione completata con successo");
+      logger.d("Sincronizzazione completata con successo $tableName");
     } else {
       logger.d("Sincronizzazione dei dati fallita");
     }

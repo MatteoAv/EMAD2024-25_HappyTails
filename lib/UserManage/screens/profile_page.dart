@@ -178,7 +178,7 @@ SliverToBoxAdapter(
                 itemBuilder: (context, index) {
                   final pet = pets[index];
                   
-                  return PetCard(petName: pet.name, petType: pet.type);
+                  return PetCard(pet : pet);
                 },
               );
               }else{

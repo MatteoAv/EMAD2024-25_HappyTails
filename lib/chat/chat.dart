@@ -179,7 +179,7 @@ class _ChatBubble extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
           decoration: BoxDecoration(
-            color: isMine ? Theme.of(context).primaryColor : Colors.grey[300],
+            color: isMine ? Colors.orange[200] : Colors.grey[300],
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(message.content),

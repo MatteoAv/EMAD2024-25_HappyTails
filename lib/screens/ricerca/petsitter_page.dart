@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:happy_tails/UserManage/model/pet.dart';
+import 'package:happy_tails/UserManage/providers/profile_providers.dart';
+import 'package:happy_tails/UserManage/repositories/local_database.dart';
 import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -83,8 +85,9 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
           'petsitter_id': petsitter_id,
       },
     );
-
-
+    final localDb = await LocalDatabase.instance.database;
+    await LocalDatabase.instance.syncData("bookings", "owner_id", owner_id, localDb);
+    ref.watch(bookingsProvider.notifier).updateBooking();
 
   }
 

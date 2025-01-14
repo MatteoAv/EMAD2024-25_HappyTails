@@ -129,6 +129,21 @@ class BookNotifier extends AsyncNotifier<List<Booking>>{
     }
     return [];
   }
+
+  Future<bool> updateBooking() async{
+    final user = ref.watch(userProvider).value;
+    if(user != null){
+      final bookList = await LocalDatabase.instance.getBookings(user.id);
+      if(bookList.isEmpty){
+        state = AsyncData([]);
+        return true;
+      }else{
+        state = AsyncData(bookList);
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 
