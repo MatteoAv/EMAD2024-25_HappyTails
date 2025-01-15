@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class VetBookPage extends StatefulWidget {
-  final Map<String, String> pet;
+  final Map<String, dynamic> pet;
 
   const VetBookPage({
     Key? key,
@@ -21,9 +21,9 @@ class _VetBookPageState extends State<VetBookPage> {
     records = _generateRecords(widget.pet['id']!);
   }
 
-  List<Map<String, String>> _generateRecords(String petId) {
+  List<Map<String, String>> _generateRecords(int petId) {
     // Simulazione di record in base all'ID del pet
-    if (petId == '1') {
+    if (petId == 1) {
       return [
         {
           'prescription': 'Antibiotico',
@@ -36,7 +36,7 @@ class _VetBookPageState extends State<VetBookPage> {
           'notes': 'Richiamo annuale',
         },
       ];
-    } else if (petId == '2') {
+    } else if (petId == 2) {
       return [
         {
           'prescription': 'Antinfiammatorio',

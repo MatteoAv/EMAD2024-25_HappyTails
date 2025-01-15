@@ -43,7 +43,7 @@ class PetSitter {
       email: map['email'],
       provincia: map['provincia'],
       comune: map['Comune'],
-      imageUrl: map['imageUrl'],
+      imageUrl: map['imageurl'],
       cani: map['cani'],
       gatti: map['gatti'],
       uccelli: map['uccelli'],

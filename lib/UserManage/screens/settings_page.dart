@@ -31,6 +31,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     TextEditingController? _surnameController;
     TextEditingController? _provinciaController;
     TextEditingController? _priceController;
+  late final fileName;
   Map<String,dynamic>? petSitter;
   File? _selected_image;
   double prezzo = 10.0 ;
@@ -77,6 +78,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       ref.read(managePetsNotifierProvider).copyWith(selectedPets: pets);
       prezzo = petSitter!['prezzo_giornaliero'] is int ? (petSitter!['prezzo_giornaliero'] as int).toDouble() 
       : petSitter!['prezzo_giornaliero'] ;
+      setState(() {
+        petSitter = result.first;
+      });
       
             }else{
               _nameController = TextEditingController(text: "Nome");
@@ -135,7 +139,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       try{
         final response = await LocalDatabase.instance.updateImage(user_id, _selected_image?.path);
         if(response){
-          
+          fileName = "${user_id}_${basename(_selected_image!.path)}";
+          await Supabase.instance.client.storage.from('imageProfile').
+          upload(fileName, _selected_image!, fileOptions: const FileOptions(upsert: true));
+
+          final publicUrl = Supabase.instance.client.storage.
+          from('imageProfile').getPublicUrl(fileName);
+
+          await Supabase.instance.client.from("petsitter").update({"imageurl": publicUrl})
+          .eq("idd", user_id);
         }
       }catch(e){
             print(e);
@@ -334,7 +346,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                   final String formatPoint = 'POINT($longitude $latitudine)';
                                   await supabase
                                   .rpc('insert_or_update_petsitter', params: {'_nome' : _nameController!.text, '_cognome' : _surnameController!.text,
-                                  '_email' : user.email, '_provincia': _provinciaController!.text, '_imageurl' : 'Empty', '_cani' : managePets['Dog'],
+                                  '_email' : user.email, '_provincia': _provinciaController!.text, '_imageurl' : fileName, '_cani' : managePets['Dog'],
                                   '_gatti': managePets['Cat'], '_pesci': managePets['Fish'], '_uccelli' : managePets['Bird'], '_rettili': managePets['Other']
                                   , '_roditori': managePets['Other'], '_comune' : user.citta.trim(), '_posizione' : formatPoint, '_prezzo_giornaliero' : prezzo, '_idd': user.id});
 

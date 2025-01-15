@@ -55,6 +55,15 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
 
   }
 
+
+    bool setDisp(DateTime date){
+      if (date.weekday == DateTime.saturday || date.weekday == DateTime.sunday) {
+          return false;
+        }
+        return true; // Abilita gli altri giorni
+    }
+
+
     Future<int> checkPrenotazione(int petid, String inizio, String fine) async {
     final prenotazioneResponse = await Supabase.instance.client.rpc(
       'check_booking_overlap', // Nome della funzione RPC in Supabase
@@ -370,6 +379,12 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
                                   context: context,
                                   firstDate: DateTime.now(),
                                   lastDate: DateTime(2100),
+                                  selectableDayPredicate: (DateTime date, DateTime? start, DateTime? end){
+                                    if(date.weekday == DateTime.saturday){
+                                      return false;
+                                    }
+                                    return true;
+                                  },
                                   initialDateRange: selectedDateRange,
                                 );
                                 if (dateRange != null) {

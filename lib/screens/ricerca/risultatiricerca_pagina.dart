@@ -419,7 +419,7 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                   email: petSitter['email'],
                   provincia: petSitter['provincia'],
                   comune: petSitter['comune'],
-                  imageUrl: petSitter['image_url'] ??
+                  imageUrl: petSitter['imageurl'] ??
                       'https://images.contentstack.io/v3/assets/blt6f84e20c72a89efa/blt2577cbc57a834982/6363df6833df8e693d1e44c7/img-pet-sitter-download-header.jpg',
                   cani: petSitter['cani'],
                   gatti: petSitter['gatti'],

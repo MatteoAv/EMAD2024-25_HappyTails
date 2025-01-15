@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:happy_tails/UserManage/model/pet.dart';
+import 'package:happy_tails/UserManage/repositories/local_database.dart';
+import 'package:happy_tails/app/routes.dart';
 
 
 const String pathIcon = 'assets/IconPets';
 
 class PetCard extends StatelessWidget{
   final Widget petIcon;
-  final String petName;
-  final String petType;
-
+  final Pet pet;
 
   static const Map<String, String> petsIcons = {
     'Cane' : "$pathIcon/dog.png",
@@ -19,10 +20,9 @@ class PetCard extends StatelessWidget{
 
   PetCard({
     Key? key,
-    required this.petName,
-    required this.petType
-  }) : petIcon = petsIcons[petType] != null
-                ? Image.asset(petsIcons[petType]!, width: 30, height: 30,)
+    required this.pet
+  }) : petIcon = petsIcons[pet.type] != null
+                ? Image.asset(petsIcons[pet.type]!, width: 30, height: 30,)
                 : const Icon(Icons.help, color: Colors.white, size : 50),
        super(key : key);
       
@@ -49,14 +49,14 @@ class PetCard extends StatelessWidget{
                           child: petIcon
                           ),
                           title: Text(
-                            petName,
+                            pet.name,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 20,
                             ),
                           ),
                           subtitle: Text(
-                            'Tipo ${petType}',
+                            'Tipo ${pet.type}',
                             style: const TextStyle(fontSize: 18),
                           ),
                           trailing: IconButton(
@@ -66,6 +66,8 @@ class PetCard extends StatelessWidget{
                               size: 40,
                             ),
                             onPressed: () {
+                              
+                              Navigator.pushNamed(context, AppRoutes.vetPage, arguments: pet);
                               // Placeholder for veterinary record action
                             },
             ),
