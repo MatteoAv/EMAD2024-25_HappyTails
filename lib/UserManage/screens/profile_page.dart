@@ -82,14 +82,7 @@ SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Benvenuto/a',
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepOrange,
-                  ),
-                ),
+
                 Text(
                   user?.userName ?? 'Ospite',
                   style: const TextStyle(
@@ -158,7 +151,7 @@ SliverToBoxAdapter(
             ),
             const SizedBox(height: 20),
             Text(
-              isPetsTabSelected ? 'Lista di Pet' : 'Lista prenotazioni',
+              isPetsTabSelected ? 'I Miei Pets' : 'Le mie prenotazioni',
               style: const TextStyle(fontSize: 30),
             ),
           ],

@@ -15,10 +15,11 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
+import 'chat_provider.dart';
 final SupabaseClient supabase = Supabase.instance.client;
-
-
-class ChatPage extends StatefulWidget {
+class ChatPage extends ConsumerWidget {
   const ChatPage({Key? key, required this.otherUserId}) : super(key: key);
   final String otherUserId;
 
@@ -29,83 +30,50 @@ class ChatPage extends StatefulWidget {
   }
 
   @override
-  State<ChatPage> createState() => _ChatPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final messagesState = ref.watch(chatProvider(otherUserId));
+    final chatNotifier = ref.read(chatProvider(otherUserId).notifier);
 
-class _ChatPageState extends State<ChatPage> {
-  late final String myUserId;
-  late final ChatRepository _chatRepository;
-  late Stream<List<Message>> _messagesStream;
-
-  @override
-  void initState() {
-    super.initState();
-    myUserId = supabase.auth.currentUser!.id;
-    _chatRepository = ChatRepository(localDatabase: LocalDatabase.instance);
-    _messagesStream = _getMessagesStream();
-  }
-
-  Stream<List<Message>> _getMessagesStream() {
-  return Stream.periodic(const Duration(seconds: 2)).asyncMap((_) async {
-    // Fetch updated messages every 2 seconds
-    final messages = await _chatRepository.getConversation(myUserId, widget.otherUserId);
-    // Sort messages by timestamp in descending order
-    messages.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    return messages;
-  });
-}
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Chat')),
-      body: StreamBuilder<List<Message>>(
-        stream: _messagesStream,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final messages = snapshot.data!;
-            return Column(
-              children: [
-                Expanded(
-                  child: messages.isEmpty
-                      ? const Center(child: Text('Start your conversation now :)'))
-                      : ListView.builder(
-                          reverse: true,
-                          itemCount: messages.length,
-                          itemBuilder: (context, index) {
-                            final message = messages[index];
-                            return _ChatBubble(
-                              message: message,
-                              isMine: message.sender_id == myUserId,
-                            );
-                          },
-                        ),
-                ),
-                _MessageBar(onSend: _sendMessage),
-              ],
-            );
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: messagesState.when(
+        data: (messages) {
+          return Column(
+            children: [
+              Expanded(
+                child: messages.isEmpty
+                    ? const Center(child: Text('Start your conversation now :)'))
+                    : ListView.builder(
+                        reverse: true,
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          final message = messages[index];
+                          return _ChatBubble(
+                            message: message,
+                            isMine: message.sender_id == supabase.auth.currentUser!.id,
+                          );
+                        },
+                      ),
+              ),
+              _MessageBar(onSend: (text) {
+                final myUserId = supabase.auth.currentUser!.id;
+                final message = Message(
+                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                  sender_id: myUserId,
+                  receiver_id: otherUserId,
+                  content: text,
+                  timestamp: DateTime.now(),
+                  status: 'unsynced',
+                );
+                chatNotifier.sendMessage(message);
+              }),
+            ],
+          );
         },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(child: Text('Error: $error')),
       ),
     );
-  }
-
-  void _sendMessage(String text) async {
-    Random rnd = new Random();
-
-    final message = Message(
-      id: rnd.nextInt(199).toString(),
-      sender_id: myUserId,
-      receiver_id: widget.otherUserId,
-      content: text,
-      timestamp: DateTime.now(),
-      status: 'unsynced',
-    );
-    await _chatRepository.sendMessage(message);
   }
 }
 
@@ -179,7 +147,7 @@ class _ChatBubble extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
           decoration: BoxDecoration(
-            color: isMine ? Colors.orange[200] : Colors.grey[300],
+            color: isMine ? Theme.of(context).primaryColorLight : Colors.grey[300],
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(message.content),
@@ -187,8 +155,6 @@ class _ChatBubble extends StatelessWidget {
       ),
       const SizedBox(width: 12),
       Text(format(message.timestamp, locale: 'en_short')),
-      const SizedBox(width: 60),
-      //if (isMine && message.status != null) Text(message.status!), // Show status
     ];
     if (isMine) chatContents = chatContents.reversed.toList();
     return Padding(
