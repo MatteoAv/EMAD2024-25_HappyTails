@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:happy_tails/UserManage/model/pet.dart';
-import 'package:happy_tails/UserManage/providers/profile_providers.dart';
-import 'package:happy_tails/UserManage/repositories/local_database.dart';
 import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -55,15 +53,6 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
 
   }
 
-
-    bool setDisp(DateTime date){
-      if (date.weekday == DateTime.saturday || date.weekday == DateTime.sunday) {
-          return false;
-        }
-        return true; // Abilita gli altri giorni
-    }
-
-
     Future<int> checkPrenotazione(int petid, String inizio, String fine) async {
     final prenotazioneResponse = await Supabase.instance.client.rpc(
       'check_booking_overlap', // Nome della funzione RPC in Supabase
@@ -94,9 +83,8 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
           'petsitter_id': petsitter_id,
       },
     );
-    final localDb = await LocalDatabase.instance.database;
-    await LocalDatabase.instance.syncData("bookings", "owner_id", owner_id, localDb);
-    ref.watch(bookingsProvider.notifier).updateBooking();
+
+
 
   }
 
@@ -379,12 +367,6 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
                                   context: context,
                                   firstDate: DateTime.now(),
                                   lastDate: DateTime(2100),
-                                  selectableDayPredicate: (DateTime date, DateTime? start, DateTime? end){
-                                    if(date.weekday == DateTime.saturday){
-                                      return false;
-                                    }
-                                    return true;
-                                  },
                                   initialDateRange: selectedDateRange,
                                 );
                                 if (dateRange != null) {

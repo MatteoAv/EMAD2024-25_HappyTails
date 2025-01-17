@@ -62,189 +62,202 @@ class UserProfilePage extends ConsumerWidget {
         backgroundColor: Colors.deepOrange[50],
       ),
       body: CustomScrollView(
-  slivers: [
-    // Sliver: Intestazione (Informazioni sull'utente)
-SliverToBoxAdapter(
-  child: Padding(
-    padding: const EdgeInsets.all(16.0),
-    child: userAsync.when(
-      data: (user) => Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          CircleAvatar(
-            radius: 60,
-            key: ValueKey(user?.imageUrl),
-            backgroundImage: user != null && user.imageUrl != null ? FileImage(File(user.imageUrl!)) : null,
-            child: user?.imageUrl == null ? const Icon(Icons.person, size: 50) : null,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-
-                Text(
-                  user?.userName ?? 'Ospite',
-                  style: const TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepOrange,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Città: ${user?.citta ?? 'Città mancante'}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    color: Colors.black54,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          InkWell(
-            onTap: () {
-              Navigator.pushNamed(context, AppRoutes.settings);
-            },
-            child: const Icon(
-              Icons.settings,
-              color: Colors.black,
-              size: 30,
-            ),
-          ),
-        ],
-      ),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => Text('Error: $err'),
-    ),
-  ),
-),
-
-    // Sliver: Pulsanti di navigazione (Pets e Book)
-    SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 50),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const SizedBox(width: 15,),
-                ExpandableButton(
-                  icon: Icons.pets,
-                  label: 'Animali',
-                  isExpanded: isPetsTabSelected,
-                  onTap: () =>
-                      ref.read(tabSelectionProvider.notifier).state = true,
-                ),
-                const SizedBox(width: 30),
-                ExpandableButton(
-                  icon: Icons.calendar_month,
-                  label: 'Prenotazioni',
-                  isExpanded: !isPetsTabSelected,
-                  onTap: () =>
-                      ref.read(tabSelectionProvider.notifier).state = false,
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Text(
-              isPetsTabSelected ? 'I Miei Pets' : 'Le mie prenotazioni',
-              style: const TextStyle(fontSize: 30),
-            ),
-          ],
-        ),
-      ),
-    ),
-    // Sliver: Contenuto Tab (Lista di Pets o Lista Prenotazioni)
-    SliverFillRemaining(
-      child: isPetsTabSelected
-          ? petsAsync.when(
-              data: (pets) {
-               if(pets.isNotEmpty){
-               return ListView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.only(top: 16.0),
-                itemCount: pets.length,
-                itemBuilder: (context, index) {
-                  final pet = pets[index];
-                  
-                  return PetCard(pet : pet);
-                },
-              );
-              }else{
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+          slivers: [
+            // Sliver: Intestazione (Informazioni sull'utente)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: userAsync.when(
+                  data: (user) => Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Image.asset(
-                        "assets/IconPets/sadcat.png",
-                        width: 100,
-                        height: 100,
+                      CircleAvatar(
+                        radius: 60,
+                        key: ValueKey(user?.imageUrl),
+                        backgroundImage: user != null && user.imageUrl != null
+                            ? FileImage(File(user.imageUrl!))
+                            : null,
+                        child: user?.imageUrl == null
+                            ? const Icon(Icons.person, size: 50)
+                            : null,
                       ),
-                      const SizedBox(height: 16),
-                      const Text(
-                      "Nessun animale registrato, aggiungine uno",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user?.userName ?? 'Ospite',
+                              style: const TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.deepOrange,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Città: ${user?.citta ?? 'Città mancante'}',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      textAlign: TextAlign.center,
+                      InkWell(
+                        onTap: () {
+                          Navigator.pushNamed(context, AppRoutes.settings);
+                        },
+                        child: const Icon(
+                          Icons.settings,
+                          color: Colors.black,
+                          size: 30,
+                        ),
+                      ),
+                    ],
+                  ),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (err, _) => Text('Error: $err'),
+                ),
+              ),
+            ),
+
+            // Sliver: Pulsanti di navigazione (Pets e Book)
+            
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 50), //Only top padding
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const SizedBox(
+                          width: 15,
+                        ),
+                        ExpandableButton(
+                          icon: Icons.pets,
+                          label: 'Animali',
+                          isExpanded: isPetsTabSelected,
+                          onTap: () => ref
+                              .read(tabSelectionProvider.notifier)
+                              .state = true,
+                        ),
+                        const SizedBox(width: 30),
+                        ExpandableButton(
+                          icon: Icons.calendar_month,
+                          label: 'Prenotazioni',
+                          isExpanded: !isPetsTabSelected,
+                          onTap: () => ref
+                              .read(tabSelectionProvider.notifier)
+                              .state = false,
+                        ),
+                      ],
+                    ),
+                    Padding( //Padding only on the text
+                      padding: const EdgeInsets.only(left: 16.0, top: 20,),
+                      child: Text(
+                        isPetsTabSelected ? 'I Miei Pets' : 'Le mie prenotazioni',
+                        style: const TextStyle(fontSize: 30),
+                      ),
                     ),
                   ],
                 ),
-              );
-            }
-              
-            },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, _) => Center(child: Text('Error: $err')),
-            )
-          : bookingsAsync.when(
-              data: (bookings) { 
-                if(bookings.isNotEmpty){
-                return ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.only(top: 16.0),
-                itemCount: bookings.length,
-                itemBuilder: (context, index) {
-                  final booking = bookings[index];
-                  return bookingCard(id: booking.id, bookingBegin: booking.dateBegin, bookingEnd: booking.dateEnd, 
-                  bookPrice: booking.price, bookState: booking.state);
-                },
-              );
-              }else{
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        "assets/IconPets/petsitter.png",
-                        width: 100,
-                        height: 100,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                      "Nessun prenotazione effettuata, trova qualche PetSitter",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
+              ),
+            ),
+
+            // Sliver: Contenuto Tab (Lista di Pets o Lista Prenotazioni)
+            isPetsTabSelected
+                ? petsAsync.when(
+                    data: (pets) => pets.isNotEmpty
+                        ? SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final pet = pets[index];
+                                return PetCard(pet: pet);
+                              },
+                              childCount: pets.length,
+                            ),
+                          )
+                        : SliverToBoxAdapter(
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    "assets/IconPets/sadcat.png",
+                                    width: 100,
+                                    height: 100,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    "Nessun animale registrato, aggiungine uno",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                    loading: () => const SliverToBoxAdapter(
+                      child: Center(child: CircularProgressIndicator()),
                     ),
-                  ],
-                ),
-              );
-              }
-                
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) =>
-          Center(child: Text('Errore: $error, $stackTrace')),
-        ),
-      ),
+                    error: (err, _) => SliverToBoxAdapter(
+                      child: Center(child: Text('Error: $err')),
+                    ),
+                  )
+                : bookingsAsync.when(
+                    data: (bookings) => bookings.isNotEmpty
+                        ? SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final booking = bookings[index];
+                                return bookingCard(
+                                  id: booking.id,
+                                  bookingBegin: booking.dateBegin,
+                                  bookingEnd: booking.dateEnd,
+                                  bookPrice: booking.price,
+                                  bookState: booking.state,
+                                );
+                              },
+                              childCount: bookings.length,
+                            ),
+                          )
+                        : SliverToBoxAdapter(
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    "assets/IconPets/petsitter.png",
+                                    width: 100,
+                                    height: 100,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    "Nessun prenotazione effettuata, trova qualche PetSitter",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                    loading: () => const SliverToBoxAdapter(
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                    error: (error, stackTrace) => SliverToBoxAdapter(
+                      child: Center(child: Text('Errore: $error, $stackTrace')),
+                    ),
+                  ),
     ],
   ),
       floatingActionButton: Visibility(
