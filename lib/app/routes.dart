@@ -33,9 +33,11 @@ class AppRoutes {
           builder: (_) => const SettingsPage(),
         );
       case sitterpage:
-        final PetSitter petsitter = route.arguments as PetSitter; // Extract arguments
+        final objects = route.arguments as List;
+        final PetSitter petsitter = objects[0] as PetSitter; // Extract arguments
+        final indisp = objects[1];
         return MaterialPageRoute(
-          builder: (_) => ProfiloPetsitter(petsitter: petsitter),
+          builder: (_) => ProfiloPetsitter(petsitter: petsitter, indisp : indisp),
       );
       case  registrationPage:
         return MaterialPageRoute(

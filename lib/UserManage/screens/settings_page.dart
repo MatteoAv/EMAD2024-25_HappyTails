@@ -76,17 +76,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       _surnameController = TextEditingController(text: petSitter!['cognome']);
       _provinciaController = TextEditingController(text: petSitter!['provincia']);
       _priceController = TextEditingController(text: petSitter!['prezzo_giornaliero'].toString());
-      ref.read(managePetsNotifierProvider).copyWith(selectedPets: pets);
       prezzo = petSitter!['prezzo_giornaliero'] is int ? (petSitter!['prezzo_giornaliero'] as int).toDouble() 
       : petSitter!['prezzo_giornaliero'] ;
       setState(() {
         petSitter = result.first;
+        ref.read(managePetsNotifierProvider).copyWith(selectedPets: pets);
       });
       
             }else{
               _nameController = TextEditingController(text: "Nome");
       _surnameController = TextEditingController(text: "cognome");
       _provinciaController = TextEditingController(text: "provincia");
+      _priceController = TextEditingController(text: "Prezzo Giornaliero");
         petSitter = null;
         
       }
@@ -189,8 +190,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   label: _tempPrezzo.toStringAsFixed(2),
                   onChanged: (value) {
                     setStateDialog(() {
-                      
+                       if(_priceController != null){
                       _priceController!.text = value.toStringAsFixed(2);
+                       }
                       _tempPrezzo = value; // Aggiorna il valore dello slider
                     });
                   },
