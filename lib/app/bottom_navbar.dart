@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:happy_tails/Auth/auth_repository.dart';
 import 'package:happy_tails/UserManage/screens/profile_page.dart';
+import 'package:happy_tails/UserManage/screens/settings_page.dart';
 import 'package:happy_tails/chat/petSitterList.dart';
 import 'package:happy_tails/home.dart';
 import 'package:happy_tails/profilo.dart';
 import 'package:happy_tails/screens/ricerca/risultatiricerca_pagina.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 
 class MainScaffold extends StatefulWidget {
   const MainScaffold({Key? key}) : super(key: key);
@@ -17,43 +18,54 @@ class MainScaffold extends StatefulWidget {
 class _MainScaffoldState extends State<MainScaffold> {
   int _selectedIndex = 0;
   final SupabaseClient supabase = Supabase.instance.client;
-  late List<Widget> _pages;
+  List<Widget> _pages = []; // Inizializzata con una lista vuota
+  bool isPetSitter = false;
 
-
-   @override
+  @override
   void initState() {
     super.initState();
     updatePages();
 
     supabase.auth.onAuthStateChange.listen((data) {
-    final event = data.event;
-    if (event == AuthChangeEvent.signedIn || event == AuthChangeEvent.signedOut) {
-    updatePages();
-  }
-});
-
-  }
-
-  
-
-  // Metodo per aggiornare la lista delle pagine
-  void updatePages() {
-    final session = supabase.auth.currentUser;
-    setState(() {
-      _pages = [
-        const HomePage(),
-        const RisultatiCercaPage(),
-        const UserListPage(),
-
-        // Aggiungi LoginPage o ProfilePage in base alla sessione
-        if (session == null)  ProfiloPage(),
-        if (session != null) const UserProfilePage(),
-      ];
+      final event = data.event;
+      if (event == AuthChangeEvent.signedIn || event == AuthChangeEvent.signedOut) {
+        updatePages();
+      }
     });
   }
 
+  void updatePages() {
+    final session = supabase.auth.currentUser;
+    if (session != null) {
+      // Check if the user is a PetSitter
+      _checkIfPetSitter().then((result) {
+        setState(() {
+          isPetSitter = result;
+          _pages = isPetSitter
+              ? [ProfiloPage(), RisultatiCercaPage(), UserListPage(), UserProfilePage()]
+              : [UserProfilePage(), RisultatiCercaPage(), UserListPage(), SettingsPage()];
+              if (_selectedIndex >= _pages.length) {
+          _selectedIndex = 0;
+        }
+        });
+      });
+    } else {
+      setState(() {
+        
+        _pages = [LoginPage(), RisultatiCercaPage()];
+        _selectedIndex = 0;
+      });
+    }
+  }
 
-  // Handle navigation bar selection
+  Future<bool> _checkIfPetSitter() async {
+    final response = await supabase
+        .from('profiles')
+        .select()
+        .eq('id',supabase.auth.currentUser!.id);
+    return response.first['isPetSitter'];
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -65,7 +77,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
-        children: _pages,
+        children: _pages.isNotEmpty ? _pages : [CircularProgressIndicator()], // Placeholder
       ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
@@ -83,21 +95,32 @@ class _MainScaffoldState extends State<MainScaffold> {
           selectedIndex: _selectedIndex,
           onDestinationSelected: _onItemTapped,
           height: 60,
-          destinations: [
-            _buildNavDestination(Icons.home, 'Home', 0),
-            _buildNavDestination(Icons.search, 'Cerca', 1),
-            _buildNavDestination(Icons.message, 'Conversazioni', 2),
-            _buildNavDestination(Icons.person, 'Profilo', 3),
-          ],
+          destinations: _buildDestinations(),
         ),
       ),
     );
   }
 
-  // Helper function for building NavigationDestination
+  List<NavigationDestination> _buildDestinations() {
+    final session = supabase.auth.currentUser;
+
+    if (session == null) {
+      return [
+        _buildNavDestination(Icons.home, 'Login', 0),
+        _buildNavDestination(Icons.search, 'Cerca', 1),
+      ];
+    }
+
+    return [
+      _buildNavDestination(Icons.home, isPetSitter ? 'Home' : 'Home', 0),
+      _buildNavDestination(Icons.search, 'Cerca', 1),
+      _buildNavDestination(Icons.message, 'Conversazioni', 2),
+      _buildNavDestination(Icons.person, 'Profilo', 3),
+    ];
+  }
+
   NavigationDestination _buildNavDestination(IconData icon, String label, int index) {
     final isSelected = _selectedIndex == index;
-
     return NavigationDestination(
       icon: Icon(
         icon,
@@ -106,6 +129,4 @@ class _MainScaffoldState extends State<MainScaffold> {
       label: label,
     );
   }
-
-
 }

@@ -6,13 +6,13 @@ import 'package:happy_tails/UserManage/repositories/local_database.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:meta/meta.dart';
 
-User? currentUser = Supabase.instance.client.auth.currentUser;
+
 
 /*
 Notifier che si occupa di recuperare l'utente attivo dal database locale
 e che si occuperà di aggiornare l'istanza del db tramite notifiche 
 */
-final userProvider = AsyncNotifierProvider<UserNotifier,model.User?>(UserNotifier.new);
+final userProvider = AsyncNotifierProvider<UserNotifier,model.User?>((){return UserNotifier();});
 
 
 /*
@@ -31,24 +31,45 @@ final tabSelectionProvider = StateProvider<bool>((ref) => true); // true for pet
 
 //Notifier dell'utente che è un future di User
 class UserNotifier extends AsyncNotifier<model.User?> {
-  bool isLoading = false;
+  
+  User? currentUser = Supabase.instance.client.auth.currentUser;
+
   @override
   Future<model.User?> build() async {
+    _listenToAuthChanges();
+    if(currentUser!=null){
     return LocalDatabase.instance.getUser(currentUser!.id);
+    }
+    return null;
+  }
+
+  final SupabaseClient supabase = Supabase.instance.client;
+
+  void _listenToAuthChanges(){
+    supabase.auth.onAuthStateChange.listen((data)async{
+      final event = data.event;
+      currentUser = Supabase.instance.client.auth.currentUser;
+      if(event == AuthChangeEvent.signedIn){
+        final user = await LocalDatabase.instance.getUser(currentUser!.id);
+        state = AsyncData(user);
+      }else if(event == AuthChangeEvent.signedOut){
+        state = AsyncData(null);
+      }
+    });
   }
 
   Future<bool> updateUser(String userId, String newNickname, String newCity, String imageUrl) async {
-    isLoading = true;
+    
     // Esegui l'aggiornamento nel database
     bool res= await LocalDatabase.instance.updateUser(userId,newNickname, newCity, imageUrl);
     if(res){
     // Aggiorna lo stato interno
     state = AsyncData(state.value?.copyWith(newNickname, newCity, imageUrl));
     
-    isLoading = false;
+    
     return true;
     }
-    isLoading = false;
+    
     return false;
   }
 

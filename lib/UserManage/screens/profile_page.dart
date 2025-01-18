@@ -102,6 +102,7 @@ SliverToBoxAdapter(
               ],
             ),
           ),
+          if(user != null && user.isPetSitter)
           InkWell(
             onTap: () {
               Navigator.pushNamed(context, AppRoutes.settings);
@@ -112,6 +113,7 @@ SliverToBoxAdapter(
               size: 30,
             ),
           ),
+          
         ],
       ),
       loading: () => const Center(child: CircularProgressIndicator()),
