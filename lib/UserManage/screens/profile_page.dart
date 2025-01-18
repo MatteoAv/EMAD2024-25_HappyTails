@@ -105,6 +105,8 @@ class UserProfilePage extends ConsumerWidget {
                           ],
                         ),
                       ),
+                      if(user != null && user.isPetSitter)
+
                       InkWell(
                         onTap: () {
                           Navigator.pushNamed(context, AppRoutes.settings);

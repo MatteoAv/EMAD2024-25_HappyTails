@@ -232,10 +232,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Impostazioni'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+        automaticallyImplyLeading: userAsync.value != null && userAsync.value!.isPetSitter,
         backgroundColor: Colors.deepOrange,
       ),
       body: Padding(
@@ -427,12 +424,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ElevatedButton(
                     onPressed: () {
                         Supabase.instance.client.auth.signOut();
-                        ref.read(userProvider.notifier).state = const AsyncData(null);
+                        //ref.invalidate(userProvider);
                         ref.invalidate(petsProvider);
                         ref.invalidate(bookingsProvider);
                         ref.invalidate(chatProvider);
                         print('Logout effettuato');
-                        Navigator.popUntil(context, ModalRoute.withName(AppRoutes.homePage));
+                        if(user!=null && user.isPetSitter){
+                         Navigator.pop(context);
+                        }
                     },
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 50),

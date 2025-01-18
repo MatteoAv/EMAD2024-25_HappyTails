@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happy_tails/UserManage/providers/profile_providers.dart';
@@ -14,57 +15,53 @@ class LoginPage extends ConsumerWidget {
   final TextEditingController passwordController = TextEditingController();
 
   Future<void> signIn(BuildContext context, WidgetRef ref) async {
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
+  final email = emailController.text.trim();
+  final password = passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Inserisci sia email che password')),
-      );
-      return;
-    }
+  if (email.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Inserisci sia email che password')),
+    );
+    return;
+  }
 
-    try {
-      // Effettua il login con email e password
-      final response = await supabase.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
 
-      if (response.user != null) {
-        final user = response.user;
-        if (user != null) {
-          final profile = await supabase
-              .from('profiles')
-              .select()
-              .eq('id', user.id)
-              .single();
-          logger.d('Login effettuato con successo: ${profile['email']}');
+  try {
+    final response = await supabase.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
 
-          // Salva i dati nel db locale se non presenti
-          if (await LocalDatabase.instance.getUser(user.id) == null) {
-            LocalDatabase.instance.insertUser(
-                user.id,
-                profile['userName'],
-                email,
-                profile['city'],
-                profile['isPetSitter']);
-          }
-          model.User? logged = await LocalDatabase.instance.getUser(user.id);
-          ref.read(userProvider.notifier).state = AsyncData(logged!);
-          Navigator.pushReplacementNamed(context, AppRoutes.homePage);
+    if (response.user != null) {
+      final user = response.user;
+      if (user != null) {
+        final profile = await supabase
+            .from('profiles')
+            .select()
+            .eq('id', user.id)
+            .single();
+        logger.d('Login effettuato con successo: ${profile['email']}');
+
+        if (await LocalDatabase.instance.getUser(user.id) == null) {
+          LocalDatabase.instance.insertUser(
+            user.id,
+            profile['userName'],
+            email,
+            profile['city'],
+            profile['isPetSitter'],
+          );
         }
-      } else {
-        throw Exception('Credenziali non valide');
       }
-    } catch (e, stackTrace) {
-      logger.d('Errore: $e, $stackTrace');
+    } else {
+      throw Exception('Credenziali non valide');
+    }
+  } catch (e, stackTrace) {
+    logger.d('Errore: $e, $stackTrace');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Errore durante il login: $e')),
       );
     }
   }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
