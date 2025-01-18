@@ -29,10 +29,11 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
   int totalReviews = 0;    // Variabile per il numero di recensioni
   String? selectedType; // Varibile per l'animale selezionato
   List<dynamic> pets = []; // lista di pet dell'utente da cui puo scegliere
+  List<dynamic> petsSelezionati = []; // lista di pet dell'utente da cui puo scegliere
   String? selectedPet; // Pet selezionato tra quelli della lista dell'utente
   int petID=0;
-
-
+  
+  //late Pet nuovo;
 
   @override
   void initState() {
@@ -49,16 +50,27 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
       },
     );
 
-       final animals = petResponse.map((animal) => Pet.fromMap(animal as Map<String, dynamic>)).toList();
-        setState(() {
-          pets = animals;
-        });
+    final animals = petResponse.map((animal) => Pet.fromMap(animal as Map<String, dynamic>)).toList();
+    setState(() {
+      pets = animals;
+    });
 
   }
 
+  Future<Pet> getPetById(int petId) async {
+    final response = await Supabase.instance.client.rpc(
+      'get_pet_by_id', // Nome della funzione RPC in Supabase
+      params: {
+        'petid': petId, 
+      },
+    );
 
+    
+    final petData = response[0];
+    return Pet.fromMap(petData as Map<String, dynamic>);
+  }
 
-    Future<int> checkPrenotazione(int petid, String inizio, String fine) async {
+  Future<int> checkPrenotazione(int petid, String inizio, String fine) async {
     final prenotazioneResponse = await Supabase.instance.client.rpc(
       'check_booking_overlap', // Nome della funzione RPC in Supabase
       params: {
@@ -261,234 +273,206 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
               ),
 
               const SizedBox(height: 10),
+              // Sezione prenotazione
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+
+                    const SizedBox(height: 20),
+
+Column(
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    const Text(
+      'Scegli il tipo di pet per cui prenotare:',
+      style: TextStyle(
+        fontSize: 15.0,
+        fontWeight: FontWeight.bold,
+        height: 1,
+      ),
+    ),
+    const SizedBox(height: 15),
+    Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      children: animalTypes.entries.map((entry) {
+        final type = entry.key;
+        final icon = entry.value;
+
+        return GestureDetector(
+          onTap: () async {
+            setState(() {
+              selectedType = type;
+              petsSelezionati.clear(); // Resetta la lista dei pets selezionati quando si cambia tipo
+            });
+            await fetchPets(type, user!.id); // Usa l'ID utente reale
+          },
+          child: AnimatedScale(
+            scale: selectedType == type ? 1.2 : 1.0,
+            duration: const Duration(milliseconds: 200),
+            child: CircleAvatar(
+              backgroundColor: selectedType == type
+                  ? Colors.deepOrange
+                  : Colors.grey[300],
+              radius: 30,
+              child: Image.asset(icon, width: 30, height: 30),
+            ),
+          ),
+        );
+      }).toList(),
+    ),
+    const SizedBox(height: 30),
+    if (selectedType != null)
+      Column(
+        children: [
+          if (pets.isEmpty) // Se la lista di animali è vuota, mostra il messaggio
+            const Text(
+              'Non hai pet di questo tipo, aggiungili dal tuo profilo',
+              style: TextStyle(color: Colors.black),
+            )
+          else
+            // Usa una ListView invece di un DropdownButton per gestire meglio le checkbox
+            ListView(
+              shrinkWrap: true, // Evita l'overflow
+              physics: NeverScrollableScrollPhysics(), // Disabilita lo scorrimento
+              children: pets.map((pet) {
+                return CheckboxListTile(
+                  title: Text(pet.name),
+                  value: petsSelezionati.contains(pet), // Verifica se il pet è selezionato
+                  onChanged: (bool? value) {
+                    setState(() {
+                      if (value == true) {
+                        // Se la casella viene selezionata, aggiungi il pet alla lista
+                        petsSelezionati.add(pet);
+                        print('Animale inserito nella lista: ${pet.name}, Stato: ${value}');
+                      } else {
+                        // Se la casella viene deselezionata, rimuovi il pet dalla lista
+                        petsSelezionati.removeWhere((selectedPet) => selectedPet.id == pet.id);
+                        print('Animale rimosso dalla lista nella lista: ${pet.name}, Stato: ${value}');
+                      }
+                    });
+
+                    for(int i=0; i<petsSelezionati.length; i++){
+                      String animal = petsSelezionati[i].name;
+                      print('Animale $i : $animal');
+                    }
+                  },
+                );
+              }).toList(),
+            ),
+        ],
+      ),
+  ],
+),
 
 
-              // Form di prenotazione
-              /*Card(
-                
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: */
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
+                    const SizedBox(height: 20),
 
-                      const SizedBox(height: 20),
-
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-
-                          const Text(
-                            'Scegli il tipo di pet per cui prenotare:',
-                            style: TextStyle(
-                              fontSize: 15.0,         // Dimensione del testo
-                              fontWeight: FontWeight.bold,  // Peso del font (es. bold, normal)
-                              //color: Colors.black,         // Colore del testo
-                              //letterSpacing: 1.0,        // Spaziatura tra le lettere
-                              height: 1,              // Altezza della riga (distanza tra linee multiple)
-                              //fontFamily: 'Roboto',     // Font personalizzato (opzionale)
-                            ),
-                          ),
-                          const SizedBox(height: 15),
-                          Wrap(
-                            spacing: 16,
-                            runSpacing: 16,
-                            children: animalTypes.entries.map((entry) {
-                              final type = entry.key;
-                              final icon = entry.value;
-
-                              return Column(
-                                children: [
-                                  GestureDetector(
-                                    onTap: () async {
-                                      setState(() {
-                                        selectedType = type; // Aggiorna la selezione
-                                      });
-                                      await fetchPets(type, user!.id); // Fetch pets for selected type
-                                    },
-                                    child: AnimatedScale(
-                                      scale: selectedType == type ? 1.2 : 1.0,
-                                      duration: const Duration(milliseconds: 200),
-                                      child: CircleAvatar(
-                                        backgroundColor: selectedType == type
-                                            ? Colors.deepOrange // Colore di sfondo selezionato
-                                            : Colors.grey[300], // Colore di sfondo non selezionato
-                                        radius: 30,
-                                        child: Image.asset(icon, width: 30, height: 30),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  // Mostra la lista dei nomi solo se il tipo è selezionato
-                                  if (selectedType == type)
-                                    Column(
-                                      children: pets.map((pet) {
-                                        bool isSelected = selectedPet == pet.name;
-                                        //petID = pet.id;
-                                        return Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                          child: InkWell(
-                                            onTap: () {
-                                              setState(() {
-                                                selectedPet = pet.name; // Imposta il pet selezionato
-                                                petID = pet.id;
-                                                print('PetID: $petID');
-                                              });
-                                              selectedPet =pet.name;
-                                              print('Cliccato su: $selectedPet');
-                                              //petID = pet.id;
-                                            },
-                                            child: Text(
-                                              pet.name,
-                                              style: TextStyle(
-                                                color: isSelected ? Colors.orange : Colors.black,
-                                              ),
-                                              ),
-                                            // Usa il campo appropriato del tuo modello Pet
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                ],
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      Row(
-                        children: [
-                          const SizedBox(width: 10),
-                          // Date Range Picker
-                          Expanded(
-                            
-                            child: GestureDetector(
-                              onTap: () async {
-                                final dateRange = await showDateRangePicker(
-                                  context: context,
-                                  firstDate: DateTime.now(),
-                                  lastDate: DateTime(2100),
-                                  selectableDayPredicate: (DateTime date, DateTime? start, DateTime? end){
-                                    for(final entry in widget.indisp){
-                                      final DateTimeRange range = DateTimeRange(start: DateTime.parse(entry['data_inizio']), 
-                                      end: DateTime.parse(entry['data_fine']));
-                                      if(date.isAfter(range.start) && date.isBefore(range.end)){
-                                        return false;
-                                      }
+                    Row(
+                      children: [
+                        const SizedBox(width: 10),
+                        // Date Range Picker
+                        Expanded(
+                          
+                          child: GestureDetector(
+                            onTap: () async {
+                              final dateRange = await showDateRangePicker(
+                                context: context,
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime(2100),
+                                selectableDayPredicate: (DateTime date, DateTime? start, DateTime? end){
+                                  for(final entry in widget.indisp){
+                                    final DateTimeRange range = DateTimeRange(start: DateTime.parse(entry['data_inizio']), 
+                                    end: DateTime.parse(entry['data_fine']));
+                                    if(date.isAfter(range.start) && date.isBefore(range.end)){
+                                      return false;
                                     }
-                                    return true;
-                                  },
-                                  initialDateRange: selectedDateRange,
-                                );
-                                if (dateRange != null) {
-                                  ref.read(selectedDateRangeProvider.notifier).state = dateRange;
-                                }
-                              },
+                                  }
+                                  return true;
+                                },
+                                initialDateRange: selectedDateRange,
+                              );
+                              if (dateRange != null) {
+                                ref.read(selectedDateRangeProvider.notifier).state = dateRange;
+                              }
+                            },
 
-                              
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.3),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                  border: Border.all(color: Colors.grey),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
-                                    const SizedBox(width: 8.0),
-                                    Text(
-                                      selectedDateRange == null
-                                          ? "Data"
-                                          : "${_dateFormat.format(selectedDateRange.start)} - ${_dateFormat.format(selectedDateRange.end)}",
-                                    ),
-                                  ],
-                                ),
+                            
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8.0),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                                border: Border.all(color: Colors.grey),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
+                                  const SizedBox(width: 8.0),
+                                  Text(
+                                    selectedDateRange == null
+                                        ? "Data"
+                                        : "${_dateFormat.format(selectedDateRange.start)} - ${_dateFormat.format(selectedDateRange.end)}",
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          const SizedBox(width: 16.0),
-                          // Number of Days
-                          Text(
-                            selectedDateRange?.duration.inDays != null
-                                ? "${selectedDateRange!.duration.inDays} ${selectedDateRange.duration.inDays == 1 ? 'giorno' : 'giorni'}"
-                                : "",
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
+                        ),
+                        const SizedBox(width: 16.0),
+                        // Number of Days
+                        Text(
+                          selectedDateRange?.duration.inDays != null
+                              ? "${selectedDateRange!.duration.inDays} ${selectedDateRange.duration.inDays == 1 ? 'giorno' : 'giorni'}"
+                              : "",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
 
-                      ElevatedButton(
+                    ElevatedButton(
 
-                          onPressed: () async {
-                                if(await isUserLoggedIn() == false){
+                        onPressed: () async {
+                              if(await isUserLoggedIn() == false){
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Per effettuare una prenotazione devi effettuare l'accesso alla piattaforma."),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                              else{
+                                if (selectedDateRange == null || selectedType == null || petsSelezionati.isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text("Per effettuare una prenotazione devi effettuare l'accesso alla piattaforma."),
+                                      content: Text("Per favore, compila tutti i campi prima di proseguire."),
                                       backgroundColor: Colors.red,
                                     ),
                                   );
-                                }
-                                else{
-                                  if (selectedDateRange == null || selectedType == null || selectedPet == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text("Per favore, compila tutti i campi prima di proseguire."),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                  } 
+                                } 
 
-                                  else {
-                                      final alreadyPrenotato = await checkPrenotazione(petID, selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0]);
-                                      if(alreadyPrenotato == 1){
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title: const Text("Prenotazione Fallita"),
-                                                content: const Text("L'intervallo di date selezionato è già prenotato per questo pet."),
-                                                actions: <Widget>[
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      Navigator.of(context).pop();
-                                                    },
-                                                    child: const Text("OK"),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                      }
-                                      else{
-                                        int durationDays = selectedDateRange.end.difference(selectedDateRange.start).inDays;
-                                        print('Durata:  $durationDays');
-                                        double totalPrice = petsitter.prezzo * durationDays;
-                                        await prenota(selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0], totalPrice, petID ,user!.id, petsitterId);
-
+                                else {
+                                    final alreadyPrenotato = await checkPrenotazione(petID, selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0]);
+                                    if(alreadyPrenotato == 1){
                                         showDialog(
                                           context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title: const Text("Prenotazione Avvenuta"),
-                                                content: const Text("La tua prenotazione è stata effettuata con successo."),
-                                                actions: <Widget>[
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text("Prenotazione Fallita"),
+                                              content: const Text("L'intervallo di date selezionato è già prenotato per questo pet."),
+                                              actions: <Widget>[
                                                 TextButton(
                                                   onPressed: () {
-                                                    Navigator.of(context).pop(); // Chiude l'alert box
+                                                    Navigator.of(context).pop();
                                                   },
                                                   child: const Text("OK"),
                                                 ),
@@ -496,38 +480,61 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
                                             );
                                           },
                                         );
+                                    }
+                                    else{
+                                      int durationDays = selectedDateRange.end.difference(selectedDateRange.start).inDays;
+                                      print('Durata:  $durationDays');
+                                      double totalPrice = petsitter.prezzo * durationDays;
+                                      for(int j=0; j<petsSelezionati.length; j++){
+                                        await prenota(selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0], totalPrice, petsSelezionati[j].id ,user!.id, petsitterId);
                                       }
+                                      showDialog(
+                                        context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text("Prenotazione Avvenuta"),
+                                              content: const Text("La tua prenotazione è stata effettuata con successo."),
+                                              actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop(); // Chiude l'alert box
+                                                },
+                                                child: const Text("OK"),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }
 
 
-                                  }
                                 }
+                              }
 
 
-                          },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          minimumSize: const Size(double.infinity, 45),
+                        },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
-                        child: const Text(
-                          'Prenota',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        minimumSize: const Size(double.infinity, 45),
+                      ),
+                      child: const Text(
+                        'Prenota',
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              //),
-
-
+              ),
 
               const SizedBox(height: 20),
+              
               // Valutazione complessiva
               Center(
                 child: Column(
@@ -576,8 +583,10 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
                   ],
                 ),
               ),
+              
               // Recensioni
               const SizedBox(height: 25),
+
               Column(
                 children: reviews.map((review) {
                   double rating = (review['voto'] ?? 0) / 2;  // Adattiamo il voto da 1-10 a 1-5 stelle
