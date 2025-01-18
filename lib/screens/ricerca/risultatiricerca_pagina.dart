@@ -225,7 +225,7 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                                 if (animalColumn.isNotEmpty) {
                                   // The selected `Comune` sent from Flutter
                                   // Step 1: Fetch coordinates for the selected `Comune`
-                                  final searchResults = await searchRepository.searchPetSitters(selectedAnimal, selectedLocation, selectedDateRange); 
+                                  final searchResults = await searchRepository.searchPetSitters([selectedAnimal], selectedLocation, selectedDateRange); 
                                   setState(() {
                                     _petSitters = List<Map<String, dynamic>>.from(searchResults);
                                   });

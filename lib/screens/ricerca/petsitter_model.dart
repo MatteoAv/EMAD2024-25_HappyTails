@@ -55,6 +55,7 @@ class PetSitter {
       roditori: map['roditori'],
       distanza: map['distanza'],
       prezzo: map['prezzo'],
+      disponibilita: map['disponibilita'],
       
 
     );
