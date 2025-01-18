@@ -213,7 +213,7 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> with Automa
                 children: [
                   CircleAvatar(
                     radius: 60,
-                    backgroundImage: AssetImage('assets/puppies.png'),
+                    backgroundImage: NetworkImage(petsitter.imageUrl),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
