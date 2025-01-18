@@ -8,8 +8,9 @@ import 'package:intl/intl.dart';
 //da fare: usare la harverstine formula (in un modo efficiente, non è la formula diretta) per calcolare la distanza dalla latitudine,longitudine del pet sitter con quella selezionata nella ricerca
 class VerticalCard extends StatelessWidget {
   final PetSitter item;
+  final List disponibilita;
 
-  const VerticalCard({Key? key, required this.item}) : super(key: key);
+  const VerticalCard({Key? key, required this.item, required this.disponibilita}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,12 +20,13 @@ class VerticalCard extends StatelessWidget {
     elevation: 3,
     child: InkWell(
       onTap: () {
+        List<dynamic> items = [item, disponibilita];
         // Print ID to debug
         print('ID del petsitter RISULTATO_CARD: ${item.id}');
         Navigator.pushNamed(
           context,
           AppRoutes.sitterpage,
-          arguments: item, // Pass the pet sitter
+          arguments: items,// Pass the pet sitter
         );
       },
       child: Padding(

@@ -11,8 +11,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final selectedDateRangeProvider = StateProvider<DateTimeRange?>((ref) => null);
 
 class ProfiloPetsitter extends ConsumerStatefulWidget {
-  const ProfiloPetsitter({Key? key, required this.petsitter}) : super(key: key);
+  const ProfiloPetsitter({Key? key, required this.petsitter, required this.indisp}) : super(key: key);
   final PetSitter petsitter;
+  final List indisp;
 
   @override
   _ProfiloPetsitterState createState() => _ProfiloPetsitterState();
@@ -52,6 +53,8 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
         });
 
   }
+
+
 
     Future<int> checkPrenotazione(int petid, String inizio, String fine) async {
     final prenotazioneResponse = await Supabase.instance.client.rpc(
@@ -367,6 +370,16 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
                                   context: context,
                                   firstDate: DateTime.now(),
                                   lastDate: DateTime(2100),
+                                  selectableDayPredicate: (DateTime date, DateTime? start, DateTime? end){
+                                    for(final entry in widget.indisp){
+                                      final DateTimeRange range = DateTimeRange(start: DateTime.parse(entry['data_inizio']), 
+                                      end: DateTime.parse(entry['data_fine']));
+                                      if(date.isAfter(range.start) && date.isBefore(range.end)){
+                                        return false;
+                                      }
+                                    }
+                                    return true;
+                                  },
                                   initialDateRange: selectedDateRange,
                                 );
                                 if (dateRange != null) {

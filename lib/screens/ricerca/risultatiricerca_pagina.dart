@@ -429,10 +429,9 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                   roditori: petSitter['roditori'],
                   distanza: petSitter['distance'].toInt(),
                   prezzo: petSitter['prezzo'].toDouble(),
-
                 );
-
-                return VerticalCard(item: petSitterItem);
+                
+                return VerticalCard(item: petSitterItem, disponibilita: petSitter['disponibilita'] ?? []);
               },
             ),
 ),
