@@ -21,17 +21,24 @@ class ProfiloPetsitter extends ConsumerStatefulWidget {
   _ProfiloPetsitterState createState() => _ProfiloPetsitterState();
 }
 
-class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
+class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> with AutomaticKeepAliveClientMixin{
 
+  @override
+  bool get wantKeepAlive => true;
+  Map<int, bool> petSelections = {}; // Map per tenere traccia delle selezioni
 
   List<Map<String, dynamic>> reviews = [];
   double totalRating = 0;  // Variabile per il punteggio totale
   int totalReviews = 0;    // Variabile per il numero di recensioni
   String? selectedType; // Varibile per l'animale selezionato
   List<dynamic> pets = []; // lista di pet dell'utente da cui puo scegliere
-  List<dynamic> petsSelezionati = []; // lista di pet dell'utente da cui puo scegliere
+  List<dynamic> petsSelezionati = []; // lista di pet selezionati dall'utente
   String? selectedPet; // Pet selezionato tra quelli della lista dell'utente
   int petID=0;
+  List<int> checkbooking = []; // per ogni animale selezionato si controlla se la data selezionata e' gia stata prenotata, il risultato viene messo in questa lista
+                               // durante il controllo se nella lista e' presente anche un solo 1, cioe anche un solo animale risulta gia prenotato per quella data allora viene restituito
+                               // un messaggio di errore
+
   
   //late Pet nuovo;
 
@@ -55,19 +62,6 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
       pets = animals;
     });
 
-  }
-
-  Future<Pet> getPetById(int petId) async {
-    final response = await Supabase.instance.client.rpc(
-      'get_pet_by_id', // Nome della funzione RPC in Supabase
-      params: {
-        'petid': petId, 
-      },
-    );
-
-    
-    final petData = response[0];
-    return Pet.fromMap(petData as Map<String, dynamic>);
   }
 
   Future<int> checkPrenotazione(int petid, String inizio, String fine) async {
@@ -168,6 +162,7 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final PetSitter petsitter = widget.petsitter;
     final int petsitterId = petsitter.id;
     final String nome = petsitter.nome;
@@ -281,90 +276,93 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> {
 
                     const SizedBox(height: 20),
 
-Column(
-  mainAxisSize: MainAxisSize.min,
-  children: [
-    const Text(
-      'Scegli il tipo di pet per cui prenotare:',
-      style: TextStyle(
-        fontSize: 15.0,
-        fontWeight: FontWeight.bold,
-        height: 1,
-      ),
-    ),
-    const SizedBox(height: 15),
-    Wrap(
-      spacing: 16,
-      runSpacing: 16,
-      children: animalTypes.entries.map((entry) {
-        final type = entry.key;
-        final icon = entry.value;
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Scegli il tipo di pet per cui prenotare:',
+                          style: TextStyle(
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.bold,
+                            height: 1,
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        Wrap(
+                          spacing: 16,
+                          runSpacing: 16,
+                          children: animalTypes.entries.map((entry) {
+                            final type = entry.key;
+                            final icon = entry.value;
 
-        return GestureDetector(
-          onTap: () async {
-            setState(() {
-              selectedType = type;
-              petsSelezionati.clear(); // Resetta la lista dei pets selezionati quando si cambia tipo
-            });
-            await fetchPets(type, user!.id); // Usa l'ID utente reale
-          },
-          child: AnimatedScale(
-            scale: selectedType == type ? 1.2 : 1.0,
-            duration: const Duration(milliseconds: 200),
-            child: CircleAvatar(
-              backgroundColor: selectedType == type
-                  ? Colors.deepOrange
-                  : Colors.grey[300],
-              radius: 30,
-              child: Image.asset(icon, width: 30, height: 30),
-            ),
-          ),
-        );
-      }).toList(),
-    ),
-    const SizedBox(height: 30),
-    if (selectedType != null)
-      Column(
-        children: [
-          if (pets.isEmpty) // Se la lista di animali è vuota, mostra il messaggio
-            const Text(
-              'Non hai pet di questo tipo, aggiungili dal tuo profilo',
-              style: TextStyle(color: Colors.black),
-            )
-          else
-            // Usa una ListView invece di un DropdownButton per gestire meglio le checkbox
-            ListView(
-              shrinkWrap: true, // Evita l'overflow
-              physics: NeverScrollableScrollPhysics(), // Disabilita lo scorrimento
-              children: pets.map((pet) {
-                return CheckboxListTile(
-                  title: Text(pet.name),
-                  value: petsSelezionati.contains(pet), // Verifica se il pet è selezionato
-                  onChanged: (bool? value) {
-                    setState(() {
-                      if (value == true) {
-                        // Se la casella viene selezionata, aggiungi il pet alla lista
-                        petsSelezionati.add(pet);
-                        print('Animale inserito nella lista: ${pet.name}, Stato: ${value}');
-                      } else {
-                        // Se la casella viene deselezionata, rimuovi il pet dalla lista
-                        petsSelezionati.removeWhere((selectedPet) => selectedPet.id == pet.id);
-                        print('Animale rimosso dalla lista nella lista: ${pet.name}, Stato: ${value}');
-                      }
-                    });
+                            return GestureDetector(
+                              onTap: () async {
+                                setState(() {
+                                  selectedType = type;
+                                });
+                                await fetchPets(type, user!.id); 
+                              },
+                              child: AnimatedScale(
+                                scale: selectedType == type ? 1.2 : 1.0,
+                                duration: const Duration(milliseconds: 200),
+                                child: CircleAvatar(
+                                  backgroundColor: selectedType == type
+                                      ? Colors.deepOrange
+                                      : Colors.grey[300],
+                                  radius: 30,
+                                  child: Image.asset(icon, width: 30, height: 30),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 30),
+                        if (selectedType != null)
+                          Column(
+                            children: [
+                              if (pets.isEmpty) // Se la lista di animali è vuota, mostra il messaggio
+                                const Text(
+                                  'Non hai pet di questo tipo, aggiungili dal tuo profilo',
+                                  style: TextStyle(color: Colors.black),
+                                )
+                              else
+                                // Usa una ListView invece di un DropdownButton per gestire meglio le checkbox
+                                ListView(
+                                  shrinkWrap: true, // Evita l'overflow
+                                  physics: NeverScrollableScrollPhysics(), // Disabilita lo scorrimento
+                                  children: pets.map((pet) {
+                                    return CheckboxListTile(
+                                      title: Text(pet.name),
+                                      value: petSelections[pet.id] ?? false, // Verifica se il pet è selezionato
+                                      onChanged: (bool? value) {
+                                        setState(() {
+                                          if (value == true) {
+                                            // Se la casella viene selezionata, aggiungi il pet alla lista
+                                            if(!petsSelezionati.contains(pet)){
+                                              petsSelezionati.add(pet);
+                                              print('Animale inserito nella lista: ${pet.name}, Stato: ${value}');
+                                            }
 
-                    for(int i=0; i<petsSelezionati.length; i++){
-                      String animal = petsSelezionati[i].name;
-                      print('Animale $i : $animal');
-                    }
-                  },
-                );
-              }).toList(),
-            ),
-        ],
-      ),
-  ],
-),
+                                          } else {
+                                            // Se la casella viene deselezionata, rimuovi il pet dalla lista
+                                            petsSelezionati.removeWhere((selectedPet) => selectedPet.id == pet.id);
+                                            print('Animale rimosso dalla lista nella lista: ${pet.name}, Stato: ${value}');
+                                          }
+                                          petSelections[pet.id] = value ?? false;
+                                        });
+
+                                        for(int i=0; i<petsSelezionati.length; i++){
+                                          String animal = petsSelezionati[i].name;
+                                          print('Animale $i : $animal');
+                                        }
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                            ],
+                          ),
+                      ],
+                    ),
 
 
                     const SizedBox(height: 20),
@@ -461,14 +459,18 @@ Column(
                                 } 
 
                                 else {
-                                    final alreadyPrenotato = await checkPrenotazione(petID, selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0]);
-                                    if(alreadyPrenotato == 1){
+                                    for(int i=0; i<petsSelezionati.length; i++){
+                                      final alreadyPrenotato = await checkPrenotazione(petsSelezionati[i].id, selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0]);
+                                      checkbooking.add(alreadyPrenotato);
+                                    }
+                                    
+                                    if(checkbooking.contains(1)){
                                         showDialog(
                                           context: context,
                                           builder: (BuildContext context) {
                                             return AlertDialog(
                                               title: const Text("Prenotazione Fallita"),
-                                              content: const Text("L'intervallo di date selezionato è già prenotato per questo pet."),
+                                              content: const Text("L'intervallo di date selezionato è già prenotato per uno dei pet selezionati."),
                                               actions: <Widget>[
                                                 TextButton(
                                                   onPressed: () {
@@ -657,4 +659,5 @@ Column(
       ),
     );
   }
+  
 }
