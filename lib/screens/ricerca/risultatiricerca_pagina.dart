@@ -5,8 +5,9 @@ import 'package:happy_tails/screens/ricerca/risultato_card.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:happy_tails/screens/ricerca/locations.dart';
+import 'package:happy_tails/screens/ricerca/risultati_repository.dart';
 
-
+final searchRepository = SearchRepository();
 // Definisci il provider per gestire la selezione delle date
 final selectedDateRangeProvider = StateProvider<DateTimeRange?>((ref) {
   return null; // Nessun valore predefinito
@@ -224,58 +225,9 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                                 if (animalColumn.isNotEmpty) {
                                   // The selected `Comune` sent from Flutter
                                   // Step 1: Fetch coordinates for the selected `Comune`
-                                  final comuneResponse = await Supabase.instance.client.rpc(
-                                    'get_comune_coordinates',
-                                    params: {
-                                      'comune_name': selectedLocation, // Pass the parameter
-                                    },
-                                  );
-
-                                  if (comuneResponse == null) {
-                                    print("Error: RPC call returned null.");
-                                  } else if (comuneResponse is List && comuneResponse.isNotEmpty) {
-                                    print("RPC Response: $comuneResponse");
-                                    print("Selected Location: $selectedLocation");
-                                    print("RPC Response: $comuneResponse");
-                                  }
-
-                                  print(comuneResponse);
-
-                                  // Then extract coordinates
-                                  final double comuneLongitude = comuneResponse[0]['longitude'] as double;
-                                  final double comuneLatitude = comuneResponse[0]['latitude'] as double;
-                                  print("Comune Longitude: $comuneLongitude, Comune Latitude: $comuneLatitude");
-
-                                  // Step 2: Query the nearest pet sitters
-                                  final petsitterResponse = await Supabase.instance.client.rpc(
-                                    'get_nearest_petsitters',
-                                    params: {
-                                      'input_longitude': comuneLongitude,
-                                      'input_latitude': comuneLatitude,
-                                      'animal_column': animalColumn
-                                    },
-                                  );
-                                  print(petsitterResponse);
-
-                                  final filteredResults = (petsitterResponse as List).where((petSitter) {
-                                    final disponibilita = petSitter['disponibilita'] as List? ?? [];
-
-                                    // If no availability, return true
-                                    if (disponibilita.isEmpty) return true;
-
-                                    return disponibilita.any((range) {
-                                      final DateTime start = DateTime.parse(range['data_inizio']);
-                                      final DateTime end = DateTime.parse(range['data_fine']);
-
-                                      // Check if the selected date range overlaps with the availability
-                                      return (selectedDateRange.end.isBefore(start) ||
-                                          selectedDateRange.start.isAfter(end));
-                                    });
-                                  }).toList();
-                                  print(filteredResults);
-
+                                  final searchResults = await searchRepository.searchPetSitters(selectedAnimal, selectedLocation, selectedDateRange); 
                                   setState(() {
-                                    _petSitters = List<Map<String, dynamic>>.from(filteredResults);
+                                    _petSitters = List<Map<String, dynamic>>.from(searchResults);
                                   });
                                 }
                               } catch (e) {
