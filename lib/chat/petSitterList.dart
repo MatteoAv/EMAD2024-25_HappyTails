@@ -7,21 +7,37 @@ class UserListPage extends StatelessWidget {
   const UserListPage({Key? key}) : super(key: key);
 
   Future<List<Map<String, dynamic>>> _fetchChatPartners() async {
-    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
-    if (currentUserId == null) return [];
+  final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+  if (currentUserId == null) return [];
 
-    final response = await Supabase.instance.client
-        .from('bookings')
-        .select('petsitter_id!inner(uuid, nome, cognome)')
-        .eq('owner_id', currentUserId);
+  final response = await Supabase.instance.client
+      .from('bookings')
+      .select('petsitter_id!inner(uuid, nome, cognome)')
+      .eq('owner_id', currentUserId);
 
-    // Proper deduplication by UUID
-    final uniquePartners = response
-        .map((b) => b['petsitter_id'] as Map<String, dynamic>)
-        .toList();
+  final uniquePartners = <Map<String, dynamic>>[];
+  final seenUuids = <String>{};
 
-    return uniquePartners;
-  }
+  for (final booking in response) {
+    final petsitter = booking['petsitter_id'] as Map<String, dynamic>?; // Nullable Map
+
+    if (petsitter != null) { // Check if petsitter is not null
+      final uuid = petsitter['uuid'] as String?; // Nullable String
+
+      if (uuid != null) { // Check if uuid is not null
+        if (!seenUuids.contains(uuid)) {
+          uniquePartners.add(petsitter);
+          seenUuids.add(uuid);
+        }
+      }
+    }
+  
+
+  return uniquePartners;
+}
+
+  return uniquePartners;
+}
 
   @override
   Widget build(BuildContext context) {
