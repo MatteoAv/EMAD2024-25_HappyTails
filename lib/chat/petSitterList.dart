@@ -1,49 +1,140 @@
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 import 'package:happy_tails/chat/chat.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UserListPage extends StatelessWidget {
   const UserListPage({Key? key}) : super(key: key);
 
-  Future<List<Map<String, dynamic>>> _fetchUsers() async {
+  Future<List<Map<String, dynamic>>> _fetchChatPartners() async {
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+    if (currentUserId == null) return [];
+
     final response = await Supabase.instance.client
-        .from('profiles') // Assuming "profiles" is the user table
-        .select('id, userName');
-    
-    return response;
+        .from('bookings')
+        .select('petsitter_id!inner(uuid, nome, cognome)')
+        .eq('owner_id', currentUserId);
+
+    // Proper deduplication by UUID
+    final uniquePartners = response
+        .map((b) => b['petsitter_id'] as Map<String, dynamic>)
+        .toList();
+
+    return uniquePartners;
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Users')),
+      appBar: AppBar(
+        title: const Text('Chats', style: TextStyle(fontSize: 20)),
+        scrolledUnderElevation: 1,
+      ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _fetchUsers(),
+        future: _fetchChatPartners(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (snapshot.hasData) {
-            final users = snapshot.data!;
-            return ListView.builder(
-              itemCount: users.length,
-              itemBuilder: (context, index) {
-                final user = users[index];
-                return ListTile(
-                  title: Text("Chat tra andrea e mario"),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      ChatPage.route(user['id']=="69946294-e811-4748-a9a3-70b287f27024"? "b17ee17c-f8f2-4855-bfdd-0c0266ecbe03": "69946294-e811-4748-a9a3-70b287f27024" ),
-                    );
-                  },
-                );
-              },
-            );
-          } else {
-            return const Center(child: Text('No users found.'));
           }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          final partners = snapshot.data ?? [];
+          if (partners.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.forum_outlined, size: 64, color: colorScheme.outline),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No conversations yet',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.outline,
+                        ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: partners.length,
+            separatorBuilder: (_, __) => const Divider(height: 24),
+            itemBuilder: (context, index) {
+              final partner = partners[index];
+              final displayName = '${partner['nome']} ${partner['cognome']}';
+
+              return Material(
+                color: colorScheme.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () => Navigator.push(
+                    context,
+                     ChatPage.route(partner['uuid']),
+                    
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 24,
+                          backgroundColor: colorScheme.primaryContainer,
+                          child: Text(
+                            partner['nome'][0],
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                displayName,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Online (farlocco)',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: colorScheme.outline,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right,
+                          color: colorScheme.outline,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
         },
       ),
     );
