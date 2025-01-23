@@ -29,6 +29,21 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'HappyTails',
       theme: ThemeData(
+        navigationBarTheme: NavigationBarThemeData(
+      labelTextStyle: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.selected)) {
+          return const TextStyle(
+            color: Colors.orange, // Colore per l'elemento selezionato
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          );
+        }
+        return const TextStyle(
+          color: Colors.black, // Colore per gli elementi non selezionati
+          fontSize: 12,
+        );
+        })
+        ),
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.orangeAccent),
         textTheme: GoogleFonts.latoTextTheme(

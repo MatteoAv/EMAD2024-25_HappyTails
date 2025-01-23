@@ -39,6 +39,7 @@ import 'package:happy_tails/UserManage/widgets/expandable_button.dart';
 import 'package:happy_tails/app/routes.dart';
 import 'package:happy_tails/UserManage/providers/profile_providers.dart';
 import 'package:happy_tails/UserManage/widgets/PetCard.dart';
+import 'package:happy_tails/header.dart';
 
 
 class UserProfilePage extends ConsumerWidget {
@@ -53,16 +54,35 @@ class UserProfilePage extends ConsumerWidget {
     final isPetsTabSelected = ref.watch(tabSelectionProvider);
     
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text(
-          'Profilo',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.deepOrange[50],
-      ),
       body: CustomScrollView(
           slivers: [
+            userAsync.when(
+            data: (user) {
+              if (user == null || !user.isPetSitter) {
+                return SliverPersistentHeader(
+                  pinned: true,
+                  floating: false,
+                  delegate: SliverAppBarDelegate(
+                    child: const Header(),
+                  ),
+                );
+              } else {
+                return SliverPersistentHeader(
+                  pinned: true,
+                  floating: false,
+                  delegate: SliverAppBarDelegate(
+                    child: const Text(""),
+                  ),
+                );
+              }
+            },
+            loading: () => const SliverToBoxAdapter(
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (err, _) => SliverToBoxAdapter(
+              child: Center(child: Text('Error: $err')),
+            ),
+          ),
             // Sliver: Intestazione (Informazioni sull'utente)
             SliverToBoxAdapter(
               child: Padding(
