@@ -4,14 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happy_tails/UserManage/providers/managePetSitter.dart';
 import 'package:happy_tails/UserManage/repositories/local_database.dart';
-import 'package:happy_tails/app/routes.dart';
 import 'package:happy_tails/chat/chat_provider.dart';
+import 'package:happy_tails/homeProvider/providers.dart';
 import 'package:happy_tails/screens/ricerca/risultatiricerca_pagina.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:happy_tails/UserManage/providers/profile_providers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 final selectionDateProvider = StateProvider<DateTimeRange?>((ref){
@@ -44,7 +45,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final user = ref.read(userProvider).valueOrNull;
     _nickController = TextEditingController(text: user?.userName);
     _cittaController = TextEditingController(text: user?.citta);
-    if(user != null && user!.imageUrl!=null){
+    if(user != null && user.imageUrl!=null){
     _selected_image = File(user.imageUrl!);
     }
     if(user != null && user.isPetSitter){
@@ -357,7 +358,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                   content: Text('Modifiche salvate con successo!'),
                                 ),
                               );
-                              Navigator.pop(context);
+                              if(user.isPetSitter){
+                                Navigator.pop(context);
+                              }
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -422,7 +425,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
                   // Pulsante per effettuare il logout
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async{
                         Supabase.instance.client.auth.signOut();
                         //ref.invalidate(userProvider);
                         ref.invalidate(petsProvider);
@@ -430,6 +433,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         ref.invalidate(chatProvider);
                         print('Logout effettuato');
                         if(user!=null && user.isPetSitter){
+                         final prefs = await SharedPreferences.getInstance(); 
+                         await prefs.clear();
+                         ref.invalidate(totalEarningsProvider);
+                         ref.invalidate(averageRatingProvider);
+                         ref.invalidate(petSitterProvider);
+                         ref.invalidate(oldEarningsProvider);
                          Navigator.pop(context);
                         }
                     },

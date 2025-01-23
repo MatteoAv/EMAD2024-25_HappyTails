@@ -3,10 +3,9 @@ import 'package:happy_tails/Auth/auth_repository.dart';
 import 'package:happy_tails/UserManage/screens/profile_page.dart';
 import 'package:happy_tails/UserManage/screens/settings_page.dart';
 import 'package:happy_tails/chat/petSitterList.dart';
-import 'package:happy_tails/home.dart';
-import 'package:happy_tails/profilo.dart';
 import 'package:happy_tails/screens/ricerca/risultatiricerca_pagina.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:happy_tails/homePagePetSitter.dart';
 
 class MainScaffold extends StatefulWidget {
   const MainScaffold({Key? key}) : super(key: key);
@@ -35,14 +34,14 @@ class _MainScaffoldState extends State<MainScaffold> {
   }
 
   void updatePages() {
-    final session = supabase.auth.currentUser;
+    var session = supabase.auth.currentUser;
     if (session != null) {
       // Check if the user is a PetSitter
       _checkIfPetSitter().then((result) {
         setState(() {
           isPetSitter = result;
           _pages = isPetSitter
-              ? [ProfiloPage(), RisultatiCercaPage(), UserListPage(), UserProfilePage()]
+              ? [HomePagePetSitter(), RisultatiCercaPage(), UserListPage(), UserProfilePage()]
               : [UserProfilePage(), RisultatiCercaPage(), UserListPage(), SettingsPage()];
               if (_selectedIndex >= _pages.length) {
           _selectedIndex = 0;
@@ -63,6 +62,7 @@ class _MainScaffoldState extends State<MainScaffold> {
         .from('profiles')
         .select()
         .eq('id',supabase.auth.currentUser!.id);
+      print(response.first['isPetSitter']);  
     return response.first['isPetSitter'];
   }
 
@@ -122,6 +122,7 @@ class _MainScaffoldState extends State<MainScaffold> {
   NavigationDestination _buildNavDestination(IconData icon, String label, int index) {
     final isSelected = _selectedIndex == index;
     return NavigationDestination(
+      
       icon: Icon(
         icon,
         color: isSelected ? Colors.orange : Colors.black,
