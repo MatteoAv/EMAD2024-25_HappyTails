@@ -87,7 +87,7 @@ class ClientListPage extends StatelessWidget {
             separatorBuilder: (_, __) => const Divider(height: 24),
             itemBuilder: (context, index) {
               final partner = partners[index];
-              final displayName = '${partner['userName']}]}';
+              final displayName = '${partner['userName']}';
 
               return Material(
                 color: colorScheme.surface,
@@ -109,7 +109,7 @@ class ClientListPage extends StatelessWidget {
                           radius: 24,
                           backgroundColor: colorScheme.primaryContainer,
                           child: Text(
-                            partner['nome'][0],
+                            partner['userName'][0],
                             style: TextStyle(
                               fontSize: 18,
                               color: colorScheme.onPrimaryContainer,
@@ -132,7 +132,7 @@ class ClientListPage extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Online (farlocco)',
+                                'Online',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium
