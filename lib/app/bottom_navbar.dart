@@ -115,7 +115,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     return [
       _buildNavDestination(Icons.home, isPetSitter ? 'Home' : 'Home', 0),
       _buildNavDestination(Icons.search, 'Cerca', 1),
-      _buildNavDestination(Icons.message, 'Conversazioni', 2),
+      _buildNavDestination(Icons.message, 'Chat', 2),
       _buildNavDestination(Icons.person, 'Profilo', 3),
     ];
   }

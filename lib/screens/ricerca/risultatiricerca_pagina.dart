@@ -382,8 +382,10 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                   distanza: petSitter['distance'].toInt(),
                   prezzo: petSitter['prezzo'].toDouble(),
                 );
+
+                final data = selectedDateRange;
                 
-                return VerticalCard(item: petSitterItem, disponibilita: petSitter['disponibilita'] ?? []);
+                return VerticalCard(item: petSitterItem, disponibilita: petSitter['disponibilita'] ?? [], dateRange: data!,);
               },
             ),
 ),
