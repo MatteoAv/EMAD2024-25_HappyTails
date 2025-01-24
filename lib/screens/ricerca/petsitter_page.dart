@@ -232,19 +232,21 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> with Automa
                         SizedBox(height: 5),
                         Row(
                           children: [
-
                             Icon(
                               Icons.location_on, // Icona per la posizione
-                              color: Colors.red, // Colore dell'icona
-                              size: 20, // Dimensione dell'icona
+                              color: Colors.red,
+                              size: 20,
                             ),
-
-                            Text(
-                              '$provincia',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
+                            Flexible(
+                              child: Text(
+                                '$provincia',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                                overflow: TextOverflow.ellipsis, // Tronca il testo con "..."
+                                maxLines: 1, // Limita a una riga
                               ),
                             ),
                             SizedBox(width: 15),
@@ -256,9 +258,9 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> with Automa
                                 color: Colors.black,
                               ),
                             ),
-
                           ],
-                        ),
+                        )
+
                       ],
                     ),
                   ),
