@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:happy_tails/Auth/auth_repository.dart';
 import 'package:happy_tails/UserManage/screens/profile_page.dart';
 import 'package:happy_tails/UserManage/screens/settings_page.dart';
+import 'package:happy_tails/chat/clientList.dart';
 import 'package:happy_tails/chat/petSitterList.dart';
 import 'package:happy_tails/screens/ricerca/risultatiricerca_pagina.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -41,7 +42,7 @@ class _MainScaffoldState extends State<MainScaffold> {
         setState(() {
           isPetSitter = result;
           _pages = isPetSitter
-              ? [HomePagePetSitter(), RisultatiCercaPage(), UserListPage(), UserProfilePage()]
+              ? [HomePagePetSitter(), RisultatiCercaPage(), ClientListPage(), UserProfilePage()]
               : [UserProfilePage(), RisultatiCercaPage(), UserListPage(), SettingsPage()];
               if (_selectedIndex >= _pages.length) {
           _selectedIndex = 0;
