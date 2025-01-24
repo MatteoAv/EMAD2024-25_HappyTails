@@ -36,8 +36,9 @@ class AppRoutes {
         final objects = route.arguments as List;
         final PetSitter petsitter = objects[0] as PetSitter; // Extract arguments
         final indisp = objects[1];
+        final dateRange = objects[2];
         return MaterialPageRoute(
-          builder: (_) => ProfiloPetsitter(petsitter: petsitter, indisp : indisp),
+          builder: (_) => ProfiloPetsitter(petsitter: petsitter, indisp : indisp, dateRange: dateRange),
       );
       case  registrationPage:
         return MaterialPageRoute(

@@ -11,9 +11,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final selectedDateRangeProvider = StateProvider<DateTimeRange?>((ref) => null);
 
 class ProfiloPetsitter extends ConsumerStatefulWidget {
-  const ProfiloPetsitter({Key? key, required this.petsitter, required this.indisp}) : super(key: key);
+  const ProfiloPetsitter({Key? key, required this.petsitter, required this.indisp, required this.dateRange}) : super(key: key);
   final PetSitter petsitter;
   final List indisp;
+  final DateTimeRange dateRange;
 
   @override
   _ProfiloPetsitterState createState() => _ProfiloPetsitterState();
@@ -167,7 +168,7 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> with Automa
     final String provincia = petsitter.provincia;
     final double prezzo = petsitter.prezzo;
     final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
-    final selectedDateRange = ref.watch(selectedDateRangeProvider);    
+    final selectedDateRange = widget.dateRange;    
 
 
     print("ID del petsitter PETSITTER_PAGE: $petsitterId");

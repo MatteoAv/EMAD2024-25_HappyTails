@@ -9,8 +9,9 @@ import 'package:intl/intl.dart';
 class VerticalCard extends StatelessWidget {
   final PetSitter item;
   final List disponibilita;
+  final DateTimeRange dateRange;
 
-  const VerticalCard({Key? key, required this.item, required this.disponibilita}) : super(key: key);
+  const VerticalCard({Key? key, required this.item, required this.disponibilita, required this.dateRange}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +21,10 @@ class VerticalCard extends StatelessWidget {
     elevation: 3,
     child: InkWell(
       onTap: () {
-        List<dynamic> items = [item, disponibilita];
+        List<dynamic> items = [item, disponibilita, dateRange];
         // Print ID to debug
         print('ID del petsitter RISULTATO_CARD: ${item.id}');
+        print('Data passata: ${dateRange}');
         Navigator.pushNamed(
           context,
           AppRoutes.sitterpage,
