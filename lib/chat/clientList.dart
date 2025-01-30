@@ -3,40 +3,44 @@ import 'package:collection/collection.dart';
 import 'package:happy_tails/chat/chat.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class UserListPage extends StatelessWidget {
-  const UserListPage({Key? key}) : super(key: key);
+class ClientListPage extends StatelessWidget {
+  const ClientListPage({Key? key}) : super(key: key);
 
   Future<List<Map<String, dynamic>>> _fetchChatPartners() async {
   final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+  print("JKfjadjf");
+
   if (currentUserId == null) return [];
+  print(currentUserId);
+  print("JKfjadjf");
+
 
   final response = await Supabase.instance.client
-      .from('bookings')
-      .select('petsitter_id!inner(uuid, nome, cognome)')
-      .eq('owner_id', currentUserId);
-  print(response);
-
+  .from('bookings')
+  .select('owner_id!inner(id,userName)');
   final uniquePartners = <Map<String, dynamic>>[];
   final seenUuids = <String>{};
+  print(response);
 
   for (final booking in response) {
-    final petsitter = booking['petsitter_id'] as Map<String, dynamic>?; // Nullable Map
+    final user = booking['owner_id'] as Map<String, dynamic>?; // Get user data
 
-    if (petsitter != null) { // Check if petsitter is not null
-      final uuid = petsitter['uuid'] as String?; // Nullable String
+    if (user != null) {
+      final uuid = user['id'] as String?;
 
-      if (uuid != null) { // Check if uuid is not null
+      if (uuid != null) {
         if (!seenUuids.contains(uuid)) {
-          uniquePartners.add(petsitter);
+          uniquePartners.add(user);
           seenUuids.add(uuid);
         }
       }
     }
   }
-  
 
   return uniquePartners;
 }
+  
+
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +87,7 @@ class UserListPage extends StatelessWidget {
             separatorBuilder: (_, __) => const Divider(height: 24),
             itemBuilder: (context, index) {
               final partner = partners[index];
-              final displayName = '${partner['nome']} ${partner['cognome']}';
+              final displayName = '${partner['userName']}';
 
               return Material(
                 color: colorScheme.surface,
@@ -94,7 +98,7 @@ class UserListPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   onTap: () => Navigator.push(
                     context,
-                     ChatPage.route(partner['uuid']),
+                     ChatPage.route(partner['id']),
                     
                   ),
                   child: Padding(
@@ -105,7 +109,7 @@ class UserListPage extends StatelessWidget {
                           radius: 24,
                           backgroundColor: colorScheme.primaryContainer,
                           child: Text(
-                            partner['nome'][0],
+                            partner['userName'][0],
                             style: TextStyle(
                               fontSize: 18,
                               color: colorScheme.onPrimaryContainer,
@@ -128,7 +132,7 @@ class UserListPage extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Online (farlocco)',
+                                'Online',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium
