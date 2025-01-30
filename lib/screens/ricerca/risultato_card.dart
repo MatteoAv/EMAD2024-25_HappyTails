@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
 import 'package:happy_tails/app/routes.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 
 //Il widget del singolo risultato di ricerca
 //da fare: usare la harverstine formula (in un modo efficiente, non è la formula diretta) per calcolare la distanza dalla latitudine,longitudine del pet sitter con quella selezionata nella ricerca
-class VerticalCard extends StatelessWidget {
+class VerticalCard extends StatefulWidget {
   final PetSitter item;
   final List disponibilita;
   final DateTimeRange dateRange;
@@ -14,114 +15,164 @@ class VerticalCard extends StatelessWidget {
   const VerticalCard({Key? key, required this.item, required this.disponibilita, required this.dateRange}) : super(key: key);
 
   @override
+  _VerticalCardState createState() => _VerticalCardState();
+}
+
+Future<double> fetchPetSitterScore(int petsitterId) async {
+  final supabase = Supabase.instance.client;
+
+  final response = await supabase.rpc('get_petsitterscore', params: {
+    'petsitter_id_input': petsitterId,
+  });
+
+  print('Punteggio ricevuto per Petsitter ID $petsitterId: ${response.toString()}');
+  return response.toDouble() ?? 0.0;  // Restituisce il punteggio o 0 se è null
+}
+
+Future<int> fetchPetSitterReview(int petsitterId) async {
+  final supabase = Supabase.instance.client;
+
+  final response = await supabase.rpc('get_petsitterreviewcount', params: {
+    'petsitter_id_input': petsitterId,
+  });
+
+  print('Recensioni per Petsitter ID $petsitterId: ${response.toString()}');
+  return response as int;  
+}
+
+
+
+class _VerticalCardState extends State<VerticalCard> {
+  double petsitterScore = 0.0;
+  int numRecensioni = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPetSitterReviews();
+  }
+
+  Future<void> _loadPetSitterReviews() async {
+    double score = await fetchPetSitterScore(widget.item.id);
+    int num = await fetchPetSitterReview(widget.item.id);
+    setState(() {
+      petsitterScore = score;
+      numRecensioni = num;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-  return Card(
-    clipBehavior: Clip.antiAlias,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-    elevation: 3,
-    child: InkWell(
-      onTap: () {
-        List<dynamic> items = [item, disponibilita, dateRange];
-        // Print ID to debug
-        print('ID del petsitter RISULTATO_CARD: ${item.id}');
-        print('Data passata: ${dateRange}');
-        Navigator.pushNamed(
-          context,
-          AppRoutes.sitterpage,
-          arguments: items,// Pass the pet sitter
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            // Profile Avatar (1/4 of horizontal space)
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.25,
-              child: CircleAvatar(
-                radius: 40,
-                backgroundImage: NetworkImage(item.imageUrl),
-                backgroundColor: Colors.grey[200],
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 3,
+      child: InkWell(
+        onTap: () {
+          List<dynamic> items = [widget.item, widget.disponibilita, widget.dateRange];
+          print('ID del petsitter RISULTATO_CARD: ${widget.item.id}');
+          print('Data passata: ${widget.dateRange}');
+          Navigator.pushNamed(
+            context,
+            AppRoutes.sitterpage,
+            arguments: items,
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              // Profile Avatar (1/4 of horizontal space)
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.25,
+                child: CircleAvatar(
+                  radius: 40,
+                  backgroundImage: NetworkImage(widget.item.imageUrl),
+                  backgroundColor: Colors.grey[200],
+                ),
               ),
-            ),
-            
-            // Content Section
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // City (above name)
-                    Text(
-                      '${item.provincia}, ${formatDistance(item.distanza)}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.black,
-                          ),
-                    ),
-                    
-                    // Name and Surname
-                    Text(
-                      '${item.nome} ${item.cognome}',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    
-                    // Star Rating
-                    Row(
-                      children: List.generate(
-                        5,
-                        (index) => Icon(
-                          index < 4 ? Icons.star : Icons.star_border,
-                          color: Colors.amber,
-                          size: 20,
+              
+              // Content Section
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // City (above name)
+                      Text(
+                        '${widget.item.provincia}, ${formatDistance(widget.item.distanza)}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.black,
+                            ),
+                      ),
+                      
+                      // Name and Surname
+                      Text(
+                        '${widget.item.nome} ${widget.item.cognome}',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      
+                      // Star Rating
+                      Row(
+                        children: List.generate(
+                          5,
+                          (index) {
+                            double starValue = petsitterScore; // Convert to half stars
+                            return Icon(
+                              index < starValue ? Icons.star : Icons.star_border,
+                              color: Colors.amber,
+                              size: 20,
+                            );
+                          },
                         ),
                       ),
-                    ),
-                    
-                    // Happy People Text
-                    Text(
-                      '10 persone felici',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                    ),
-                  ],
+                      
+                      // Happy People Text
+                      Text(
+                        '$numRecensioni recensioni',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.grey[600],
+                            ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            
-            // Right Column: Price and Arrow
-            Column(
-              mainAxisSize: MainAxisSize.min, // Shrinks to fit content
-              children: [
-                // Price Text
-                Text(
-                  '${NumberFormat('0.00').format(item.prezzo)}€/g',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[800],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
-                ),
-                const SizedBox(height: 8), // Space between text and icon
-                
-                // Right Arrow
-                Icon(
-                  Icons.chevron_right,
-                  color: Colors.orange[600],
-                  size: 37,
-                ),
-              ],
-            ),
-          ],
+              
+              // Right Column: Price and Arrow
+              Column(
+                mainAxisSize: MainAxisSize.min, // Shrinks to fit content
+                children: [
+                  // Price Text
+                  Text(
+                    '${NumberFormat('0.00').format(widget.item.prezzo)}€/g',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey[800],
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                  ),
+                  const SizedBox(height: 8), // Space between text and icon
+                  
+                  // Right Arrow
+                  Icon(
+                    Icons.chevron_right,
+                    color: Colors.orange[600],
+                    size: 37,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
-}
+
 
 String formatDistance(int distanceInMeters) {
   // Convert meters to kilometers

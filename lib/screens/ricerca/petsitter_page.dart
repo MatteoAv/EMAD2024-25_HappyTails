@@ -94,8 +94,6 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> with Automa
       },
     );
 
-
-
   }
 
   Future<void> _loadReviews() async {

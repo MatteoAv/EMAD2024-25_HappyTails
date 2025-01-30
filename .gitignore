@@ -46,3 +46,4 @@ app.*.map.json
 macos/Podfile.lock
 macos/Runner/DebugProfile.entitlements
 macos/Runner/Release.entitlements
+pubspec.yaml
