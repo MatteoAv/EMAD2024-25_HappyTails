@@ -26,7 +26,7 @@ Future<double> fetchPetSitterScore(int petsitterId) async {
   });
 
   print('Punteggio ricevuto per Petsitter ID $petsitterId: ${response.toString()}');
-  return response.toDouble() ?? 0.0;  // Restituisce il punteggio o 0 se è null
+  return response as double;
 }
 
 Future<int> fetchPetSitterReview(int petsitterId) async {
@@ -117,18 +117,39 @@ class _VerticalCardState extends State<VerticalCard> {
                       
                       // Star Rating
                       Row(
-                        children: List.generate(
-                          5,
-                          (index) {
-                            double starValue = petsitterScore; // Convert to half stars
+                        children: List.generate(5, (index) {
+                          // Calcolare il punteggio intero (stelle piene)
+                          int fullStars = petsitterScore.toInt();
+                          
+                          // Calcolare se ci sono mezze stelle (parti decimali)
+                          double fractionalPart = petsitterScore - fullStars;
+
+                          if (index < fullStars) {
+                            // Mostra una stella piena
                             return Icon(
-                              index < starValue ? Icons.star : Icons.star_border,
+                              Icons.star,
                               color: Colors.amber,
                               size: 20,
                             );
-                          },
-                        ),
+                          } else if (index == fullStars && fractionalPart >= 0.5) {
+                            // Mostra una mezza stella solo se la parte decimale è >= 0.5
+                            return Icon(
+                              Icons.star_half,
+                              color: Colors.amber,
+                              size: 20,
+                            );
+                          } else {
+                            // Mostra una stella vuota
+                            return Icon(
+                              Icons.star_border,
+                              color: Colors.amber,
+                              size: 20,
+                            );
+                          }
+                        }),
                       ),
+
+
                       
                       // Happy People Text
                       Text(
