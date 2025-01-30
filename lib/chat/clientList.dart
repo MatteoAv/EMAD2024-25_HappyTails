@@ -16,8 +16,10 @@ class ClientListPage extends StatelessWidget {
 
 
   final response = await Supabase.instance.client
-  .from('bookings')
-  .select('owner_id!inner(id,userName)');
+  .rpc('get_bookings_with_names', params: {'p_petsitter_id': currentUserId})
+  .select();
+  // .from('bookings')
+  //.select('owner_id!inner(id,userName)');
   final uniquePartners = <Map<String, dynamic>>[];
   final seenUuids = <String>{};
   print(response);
