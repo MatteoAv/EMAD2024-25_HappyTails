@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:happy_tails/UserManage/repositories/local_database.dart';
+import 'package:happy_tails/app/bottom_navbar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:happy_tails/UserManage/providers/profile_providers.dart';
 import 'package:happy_tails/app/routes.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -52,16 +55,15 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           'isPetSitter': isPetSitter,
         });
 
-        // Inserisci i dati nel database locale se non esistono
-        if (await LocalDatabase.instance.getUser(user.id) == null) {
-          LocalDatabase.instance.insertUser(
-            user.id,
-            username,
-            email,
-            city,
-            isPetSitter,
-          );
-        }
+      final pref = await SharedPreferences.getInstance();
+      final UserMap = {
+        'id' : user.id,
+        'email': email,
+        'userName' : username,
+        'citta' : city,
+        'isPetSitter' : isPetSitter
+        };
+        await pref.setString("user", jsonEncode(UserMap));
 
         final newUser = model.User(
           id: user.id,
@@ -72,7 +74,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           isPetSitter: isPetSitter,
         );
         // Aggiorna il provider con il nuovo utente
-        ref.read(userProvider.notifier).state = AsyncData(newUser);
+        ref.read(userProvider.notifier).updateUser(newUser.id, newUser.userName, newUser.citta, "", email, isPetSitter);
+        ref.read(pageProvider.notifier).updatePages();
 
         if(isPetSitter){
           _showPetSitterAlert(context);

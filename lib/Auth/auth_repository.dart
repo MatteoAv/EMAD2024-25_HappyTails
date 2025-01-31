@@ -1,12 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happy_tails/UserManage/providers/profile_providers.dart';
-import 'package:happy_tails/UserManage/repositories/local_database.dart';
+import 'package:happy_tails/app/bottom_navbar.dart';
 import 'package:happy_tails/app/routes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:logger/logger.dart';
-import 'package:happy_tails/UserManage/model/user.dart' as model;
 
 class LoginPage extends ConsumerWidget {
   final logger = Logger();
@@ -42,16 +43,19 @@ class LoginPage extends ConsumerWidget {
             .single();
         logger.d('Login effettuato con successo: ${profile['email']}');
 
-        if (await LocalDatabase.instance.getUser(user.id) == null) {
-          LocalDatabase.instance.insertUser(
-            user.id,
-            profile['userName'],
-            email,
-            profile['city'],
-            profile['isPetSitter'],
-          );
-        }
+      final pref = await SharedPreferences.getInstance();
+      final UserMap = {
+        'id' : profile['id'],
+        'email': email,
+        'userName' : profile['userName'],
+        'citta' : profile['city'],
+        'isPetSitter' : profile['isPetSitter']
+        };
+        await pref.setString("user", jsonEncode(UserMap));
+        ref.read(userProvider.notifier).updateUser(user.id, profile['userName'], profile['city'], '', email, profile['isPetSitter']);
+        ref.read(pageProvider.notifier).updatePages();
       }
+
     } else {
       throw Exception('Credenziali non valide');
     }

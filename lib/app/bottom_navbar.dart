@@ -1,80 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:happy_tails/Auth/auth_repository.dart';
-import 'package:happy_tails/UserManage/screens/profile_page.dart';
-import 'package:happy_tails/UserManage/screens/settings_page.dart';
-import 'package:happy_tails/chat/clientList.dart';
-import 'package:happy_tails/chat/petSitterList.dart';
-import 'package:happy_tails/screens/ricerca/risultatiricerca_pagina.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:happy_tails/homePagePetSitter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MainScaffold extends StatefulWidget {
+import 'package:happy_tails/app/navbarProvider.dart';
+
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+
+final supabase = Supabase.instance.client;
+final pageProvider = StateNotifierProvider<PageManager, List<Widget>>((ref) => PageManager());
+
+class MainScaffold extends ConsumerStatefulWidget {
   const MainScaffold({Key? key}) : super(key: key);
 
   @override
   _MainScaffoldState createState() => _MainScaffoldState();
+
 }
 
-class _MainScaffoldState extends State<MainScaffold> {
+  class _MainScaffoldState extends ConsumerState<MainScaffold>{
   int _selectedIndex = 0;
-  final SupabaseClient supabase = Supabase.instance.client;
-  List<Widget> _pages = []; // Inizializzata con una lista vuota
-  bool isPetSitter = false;
+  List<Widget> _pages = [];
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
-    updatePages();
 
     supabase.auth.onAuthStateChange.listen((data) {
       final event = data.event;
       if (event == AuthChangeEvent.signedIn || event == AuthChangeEvent.signedOut) {
-        updatePages();
+        _selectedIndex = 0;
       }
     });
   }
 
-  void updatePages() {
-    var session = supabase.auth.currentUser;
-    if (session != null) {
-      // Check if the user is a PetSitter
-      _checkIfPetSitter().then((result) {
-        setState(() {
-          isPetSitter = result;
-          _pages = isPetSitter
-              ? [HomePagePetSitter(), RisultatiCercaPage(), ClientListPage(), UserProfilePage()]
-              : [UserProfilePage(), RisultatiCercaPage(), UserListPage(), SettingsPage()];
-              if (_selectedIndex >= _pages.length) {
-          _selectedIndex = 0;
-        }
-        });
-      });
-    } else {
-      setState(() {
-        
-        _pages = [LoginPage(), RisultatiCercaPage()];
-        _selectedIndex = 0;
-      });
-    }
-  }
-
-  Future<bool> _checkIfPetSitter() async {
-    final response = await supabase
-        .from('profiles')
-        .select()
-        .eq('id',supabase.auth.currentUser!.id);
-      print(response.first['isPetSitter']);  
-    return response.first['isPetSitter'];
-  }
-
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+      setState(() {
+          _selectedIndex = index;
+      });
   }
 
   @override
   Widget build(BuildContext context) {
+    _pages = ref.watch(pageProvider);
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
@@ -113,7 +80,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     }
 
     return [
-      _buildNavDestination(Icons.home, isPetSitter ? 'Home' : 'Home', 0),
+      _buildNavDestination(Icons.home, 'Home', 0),
       _buildNavDestination(Icons.search, 'Cerca', 1),
       _buildNavDestination(Icons.message, 'Chat', 2),
       _buildNavDestination(Icons.person, 'Profilo', 3),

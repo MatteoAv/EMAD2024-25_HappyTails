@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happy_tails/UserManage/providers/managePetSitter.dart';
-import 'package:happy_tails/UserManage/repositories/local_database.dart';
+import 'package:happy_tails/app/bottom_navbar.dart';
 import 'package:happy_tails/chat/chat_provider.dart';
 import 'package:happy_tails/homeProvider/providers.dart';
 import 'package:happy_tails/screens/ricerca/risultatiricerca_pagina.dart';
@@ -29,6 +29,7 @@ class SettingsPage extends ConsumerStatefulWidget {
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   late final TextEditingController _nickController;
   late final TextEditingController _cittaController;
+
     TextEditingController? _nameController;
     TextEditingController? _surnameController;
     TextEditingController? _provinciaController;
@@ -39,18 +40,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   double prezzo = 10.0 ;
 
 
+
   @override
   void initState(){
     super.initState();
-    final user = ref.read(userProvider).valueOrNull;
-    _nickController = TextEditingController(text: user?.userName);
-    _cittaController = TextEditingController(text: user?.citta);
-    if(user != null && user.imageUrl!=null){
-    _selected_image = File(user.imageUrl!);
-    }
-    if(user != null && user.isPetSitter){
-      checkPetSitter();
-    }
+    _nickController = TextEditingController();
+    _cittaController = TextEditingController();
   }
 
   @override
@@ -79,13 +74,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       _priceController = TextEditingController(text: petSitter!['prezzo_giornaliero'].toString());
       prezzo = petSitter!['prezzo_giornaliero'] is int ? (petSitter!['prezzo_giornaliero'] as int).toDouble() 
       : petSitter!['prezzo_giornaliero'] ;
+      if(mounted){
       setState(() {
         petSitter = result.first;
         ref.read(managePetsNotifierProvider).copyWith(selectedPets: pets);
       });
+      }
       
-            }else{
-              _nameController = TextEditingController(text: "Nome");
+    }else{
+       _nameController = TextEditingController(text: "Nome");
       _surnameController = TextEditingController(text: "cognome");
       _provinciaController = TextEditingController(text: "provincia");
       _priceController = TextEditingController(text: "Prezzo Giornaliero");
@@ -130,18 +127,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         _selected_image = localFile;
       });
 
-
+      final user = ref.read(userProvider).value;
+      if(user != null){
       await ref.read(userProvider.notifier).updateUser(
         ref.read(userProvider).value!.id, 
-      _nickController.text.trim(), _cittaController.text.trim(), _selected_image!.path);
+      _nickController.text.trim(), _cittaController.text.trim(), _selected_image!.path, user.email, user.isPetSitter);
+      }
     }
   }
 
 
   Future<void> _updateImageProfile(String user_id)async{
-      try{
-        final response = await LocalDatabase.instance.updateImage(user_id, _selected_image?.path);
-        if(response){
           fileName = "${user_id}_${basename(_selected_image!.path)}";
           await Supabase.instance.client.storage.from('imageProfile').
           upload(fileName, _selected_image!, fileOptions: const FileOptions(upsert: true));
@@ -152,10 +148,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           await Supabase.instance.client.from("petsitter").update({"imageurl": publicUrl})
           .eq("idd", user_id);
         }
-      }catch(e){
-            print(e);
-      }
-  }
 
 
   void _showPriceSliderDialog(BuildContext context) {
@@ -226,6 +218,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.read(userProvider).valueOrNull;
+    if(user != null){
+      _nickController.text = user.userName;
+      _cittaController.text = user.citta;
+      if(user.imageUrl != null){
+    _selected_image = File(user.imageUrl!);
+      }
+    }
+    if(user != null && user.isPetSitter){
+      checkPetSitter();
+    }
     final userAsync = ref.watch(userProvider);
     final selectedRange = ref.watch(selectedDateRangeProvider);
     final managePets = ref.watch(managePetsNotifierProvider).selectedPets;
@@ -255,9 +258,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 child: const Text('Seleziona Foto'),
               ),
               const SizedBox(height: 16),
+              Visibility(
+                visible: user != null && user.isPetSitter,
+              child:
               ElevatedButton(
                 onPressed: () => _updateImageProfile(user!.id),
                 child: const Text('Salva Foto Profilo'),
+              ),
               ),
               const Divider(),
                   ExpansionTile(
@@ -338,6 +345,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                   _nickController.text.trim(),
                                   _cittaController.text.trim(),
                                   _selected_image!.path,
+                                  user.email,
+                                  user.isPetSitter
                                 );
                                 if(user.isPetSitter){
                                   final supabase = Supabase.instance.client;
@@ -428,9 +437,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     onPressed: () async{
                         Supabase.instance.client.auth.signOut();
                         //ref.invalidate(userProvider);
+                        ref.read(pageProvider.notifier).updatePages();
                         ref.invalidate(petsProvider);
                         ref.invalidate(bookingsProvider);
                         ref.invalidate(chatProvider);
+                        clearUserPrefs();
                         print('Logout effettuato');
                         if(user!=null && user.isPetSitter){
                          final prefs = await SharedPreferences.getInstance(); 
@@ -441,6 +452,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                          ref.invalidate(oldEarningsProvider);
                          Navigator.pop(context);
                         }
+                        
                     },
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 50),
