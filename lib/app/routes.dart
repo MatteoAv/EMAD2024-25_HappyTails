@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:happy_tails/Auth/auth_repository.dart';
 import 'package:happy_tails/Auth/registration.dart';
 import 'package:happy_tails/UserManage/model/pet.dart';
+import 'package:happy_tails/UserManage/screens/paymentMethods.dart';
 import 'package:happy_tails/UserManage/screens/vetbook_page.dart';
 import 'package:happy_tails/home.dart';
 import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
@@ -18,6 +19,7 @@ class AppRoutes {
   static const String registrationPage = "/registration";
   static const String loginPage = "/login";
   static const String vetPage = "/vetBook";
+  static const String payment_methods = "/paymentMethods";
 
   static Route<dynamic> generateRoute(RouteSettings route) {
     switch (route.name) {
@@ -51,6 +53,14 @@ class AppRoutes {
       case vetPage:
       Pet pet = route.arguments as Pet;
       return MaterialPageRoute(builder: (_) => VetBookPage(pet: pet.toMap()));
+
+      case payment_methods:
+       String idUser = "";
+      if(route.arguments != null){
+        idUser = route.arguments as String;
+      }
+      return MaterialPageRoute(builder: (_) => PaymentMethodsPage(customerId: idUser,));
+
       default:
         return MaterialPageRoute(
           builder: (_) => const HomePage(),

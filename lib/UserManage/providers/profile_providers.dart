@@ -21,6 +21,7 @@ import 'package:meta/meta.dart';
         citta: userMap['city'],
         imageUrl: userMap['imageUrl'] ?? '',
         isPetSitter: userMap['isPetSitter'] ?? false,
+        customerId: userMap['customerId']
       );
     }
     return null; // Nessun dato salvato
@@ -36,6 +37,7 @@ import 'package:meta/meta.dart';
       'city': user.citta,
       'imageUrl': user.imageUrl,
       'isPetSitter': user.isPetSitter,
+      'customerId' : user.customerId
     };
     await prefs.setString('user', jsonEncode(userMap));
     return true;
@@ -80,6 +82,7 @@ class UserNotifier extends AsyncNotifier<model.User?> {
       // Prova a recuperare i dati dalle SharedPreferences
     final userFromPrefs = await _getUserFromPrefs();
     if (userFromPrefs != null) {
+      print(userFromPrefs.customerId);
       state = AsyncData(userFromPrefs);
       return userFromPrefs;
     }
@@ -89,15 +92,14 @@ class UserNotifier extends AsyncNotifier<model.User?> {
 
   final SupabaseClient supabase = Supabase.instance.client;
 
-  Future<bool> updateUser(String userId, String newNickname, String newCity, String imageUrl, String email, bool isPetSitter) async {
+  Future<bool> updateUser(String userId, String newNickname, String newCity, String imageUrl, String email, bool isPetSitter, String? customer_id) async {
     model.User newUser = model.User(id: userId, userName: newNickname, citta: newCity, 
-    imageUrl: imageUrl, email: email, isPetSitter: isPetSitter);
-    // Esegui l'aggiornamento nel database
+    imageUrl: imageUrl, email: email, isPetSitter: isPetSitter, customerId: customer_id);
+   
     bool res = await _updateUserInPrefs(newUser);
     if(res){
     // Aggiorna lo stato interno
     state = AsyncData(newUser);
-    
     return true;
     }
     

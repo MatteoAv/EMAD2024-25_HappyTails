@@ -49,10 +49,12 @@ class LoginPage extends ConsumerWidget {
         'email': email,
         'userName' : profile['userName'],
         'citta' : profile['city'],
-        'isPetSitter' : profile['isPetSitter']
+        'isPetSitter' : profile['isPetSitter'],
+        'imageUrl' : '',
+        'customerId' : profile['customerId']
         };
         await pref.setString("user", jsonEncode(UserMap));
-        ref.read(userProvider.notifier).updateUser(user.id, profile['userName'], profile['city'], '', email, profile['isPetSitter']);
+        ref.read(userProvider.notifier).updateUser(user.id, profile['userName'], profile['city'], '', email, profile['isPetSitter'], profile['customerId']);
         ref.read(pageProvider.notifier).updatePages();
       }
 
