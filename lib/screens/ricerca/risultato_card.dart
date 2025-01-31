@@ -42,7 +42,7 @@ class VerticalCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: TweenAnimationBuilder<double>(
@@ -143,7 +143,7 @@ class VerticalCard extends StatelessWidget {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
+                              Expanded( // Ensures the text section takes available space
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -168,11 +168,15 @@ class VerticalCard extends StatelessWidget {
                                           size: 16,
                                           color: theme.colorScheme.outline,
                                         ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          '${item.comune}',
-                                          style: theme.textTheme.bodyMedium?.copyWith(
-                                            color: theme.colorScheme.outline,
+                                        const SizedBox(width: 5),
+                                        Expanded( // ✅ Prevents overflow in long location names
+                                          child: Text(
+                                            '${item.comune}',
+                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                              color: theme.colorScheme.outline,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
                                       ],
@@ -181,7 +185,8 @@ class VerticalCard extends StatelessWidget {
                                 ),
                               ),
 
-                              // Price
+                              const SizedBox(width: 8), // Spacing before the price column
+
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
