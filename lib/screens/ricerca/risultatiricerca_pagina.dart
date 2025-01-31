@@ -94,13 +94,11 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
     children: [
       const SizedBox(height: 24),
       Card(
-        elevation: 0,
+        elevation: 10,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: Theme.of(context).dividerColor,
-            width: 1,
-          ),
+
+          
         ),
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -338,13 +336,14 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.search_rounded, size: 20),
+                            const Icon(Icons.search_rounded, size: 20,color: Color.fromARGB(255, 253, 238, 213),),
                             const SizedBox(width: 8),
                             Text(
                               'Cerca',
                               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 0.5,
+                                color: const Color.fromARGB(255, 253, 238, 213)
                               ),
                             ),
                           ],
