@@ -1,11 +1,51 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happy_tails/UserManage/model/user.dart' as model;
 import 'package:happy_tails/UserManage/model/pet.dart';
 import 'package:happy_tails/UserManage/model/booking.dart';
 import 'package:happy_tails/UserManage/repositories/local_database.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:meta/meta.dart';
 
+// Recupera l'utente dalle SharedPreferences
+  Future<model.User?> _getUserFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userString = prefs.getString('user');
+    if (userString != null) {
+      final userMap = jsonDecode(userString) as Map<String, dynamic>;
+      return model.User(
+        id: userMap['id'],
+        userName: userMap['userName'],
+        email: userMap['email'],
+        citta: userMap['city'],
+        imageUrl: userMap['imageUrl'] ?? '',
+        isPetSitter: userMap['isPetSitter'] ?? false,
+      );
+    }
+    return null; // Nessun dato salvato
+  }
+
+  // Salva/aggiorna i dati dell'utente nelle SharedPreferences
+  Future<bool> _updateUserInPrefs(model.User user) async {
+    final prefs = await SharedPreferences.getInstance();
+    final userMap = {
+      'id': user.id,
+      'userName': user.userName,
+      'email': user.email,
+      'city': user.citta,
+      'imageUrl': user.imageUrl,
+      'isPetSitter': user.isPetSitter,
+    };
+    await prefs.setString('user', jsonEncode(userMap));
+    return true;
+  }
+
+  // Cancella i dati dell'utente dalle SharedPreferences
+  Future<void> clearUserPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user');
+  }
 
 
 /*
@@ -36,36 +76,27 @@ class UserNotifier extends AsyncNotifier<model.User?> {
 
   @override
   Future<model.User?> build() async {
-    _listenToAuthChanges();
     if(currentUser!=null){
-    return LocalDatabase.instance.getUser(currentUser!.id);
+      // Prova a recuperare i dati dalle SharedPreferences
+    final userFromPrefs = await _getUserFromPrefs();
+    if (userFromPrefs != null) {
+      state = AsyncData(userFromPrefs);
+      return userFromPrefs;
+    }
     }
     return null;
   }
 
   final SupabaseClient supabase = Supabase.instance.client;
 
-  void _listenToAuthChanges(){
-    supabase.auth.onAuthStateChange.listen((data)async{
-      final event = data.event;
-      currentUser = Supabase.instance.client.auth.currentUser;
-      if(event == AuthChangeEvent.signedIn){
-        final user = await LocalDatabase.instance.getUser(currentUser!.id);
-        state = AsyncData(user);
-      }else if(event == AuthChangeEvent.signedOut){
-        state = AsyncData(null);
-      }
-    });
-  }
-
-  Future<bool> updateUser(String userId, String newNickname, String newCity, String imageUrl) async {
-    
+  Future<bool> updateUser(String userId, String newNickname, String newCity, String imageUrl, String email, bool isPetSitter) async {
+    model.User newUser = model.User(id: userId, userName: newNickname, citta: newCity, 
+    imageUrl: imageUrl, email: email, isPetSitter: isPetSitter);
     // Esegui l'aggiornamento nel database
-    bool res= await LocalDatabase.instance.updateUser(userId,newNickname, newCity, imageUrl);
+    bool res = await _updateUserInPrefs(newUser);
     if(res){
     // Aggiorna lo stato interno
-    state = AsyncData(state.value?.copyWith(newNickname, newCity, imageUrl));
-    
+    state = AsyncData(newUser);
     
     return true;
     }
