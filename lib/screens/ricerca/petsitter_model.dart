@@ -45,26 +45,24 @@ class PetSitter {
   });
 
   factory PetSitter.fromMap(Map<String, dynamic> map) {
-    return PetSitter(
-      id: map['id'],
-      nome: map['nome'],
-      cognome: map['cognome'],
-      email: map['email'],
-      provincia: map['provincia'],
-      comune: map['Comune'],
-      imageUrl: map['imageurl'],
-      cani: map['cani'],
-      gatti: map['gatti'],
-      uccelli: map['uccelli'],
-      pesci: map['pesci'],
-      rettili: map['rettili'],
-      roditori: map['roditori'],
-      distanza: map['distanza'],
-      prezzo: map['prezzo'],
-      disponibilita: map['disponibilita'],
-      
-      
-
-    );
-  }
+  return PetSitter(
+    id: map['id'],
+    nome: map['nome'],
+    cognome: map['cognome'],
+    email: map['email'],
+    provincia: map['provincia'],
+    comune: map['Comune'],  // matches 'Comune' from response
+    imageUrl: map['imageurl'],  // matches 'imageurl' from response
+    cani: map['cani'],
+    gatti: map['gatti'],
+    uccelli: map['uccelli'],
+    pesci: map['pesci'],
+    rettili: map['rettili'],
+    roditori: map['roditori'],
+    prezzo: map['prezzo_giornaliero'].toDouble(),  // matches 'prezzo_giornaliero'
+    // Remove or provide defaults for missing fields:
+    distanza: map['distanza'] ?? 0,
+    disponibilita: map['disponibilita'] ?? [],
+  );
+}
 }

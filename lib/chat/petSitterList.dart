@@ -128,7 +128,7 @@ class UserListPage extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Online (farlocco)',
+                                'Online',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium
