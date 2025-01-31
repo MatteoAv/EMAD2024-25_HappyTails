@@ -79,7 +79,7 @@ class VerticalCard extends StatelessWidget {
               highlightColor: Colors.transparent,
               splashColor: theme.colorScheme.primary.withOpacity(0.1),
               child: Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(10),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -87,8 +87,8 @@ class VerticalCard extends StatelessWidget {
                     Hero(
                       tag: item.id,
                       child: Container(
-                        width: 100,
-                        height: 100,
+                        width: 90,
+                        height: 90,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           image: DecorationImage(
@@ -171,7 +171,7 @@ class VerticalCard extends StatelessWidget {
                                         const SizedBox(width: 5),
                                         Expanded( // ✅ Prevents overflow in long location names
                                           child: Text(
-                                            '${item.comune}',
+                                            '${item.comune}, ${formatDistance(item.distanza)}' ,
                                             style: theme.textTheme.bodyMedium?.copyWith(
                                               color: theme.colorScheme.outline,
                                             ),
@@ -198,7 +198,7 @@ class VerticalCard extends StatelessWidget {
                                     ),
                                   ),
                                   Text(
-                                    'per day',
+                                    'al giorno',
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: theme.colorScheme.outline,
                                     ),
@@ -222,17 +222,38 @@ class VerticalCard extends StatelessWidget {
                                 ),
                                 child: Row(
                                   children: [
-                                    Text(
-                                      item.rating.toString(),
-                                      style: theme.textTheme.bodyLarge?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
+                    
                                     const SizedBox(width: 4),
-                                    Icon(
-                                      Icons.star_rounded,
-                                      color: Colors.amber.shade600,
-                                      size: 20,
+                                    Row(
+                                      children: List.generate(5, (index) {
+                                        // Calcolare il punteggio intero (stelle piene)
+                                        int fullStars = item.rating?.toInt() ?? 0;
+                                        
+                                        // Calcolare se ci sono mezze stelle (parti decimali)
+                                        double fractionalPart = item.rating! - fullStars;
+                                        if (index < fullStars) {
+                                          // Mostra una stella piena
+                                          return Icon(
+                                            Icons.star,
+                                            color: Colors.amber,
+                                            size: 20,
+                                          );
+                                        } else if (index == fullStars && fractionalPart >= 0.5) {
+                                          // Mostra una mezza stella solo se la parte decimale è >= 0.5
+                                          return Icon(
+                                            Icons.star_half,
+                                            color: Colors.amber,
+                                            size: 20,
+                                          );
+                                        } else {
+                                          // Mostra una stella vuota
+                                          return Icon(
+                                            Icons.star_border,
+                                            color: Colors.amber,
+                                            size: 20,
+                                          );
+                                        }
+                                      }),
                                     ),
                                   ],
                                 ),
@@ -250,25 +271,35 @@ class VerticalCard extends StatelessWidget {
                           const SizedBox(height: 12),
 
                           // Pet Types
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              if (item.cani)
-                                _PetTypeChip(
-                                  icon: Icons.pets,
-                                  label: 'Cani',
-                                  color: Colors.brown.shade400,
-                                ),
-                              if (item.gatti)
-                                _PetTypeChip(
-                                  icon: Icons.catching_pokemon,
-                                  label: 'Gatti',
-                                  color: Colors.blueGrey.shade400,
-                                ),
-                              // Add other pet types...
-                            ],
-                          ),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                if (item.cani) ...[
+                                  _PetTypeChip(
+                                    icon: Icons.pets,
+                                    label: 'Cani',
+                                    color: Colors.brown.shade400,
+                                  ),
+                                  const SizedBox(width: 6), // Small spacing
+                                ],
+                                if (item.gatti) ...[
+                                  _PetTypeChip(
+                                    icon: Icons.catching_pokemon,
+                                    label: 'Gatti',
+                                    color: Colors.blueGrey.shade400,
+                                  ),
+                                  const SizedBox(width: 6), // Small spacing
+                                ],
+                                if (item.pesci || item.rettili || item.roditori || item.uccelli)
+                                  _PetTypeChip(
+                                    icon: Icons.pest_control,
+                                    label: 'Altri',
+                                    color: Colors.green.shade400,
+                                  ),
+                              ],
+                            ),
+                          )
                         ],
                       ),
                     ),
