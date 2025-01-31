@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happy_tails/UserManage/providers/managePetSitter.dart';
 import 'package:happy_tails/app/bottom_navbar.dart';
+import 'package:happy_tails/app/routes.dart';
 import 'package:happy_tails/chat/chat_provider.dart';
 import 'package:happy_tails/homeProvider/providers.dart';
 import 'package:happy_tails/screens/ricerca/risultatiricerca_pagina.dart';
@@ -131,7 +132,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if(user != null){
       await ref.read(userProvider.notifier).updateUser(
         ref.read(userProvider).value!.id, 
-      _nickController.text.trim(), _cittaController.text.trim(), _selected_image!.path, user.email, user.isPetSitter);
+      _nickController.text.trim(), _cittaController.text.trim(), _selected_image!.path, user.email, user.isPetSitter, user.customerId);
       }
     }
   }
@@ -218,7 +219,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.read(userProvider).valueOrNull;
+    final user = ref.read(userProvider).value;
     if(user != null){
       _nickController.text = user.userName;
       _cittaController.text = user.citta;
@@ -346,7 +347,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                   _cittaController.text.trim(),
                                   _selected_image!.path,
                                   user.email,
-                                  user.isPetSitter
+                                  user.isPetSitter,
+                                  user.customerId
                                 );
                                 if(user.isPetSitter){
                                   final supabase = Supabase.instance.client;
@@ -390,7 +392,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     leading: const Icon(Icons.payment),
                     title: const Text('Payment Methods'),
                     onTap: () {
-                     // Navigator.pushNamed(context, AppRoutes.paymentMethods);
+                     Navigator.pushNamed(context, AppRoutes.payment_methods, arguments: user?.customerId);
                     },
                   ),
                   if(user!= null && user.isPetSitter)

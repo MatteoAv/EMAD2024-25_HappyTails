@@ -5,6 +5,7 @@ class User{
   String? imageUrl;
   String citta;
   bool isPetSitter;
+  String? customerId;
 
 
   User({
@@ -13,7 +14,8 @@ class User{
     required this.imageUrl,
     required this.userName,
     required this.citta,
-    required this.isPetSitter
+    required this.isPetSitter,
+    required this.customerId
   });
 
 
@@ -25,8 +27,8 @@ class User{
      userName: map ['userName'],
      imageUrl: map ['imageUrl'],
      citta: map ['citta'],
-     isPetSitter: map ['isPetSitter'] == 0 ? false : true
-    
+     isPetSitter: map ['isPetSitter'] == 0 ? false : true,
+     customerId: map ['customerId']
     );
   }
 
@@ -37,7 +39,8 @@ class User{
       'userName': userName,
       'imageUrl': imageUrl,
       'citta': citta,
-      'isPetSitter': isPetSitter == 0 ? false : true
+      'isPetSitter': isPetSitter == 0 ? false : true,
+      'customerId' : customerId
     };
   }
 

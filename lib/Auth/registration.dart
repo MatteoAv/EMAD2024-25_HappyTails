@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:happy_tails/Auth/EncryptService.dart';
 import 'package:happy_tails/app/bottom_navbar.dart';
+import 'package:happy_tails/payment_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:happy_tails/UserManage/providers/profile_providers.dart';
 import 'package:happy_tails/app/routes.dart';
@@ -29,6 +31,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     final password = passwordController.text;
     final username = usernameController.text;
     final city = cityController.text;
+    final encrypter = EncryptionService();
 
     if (email.isEmpty || password.isEmpty || username.isEmpty || city.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -46,6 +49,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
       final user = response.user;
 
       if (user != null) {
+        final customerId = await PaymentService.createCustomer(email, username);
+        
         // Inserisce i dati aggiuntivi nella tabella profiles
         await supabase.from('profiles').insert({
           'id': user.id,
@@ -53,6 +58,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           'userName': username,
           'city': city,
           'isPetSitter': isPetSitter,
+          'customerId' : customerId
         });
 
       final pref = await SharedPreferences.getInstance();
@@ -61,7 +67,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         'email': email,
         'userName' : username,
         'citta' : city,
-        'isPetSitter' : isPetSitter
+        'isPetSitter' : isPetSitter,
+        'customerId' : customerId
         };
         await pref.setString("user", jsonEncode(UserMap));
 
@@ -72,9 +79,10 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           citta: city,
           imageUrl: "",
           isPetSitter: isPetSitter,
+          customerId: customerId
         );
         // Aggiorna il provider con il nuovo utente
-        ref.read(userProvider.notifier).updateUser(newUser.id, newUser.userName, newUser.citta, "", email, isPetSitter);
+        ref.read(userProvider.notifier).updateUser(newUser.id, newUser.userName, newUser.citta, "", email, isPetSitter, customerId);
         ref.read(pageProvider.notifier).updatePages();
 
         if(isPetSitter){
