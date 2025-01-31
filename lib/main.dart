@@ -52,6 +52,18 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.latoTextTheme(
           Theme.of(context).textTheme,
         ),
+        dropdownMenuTheme: DropdownMenuThemeData(
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.transparent,
+      ),
+      menuStyle: MenuStyle(
+        elevation: MaterialStateProperty.all(4),
+        backgroundColor: MaterialStateProperty.all(
+          Theme.of(context).colorScheme.surface,
+        ),
+      ),
+      ),
       ),
       debugShowCheckedModeBanner: false,
       home: const MainScaffold(), // Separate stateful navigation logic

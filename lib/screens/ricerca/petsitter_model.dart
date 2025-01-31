@@ -14,6 +14,10 @@ class PetSitter {
   final bool roditori;
   final int distanza;
   final double prezzo;
+  final double? rating;
+  final int? numeroRecensioni;
+
+
   final List<dynamic>? disponibilita;
   
 
@@ -34,6 +38,8 @@ class PetSitter {
     required this.distanza,
     required this.prezzo,
     this.disponibilita,
+    this.rating,
+    this.numeroRecensioni
 
 
   });
@@ -56,6 +62,7 @@ class PetSitter {
       distanza: map['distanza'],
       prezzo: map['prezzo'],
       disponibilita: map['disponibilita'],
+      
       
 
     );

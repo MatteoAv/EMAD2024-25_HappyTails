@@ -60,22 +60,62 @@ class SearchRepository {
       return []; // Return an empty list if no pet sitters are found
     }
     print(petsitterResponse);
+    // Cast the initial response to proper type
+    final List<Map<String, dynamic>> typedPetsitterResponse = 
+        (petsitterResponse as List).cast<Map<String, dynamic>>();
 
-    // Filter results based on date availability
-    return (petsitterResponse as List).where((petSitter) {
-      final disponibilita = petSitter['disponibilita'] as List? ?? [];
+    // Add rating and review count with proper typing
+    final List<Map<String, dynamic>> updatedPetsitters = await Future.wait(
+      typedPetsitterResponse.map((Map<String, dynamic> petSitter) async {
+        try {
+          final petsitterId = petSitter['id'] as int;
+          
+          // Get rating
+          final ratingResponse = await Supabase.instance.client.rpc(
+            'get_petsitterscore',
+            params: {'petsitter_id_input': petsitterId},
+          );
+          
+          // Get review count
+          final reviewCountResponse = await Supabase.instance.client.rpc(
+            'get_petsitterreviewcount',
+            params: {'petsitter_id_input': petsitterId},
+          );
+
+          return {
+            ...petSitter,
+            'rating': (ratingResponse as num?)?.toDouble() ?? 0.0,
+            'numeroRecensioni': (reviewCountResponse as num?)?.toInt() ?? 0,
+          };
+        } catch (e) {
+          print('Error fetching data for petsitter ${petSitter['id']}: $e');
+          return {
+            ...petSitter,
+            'rating': 0.0,
+            'numeroRecensioni': 0,
+          };
+        }
+      }),
+    );
+
+    // Filter with proper type casting
+    return updatedPetsitters.where((Map<String, dynamic> petSitter) {
+      final disponibilita = (petSitter['disponibilita'] as List<dynamic>?)
+          ?.cast<Map<String, dynamic>>() 
+          ?? [];
 
       if (disponibilita.isEmpty) return true;
 
-      return disponibilita.any((range) {
-        final DateTime start = DateTime.parse(range['data_inizio']);
-        final DateTime end = DateTime.parse(range['data_fine']);
+      return disponibilita.any((Map<String, dynamic> range) {
+        final DateTime start = DateTime.parse(range['data_inizio'] as String);
+        final DateTime end = DateTime.parse(range['data_fine'] as String);
 
-        return (selectedDateRange.end.isBefore(start) ||
-            selectedDateRange.start.isAfter(end));
+        return selectedDateRange.end.isBefore(start) ||
+            selectedDateRange.start.isAfter(end);
       });
     }).toList();
   }
+}
 
   // Determines the appropriate RPC based on the number of selected animal types
   String _determineRpc(int numberOfSelectedAnimals) {
@@ -87,7 +127,7 @@ class SearchRepository {
       return 'get_nearest_petsitters_multiple';
     }
   }
-}
+
 
 
 

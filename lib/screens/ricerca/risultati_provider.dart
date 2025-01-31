@@ -1,3 +1,44 @@
+
+
+
+
+// Add this in your providers file
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:happy_tails/screens/ricerca/risultato_card.dart';
+
+final sortProvider = StateProvider<String>((ref) => 'Distanza'); // Default sort
+
+
+
+
+List<Map<String, dynamic>> sortPetSitters(
+  List<Map<String, dynamic>> sitters,
+  String sortBy,
+) {
+  switch (sortBy) {
+    case 'Alfabetico':
+      return List.from(sitters)
+        ..sort((a, b) => ('${a['nome']} ${a['cognome']}')
+            .compareTo('${b['nome']} ${b['cognome']}'));
+    case 'Popolarità':
+      // Adjust this based on your actual popularity criteria
+      return List.from(sitters)
+        ..sort((a, b) => (b['rating'] ?? 0).compareTo(a['rating'] ?? 0));
+    case 'Distanza':
+    default:
+      // Adjust this based on your actual date criteria
+      return List.from(sitters)
+  ..sort((a, b) => (a['distance'] ?? 0).compareTo(b['distance'] ?? 0));
+}
+}
+
+
+Future<void> updatePetSitters(List<dynamic> sortedSitters) async {
+  for (var petsitter in sortedSitters) {
+    petsitter['rating'] = await fetchPetSitterScore(petsitter['id']);
+    petsitter['reviews'] = await fetchPetSitterReview(petsitter['id']);
+  }
+}
 /*
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 //import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
