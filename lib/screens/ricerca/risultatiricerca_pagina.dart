@@ -110,82 +110,90 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                             // In your state management (where selectedAnimal is defined)
                             // In your DropdownButtonFormField
                             Expanded(
-                              child: DropdownButtonFormField<String>(
-                                value: selectedAnimal,
-                                decoration: InputDecoration(
-                                  labelText: "Animale",
-                                  filled: true,
-                                  prefixIcon: Icon(
-                                    Icons.pets_rounded,
-                                    color: Theme.of(context).colorScheme.outline,
-                                  ),
-                                  suffixIcon: Padding(
-                                    padding: const EdgeInsets.only(right: 8), // Control right spacing
-                                    child: Icon(
-                                      Icons.arrow_drop_down_rounded,
-                                      color: Theme.of(context).colorScheme.outline,
-                                      size: 24,
-                                    ),
-                                  ),
-                                
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  errorBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).colorScheme.error,
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  // ... keep other border properties from previous version
-                                ),
-                                dropdownColor: Theme.of(context).colorScheme.surface,
-                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurface,
-                                ),
-                                icon: const SizedBox.shrink(), // Hide default icon
-                                isExpanded: true, // Ensure text doesn't overflow
-                                items: [
-                                  DropdownMenuItem<String>(
-                                    value: null,
-                                    enabled: false,
-                                    child: Text(
-                                      "Seleziona animale",
-                                      style: TextStyle(
-                                        color: Theme.of(context).colorScheme.outline,
-                                      ),
-                                    ),
-                                  ),
-                                  ...animalMap.keys.map((String animal) {
-                                    return DropdownMenuItem<String>(
-                                      value: animal,
-                                      child: Text(
-                                        animal,
-                                        style: Theme.of(context).textTheme.bodyLarge,
-                                      ),
-                                    );
-                                  }),
-                                ],
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    cliccato = false;
-                                    setState(() => selectedAnimal = value);
-                                  }
-                                },
-                                validator: (value) => value == null ? 'Seleziona un animale' : null,
-                              ),
-                            ),
+  child: DropdownButtonFormField<String>(
+    value: selectedAnimal,
+    decoration: InputDecoration(
+      labelText: selectedAnimal != null ? "Animale" : null,
+      filled: true,
+      prefixIcon: Icon(
+        Icons.pets_rounded,
+        color: Theme.of(context).colorScheme.outline,
+      ),
+      suffixIcon: Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: Icon(
+          Icons.arrow_drop_down_rounded,
+          color: Theme.of(context).colorScheme.outline,
+          size: 24,
+        ),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+      contentPadding: const EdgeInsets.symmetric(vertical: 16),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(
+          color: Theme.of(context).colorScheme.error,
+          width: 1.5,
+        ),
+      ),
+    ),
+    dropdownColor: Theme.of(context).colorScheme.surface,
+    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+      color: Theme.of(context).colorScheme.onSurface,
+    ),
+    icon: const SizedBox.shrink(), // Hide default icon
+    isExpanded: true, // Ensure text doesn't overflow
+    hint: TextFormField(
+            decoration: InputDecoration(
+              labelText: "Animale",
+              filled: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+          ),
+    items: [
+      DropdownMenuItem<String>(
+        value: null,
+        enabled: false,
+        child: Text(
+          "Seleziona animale",
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.outline,
+          ),
+        ),
+      ),
+      ...animalMap.keys.map((String animal) {
+        return DropdownMenuItem<String>(
+          value: animal,
+          child: Text(
+            animal,
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        );
+      }),
+    ],
+    onChanged: (value) {
+      if (value != null) {
+        setState(() => selectedAnimal = value);
+      }
+    },
+    validator: (value) => value == null ? 'Seleziona un animale' : null,
+  ),
+),
                             const SizedBox(width: 16),
                             Expanded(
                               child: Autocomplete<String>(
