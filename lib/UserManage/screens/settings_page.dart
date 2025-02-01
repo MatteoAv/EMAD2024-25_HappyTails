@@ -446,12 +446,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         clearUserPrefs();
                         print('Logout effettuato');
                         if(user!=null && user.isPetSitter){
-                         final prefs = await SharedPreferences.getInstance(); 
-                         await prefs.clear();
-                         ref.invalidate(totalEarningsProvider);
-                         ref.invalidate(averageRatingProvider);
-                         ref.invalidate(petSitterProvider);
-                         ref.invalidate(oldEarningsProvider);
+                          final prefs = await SharedPreferences.getInstance(); 
+                          await prefs.remove('earnings');
+                          ref.invalidate(petSitterProvider);
+                          ref.invalidate(earningsCacheProvider);
+                          ref.invalidate(petSitterProvider);
+                          ref.invalidate(totalEarningsProvider);
+                          ref.invalidate(averageRatingProvider);
+                          ref.invalidate(oldEarningsProvider);
+                          ref.invalidate(earningsCacheProvider);
                          Navigator.pop(context);
                         }
                         

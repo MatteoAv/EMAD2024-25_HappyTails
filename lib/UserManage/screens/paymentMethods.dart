@@ -3,7 +3,6 @@ import 'package:happy_tails/Auth/EncryptService.dart';
 import 'package:happy_tails/UserManage/widgets/AddCardFormModal.dart';
 import 'package:happy_tails/payment_service.dart';
 
-
 class PaymentMethodsPage extends StatefulWidget {
   final String customerId;
 
@@ -33,12 +32,12 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Metodi di pagamento'),
+        title: Text('Metodi di Pagamento 🐾'),
+        backgroundColor: Colors.orange.shade600,
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -63,15 +62,34 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                           itemCount: _paymentMethods.length,
                           itemBuilder: (context, index) {
                             final method = _paymentMethods[index];
-                            return ListTile(
-                              leading: Icon(Icons.credit_card, color: Colors.blue),
-                              title: Text('${method['card']['brand']} **** ${method['card']['last4']}'),
-                              subtitle: Text('Scadenza: ${method['card']['exp_month']}/${method['card']['exp_year']}'),
-                              trailing: Icon(Icons.arrow_forward_ios, size: 16),
-                              onTap: () {
-                                // Qui puoi aggiungere azioni per modificare o eliminare il metodo
-                                print('Metodo selezionato: ${method['id']}');
-                              },
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              child: Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                elevation: 4,
+                                color: Colors.amber.shade50,
+                                child: ListTile(
+                                  leading: Icon(
+                                    Icons.pets, // Zampetta 🐾 per il tema animali
+                                    color: Colors.black,
+                                    size: 30,
+                                  ),
+                                  title: Text(
+                                    '${method['card']['brand']} **** ${method['card']['last4']}',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Text(
+                                    'Scadenza: ${method['card']['exp_month']}/${method['card']['exp_year']}',
+                                    style: TextStyle(color: Colors.grey.shade700),
+                                  ),
+                                  trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                                  onTap: () {
+                                    print('Metodo selezionato: ${method['id']}');
+                                  },
+                                ),
+                              ),
                             );
                           },
                         ),
@@ -80,25 +98,32 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                   padding: const EdgeInsets.all(16.0),
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      //print(widget.customerId);
-                      showModalBottomSheet(context: context,
-                      isScrollControlled: true,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                      ),
-                      builder: (context) => AddCardFormModal(
-                        customerId : widget.customerId,
-                        onCardAdded: (){
-                          _fetchPaymentMethods();
-                        },
-                      ),
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                        ),
+                        builder: (context) => AddCardFormModal(
+                          customerId: widget.customerId,
+                          onCardAdded: () {
+                            Navigator.pop(context);
+                            _fetchPaymentMethods();
+                          },
+                        ),
                       );
                     },
-                    icon: Icon(Icons.add),
-                    label: Text('Aggiungi metodo di pagamento'),
+                    icon: Icon(Icons.add, color: Colors.white, size:30),
+                    label: Text('Aggiungi Metodo di Pagamento', 
+                    style: TextStyle(color: Colors.white),
+                    ),
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       textStyle: TextStyle(fontSize: 16),
+                      backgroundColor: Colors.orange.shade600,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),

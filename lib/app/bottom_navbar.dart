@@ -28,7 +28,9 @@ class MainScaffold extends ConsumerStatefulWidget {
     supabase.auth.onAuthStateChange.listen((data) {
       final event = data.event;
       if (event == AuthChangeEvent.signedIn || event == AuthChangeEvent.signedOut) {
-        _selectedIndex = 0;
+        setState(() {
+          _selectedIndex = 0;
+        });
       }
     });
   }
