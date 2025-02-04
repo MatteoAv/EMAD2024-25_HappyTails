@@ -245,6 +245,8 @@ class UserProfilePage extends ConsumerWidget {
                                   bookingEnd: booking.dateEnd,
                                   bookPrice: booking.price,
                                   bookState: booking.state,
+                                  petSitterId: booking.petsitter_id, 
+                                  petId: booking.pet_id,
                                 );
                               },
                               childCount: bookings.length,

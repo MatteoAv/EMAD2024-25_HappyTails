@@ -28,7 +28,7 @@ Future<int> fetchPetSitterReview(int petsitterId) async {
 //Il widget del singolo risultato di ricerca
 //da fare: usare la harverstine formula (in un modo efficiente, non è la formula diretta) per calcolare la distanza dalla latitudine,longitudine del pet sitter con quella selezionata nella ricerca
 class VerticalCard extends StatelessWidget {
-    final PetSitter item;
+  final PetSitter item;
   final List disponibilita;
   final DateTimeRange dateRange;
 
