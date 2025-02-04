@@ -119,12 +119,14 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         TextButton(
           onPressed: () {
             Navigator.pop(context);
+            Navigator.pop(context);
           },
           child: const Text('Chiudi'),
         ),
         ElevatedButton(
           onPressed: () {
             Navigator.pop(context); // Chiude il dialog
+            Navigator.pop(context);
             Navigator.pushNamed(context, AppRoutes.settings); // Naviga alla pagina delle impostazioni
           },
           child: const Text('Vai alle Impostazioni'),

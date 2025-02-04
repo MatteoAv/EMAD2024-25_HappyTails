@@ -14,101 +14,99 @@ class AddCardFormModal extends StatefulWidget {
 
 class _AddCardFormModalState extends State<AddCardFormModal> {
   final _formKey = GlobalKey<FormState>();
-  String? _cardNumber;
-  String? _expiryMonth;
-  String? _expiryYear;
-  String? _cvv;
-  String? _nameOnCard;
+  final CardEditController _cardController = CardEditController();
+  bool _isProcessing = false;
 
   Future<void> _submit() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      try {
-        // Step 1: Crea il PaymentMethod
-        final paymentMethod = await Stripe.instance.createPaymentMethod(
-          params : PaymentMethodParams.card(
-            paymentMethodData: PaymentMethodData(
-              billingDetails: BillingDetails(
+    if (_isProcessing) return;
+    setState(() => _isProcessing = true);
 
-              ),
-            ),
+    try {
+      // Creazione del PaymentMethod
+      final paymentMethod = await Stripe.instance.createPaymentMethod(
+        params: PaymentMethodParams.card(
+          paymentMethodData: PaymentMethodData(
+            billingDetails: BillingDetails(name: "Test User"),
           ),
-        );
-        print(paymentMethod.id);
-        print(widget.customerId);
-        // Step 2: Associa la carta al cliente su Stripe via backend
-        await PaymentService.attachPaymentMethod(paymentMethod.id, widget.customerId);
-      } catch (e) {
-        print(e);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Errore: $e')),
-        );
-      }
+        ),
+      );
+
+      // Associa il metodo al cliente
+      await PaymentService.attachPaymentMethod(paymentMethod.id, widget.customerId);
+
+      widget.onCardAdded();
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Errore: $e')),
+      );
+    } finally {
+      setState(() => _isProcessing = false);
     }
+  }
+
+  @override
+  void dispose() {
+    _cardController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom, // Gestisce la tastiera
-        left: 16,
-        right: 16,
-        top: 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      child: Form(
-        key: _formKey,
-        child: ListView(
-          shrinkWrap: true,
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          boxShadow: [
+            BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 2),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               'Aggiungi Metodo di Pagamento',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16),
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Nome sul titolare della carta'),
-              onSaved: (value) => _nameOnCard = value,
-              validator: (value) => value == null || value.isEmpty ? 'Inserisci il nome' : null,
-            ),
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Numero della carta'),
-              keyboardType: TextInputType.number,
-              onSaved: (value) => _cardNumber = value,
-              validator: (value) => value == null || value.isEmpty ? 'Inserisci il numero della carta' : null,
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    decoration: InputDecoration(labelText: 'Mese di scadenza (MM)'),
-                    keyboardType: TextInputType.number,
-                    onSaved: (value) => _expiryMonth = value,
-                    validator: (value) => value == null || value.isEmpty ? 'Inserisci il mese' : null,
-                  ),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: CardField(
+                controller: _cardController,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
                 ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    decoration: InputDecoration(labelText: 'Anno di scadenza (YY)'),
-                    keyboardType: TextInputType.number,
-                    onSaved: (value) => _expiryYear = value,
-                    validator: (value) => value == null || value.isEmpty ? 'Inserisci l\'anno' : null,
-                  ),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
                 ),
-              ],
-            ),
-            TextFormField(
-              decoration: InputDecoration(labelText: 'CVV'),
-              keyboardType: TextInputType.number,
-              onSaved: (value) => _cvv = value,
-              validator: (value) => value == null || value.isEmpty ? 'Inserisci il CVV' : null,
+              ),
             ),
             SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _submit,
-              child: Text('Aggiungi Metodo di Pagamento'),
+            ElevatedButton.icon(
+              onPressed: _isProcessing ? null : _submit,
+              icon: Icon(Icons.credit_card),
+              label: _isProcessing
+                  ? CircularProgressIndicator(color: Colors.white)
+                  : Text('Salva Carta'),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                textStyle: TextStyle(fontSize: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
             ),
           ],
         ),

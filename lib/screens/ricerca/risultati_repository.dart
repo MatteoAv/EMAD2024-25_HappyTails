@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SearchRepository {
@@ -62,7 +61,7 @@ class SearchRepository {
     print(petsitterResponse);
     // Cast the initial response to proper type
     final List<Map<String, dynamic>> typedPetsitterResponse = 
-        (petsitterResponse as List).cast<Map<String, dynamic>>();
+        (petsitterResponse).cast<Map<String, dynamic>>();
 
     // Add rating and review count with proper typing
     final List<Map<String, dynamic>> updatedPetsitters = await Future.wait(

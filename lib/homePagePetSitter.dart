@@ -37,7 +37,7 @@ class HomePagePetSitter extends ConsumerWidget {
                     value: totalEarnings.when(
                       data: (value) => '€${value.toStringAsFixed(2)}',
                       loading: () => 'Loading...',
-                      error: (e, _) => 'Errore',
+                      error: (e, _) => 'Nessun Informazione disponibile',
                     ),
                   ),
                   const SizedBox(height: 16,),
@@ -51,7 +51,7 @@ class HomePagePetSitter extends ConsumerWidget {
                         }
                         return '0.0';},
                       loading: () => 'Loading...',
-                      error: (e, _) => 'Errore',
+                      error: (e, _) => 'Nessun Informazione disponibile',
                     ),
                   ),
                   const SizedBox(height: 16,),
@@ -61,11 +61,12 @@ class HomePagePetSitter extends ConsumerWidget {
                     value: averageRating.when(
                       data: (value) => '${value.toStringAsFixed(2)}',
                       loading: () => 'Loading...',
-                      error: (e, _) => 'Errore',
+                      error: (e, _) => 'Nessun Informazione disponibile',
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text('Statistiche Dettagliate'),
+                  const Text('Statistiche Dettagliate', 
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
                   oldEarnings.when(
                     data: (earnings) {
                     if (earnings.isEmpty || earnings.every((value) => value == 0.0)) {
@@ -98,7 +99,8 @@ class HomePagePetSitter extends ConsumerWidget {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(child: Text('Errore: $error')),
+          error: (error, _) => const Center(child: Text('Nessun Informazione disponibile',
+          style: TextStyle(fontSize: 20),)),
             ),
             const SizedBox(height: 16),
           ],
