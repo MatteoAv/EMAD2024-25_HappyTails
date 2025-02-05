@@ -36,7 +36,7 @@ class ClientListPage extends StatelessWidget {
       
 
       if (clientName != null && bookingDetails != null) {
-        final actualBooking = Booking.fromMapFull(bookingDetails);
+        final actualBooking = Booking.fromMapFull(bookingDetails,booking["owner_username"],booking["pet_name"],booking["pet_type"]);
 
         if (!uniqueClients.containsKey(clientName)) {
           uniqueClients[clientName] = [];
@@ -109,11 +109,8 @@ class ClientListPage extends StatelessWidget {
                 ),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
-                  onTap: () => Navigator.push(
-                    context,
-                     ChatWithClientPage.route(clientId),
-                    
-                  ),
+                  onTap: () => Navigator.of(context).push(ChatWithClientPage.route(clientId, booking)), // Pass both parameters
+
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Row(

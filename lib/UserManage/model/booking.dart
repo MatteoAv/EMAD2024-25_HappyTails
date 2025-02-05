@@ -57,7 +57,7 @@ class Booking {
       petsitter_id: map['petsitter_id']
     );
   }
-  factory Booking.fromMapFull(Map<String, dynamic> map) {
+  factory Booking.fromMapFull(Map<String, dynamic> map,String?owner_name,String?pet_name,String?pet_type) {
     return Booking(
       id: map['id'],
       id_trans: map['id_trans'],
@@ -74,9 +74,9 @@ class Booking {
       pet_id: map ['pet_id'],
       owner_id: map['owner_id'],
       petsitter_id: map['petsitter_id'],
-      owner_username: map['owner_username'],
-      pet_name: map['pet_name'],
-      pet_type: map['pet_type']
+      owner_username: map['owner_username']??owner_name,
+      pet_name: map['pet_name']??pet_name,
+      pet_type: map['pet_type']??pet_type
 
     );
   }

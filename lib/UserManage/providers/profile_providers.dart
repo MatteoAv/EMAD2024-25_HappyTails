@@ -201,3 +201,20 @@ class BookNotifier extends AsyncNotifier<List<Booking>>{
 }
 
 
+class BookingService {
+  Future<bool> respondToBooking(int bookingId, {required bool accepted}) async {
+    String state = accepted ? "Confermata" : "rifiutata";
+
+    final response = await Supabase.instance.client
+        .from('bookings')
+        .update({'state': state})
+        .eq('id', bookingId);
+
+    if (response.error != null) {
+      print('Error updating booking: ${response.error!.message}');
+      return false;
+    }
+
+    return true;
+  }
+}

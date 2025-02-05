@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:booking_calendar/booking_calendar.dart';
+import 'package:booking_calendar/booking_calendar.dart'hide BookingService;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:happy_tails/UserManage/model/booking.dart';
@@ -94,11 +94,12 @@ String _getUrgencyLabel(Urgency urgency) {
 
 // Updated ChatPage with preserved logic + new features
 class ChatWithClientPage extends ConsumerWidget {
-  const ChatWithClientPage({Key? key, required this.otherUserId}) : super(key: key);
+  const ChatWithClientPage({Key? key, required this.otherUserId, required this.bookings}) : super(key: key);
   final String otherUserId;
-  static Route<void> route(String otherUserId) {
+  final List<Booking> bookings;
+ static Route<void> route(String otherUserId, List<Booking> bookings) { // Added booking parameter
     return MaterialPageRoute(
-      builder: (context) => ChatWithClientPage(otherUserId: otherUserId),
+      builder: (context) => ChatWithClientPage(otherUserId: otherUserId, bookings: bookings),
     );
   }
 
@@ -106,102 +107,61 @@ class ChatWithClientPage extends ConsumerWidget {
  Widget build(BuildContext context, WidgetRef ref) {
   final messagesState = ref.watch(chatProvider(otherUserId));
   final chatNotifier = ref.read(chatProvider(otherUserId).notifier);
-
-  return ref.watch(petSitterProvider(otherUserId)).when(
-    data: (petSitter) {
-      return ref.watch(bookingsProvider).when(
-        data: (bookings) {
-          final filteredList = bookings
-              .where((booking) => booking.petsitter_id == petSitter.id)
-              .toList()
-            ..sort((a, b) => b.dateBegin.compareTo(a.dateBegin));
-          print("fdsdfj");
-
-          if (filteredList.isEmpty) {
-            return Scaffold(
-              appBar: AppBar(
-                title: _buildAppBarTitle(context, petSitter),
-                actions: const [_HeaderMenuButton()],
+    return Scaffold(
+      appBar: AppBar(
+        title: _buildAppBarTitle(context, bookings[0].owner_username??""),
+        actions: const [_HeaderMenuButton()],
+      ),
+      body: Column(
+        children: [
+          PetsitterBookingCard(booking: bookings[0]),
+          Expanded(
+            child: messagesState.when(
+              data: (messages) => _MessageList(
+                messages: messages,
+                otherUserId: otherUserId,
+                onRefresh: () {},
               ),
-              body: const Center(child: Text('No bookings found')),
-            );
-          }
-
-          final booking = filteredList.first;
-
-          return Scaffold(
-            appBar: AppBar(
-              title: _buildAppBarTitle(context, petSitter),
-              actions: const [_HeaderMenuButton()],
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Center(child: Text('Error: $error')),
             ),
-            body: Column(
-              children: [
-                PetsitterBookingCard(booking: booking),
-                Expanded(
-                  child: messagesState.when(
-                    data: (messages) => _MessageList(
-                      messages: messages,
-                      otherUserId: otherUserId,
-                      onRefresh: () {},
-                    ),
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (error, _) => Center(child: Text('Error: $error')),
-                  ),
-                ),
-                _MessageBar(
-                  onSend: (text) {
-                    final myUserId = Supabase.instance.client.auth.currentUser!.id;
-                    final message = Message(
-                      id: DateTime.now().millisecondsSinceEpoch.toString(),
-                      sender_id: myUserId,
-                      receiver_id: otherUserId,
-                      content: text,
-                      timestamp: DateTime.now(),
-                      status: 'unsynced',
-                    );
-                    chatNotifier.sendMessage(message);
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-        loading: () => Scaffold(
-          appBar: AppBar(title: _buildAppBarTitle(context, petSitter)),
-          body: const Center(child: CircularProgressIndicator()),
-        ),
-        error: (error, stackTrace) => Scaffold(
-          appBar: AppBar(title: _buildAppBarTitle(context, petSitter)),
-          body: Center(child: Text('Error: $error')),
-        ),
-      );
-    },
-    loading: () => const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
-    ),
-    error: (error, stackTrace) => Scaffold(
-      appBar: AppBar(title: const Text('Error')),
-      body: Center(child: Text('Error: $error')),
-    ),
-  );
+          ),
+          _MessageBar(
+            onSend: (text) {
+              final myUserId = Supabase.instance.client.auth.currentUser!.id;
+              final message = Message(
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                sender_id: myUserId,
+                receiver_id: otherUserId,
+                content: text,
+                timestamp: DateTime.now(),
+                status: 'unsynced',
+              );
+              chatNotifier.sendMessage(message);
+            },
+          ),
+        ],
+      ),
+    );
+        
+       
 }
 
-  Widget _buildAppBarTitle(context, PetSitter sitter) {
-    print(sitter.nome);
+  Widget _buildAppBarTitle(context, String client_name) {
     print("ddsfhuiaf");
   return GestureDetector(
     onTap: () => Navigator.pushNamed(
  context,
 AppRoutes.sitterpage,
-arguments: [sitter,[],DateTimeRange(
+arguments: [client_name,[],DateTimeRange(
   start: DateTime.now(),
   end: DateTime.now().add(const Duration(days: 1))
 )],// Pass the pet sitter
  ),
     child: ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(backgroundImage: NetworkImage(sitter.imageUrl)),
-      title: Text(sitter.nome),
+      //leading: CircleAvatar(backgroundImage: NetworkImage(sitter.imageUrl)),
+      title: Text(client_name),
       /*subtitle: Text('Attivo', style: TextStyle(
         color: Colors.green.shade500,
         fontSize: 12
@@ -377,6 +337,9 @@ class PetsitterBookingCard extends StatefulWidget {
 }
 
 class _PetsitterBookingCardState extends State<PetsitterBookingCard> {
+  String? _processingState; // null = not processing, 'accepting' or 'declining'
+
+  bool get _isProcessing => _processingState != null;
   double _cardElevation = 2;
   final Duration _elevationDuration = const Duration(milliseconds: 200);
   
@@ -550,7 +513,6 @@ Color _getProgressColor(double progress) {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(widget.booking.owner_username??""),
-              Text(widget.booking.owner_username??""),
               /*if (widget.booking.clientNotes != null)
                 Text('Richiesta speciali: ${widget.booking.clientNotes}'),*/
             ],
@@ -651,29 +613,38 @@ void _showStatusChangeError(String errorMessage) {
   // );
 }
   void _handleBookingResponse(bool accepted) async {
-    if (widget.booking.state != 'richiesta') {
+    if (widget.booking.state != 'Richiesta') {
       _showStatusChangeError("error");
       return;
     }
 
-    setState(() {
-     // _processingState = accepted ? 'accepting' : 'declining';
-    });
-/*
+    if (_isProcessing) return; // Prevent duplicate actions
+
+    setState(() => _processingState = accepted ? 'Confermata' : 'Rifiutata');
+
     try {
-      //final success = await BookingService().respondToBooking(
+      final success = await BookingService().respondToBooking(
         widget.booking.id,
         accepted: accepted,
       );
 
       if (success) {
+        // Update booking state using Provider
+       /* final bookingsModel = context.read<BookingsModel>(); // Your model class name might differ
+        bookingsModel.updateBooking(widget.booking.copyWith(
+          state: accepted ? 'accettato' : 'rifiutato',
+        ));*/
+
         _showConfirmationAnimation(accepted);
-       // context.read<BookingsBloc>().add(BookingUpdated(widget.booking));
         HapticFeedback.selectionClick();
+      } else {
+        _showActionError(accepted);
       }
     } catch (e) {
       _showActionError(accepted);
-    }*/
+    } finally {
+      setState(() => _processingState = null);
+    }
   }
 
   void _showDeclineConfirmationDialog() {
@@ -792,7 +763,7 @@ void _showStatusChangeError(String errorMessage) {
 
   String _formatDate(String date) {
     final dt = DateTime.parse(date);
-    return DateFormat('dd MMM yyyy', 'it_IT').format(dt);
+    return DateFormat('dd MMM yyyy').format(dt);
   }
 
   Color _getUrgencyTextColor(int days) {
