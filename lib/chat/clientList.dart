@@ -109,7 +109,7 @@ class ClientListPage extends StatelessWidget {
                 ),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
-                  onTap: () => Navigator.of(context).push(ChatWithClientPage.route(clientId, booking)), // Pass both parameters
+                  onTap: () => Navigator.of(context).push(ChatWithClientPage.route(clientId)), // Pass both parameters
 
                   child: Padding(
                     padding: const EdgeInsets.all(12),

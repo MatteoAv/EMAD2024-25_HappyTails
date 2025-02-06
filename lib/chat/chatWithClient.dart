@@ -94,22 +94,31 @@ String _getUrgencyLabel(Urgency urgency) {
 
 // Updated ChatPage with preserved logic + new features
 class ChatWithClientPage extends ConsumerWidget {
-  const ChatWithClientPage({Key? key, required this.otherUserId, required this.bookings}) : super(key: key);
-  final String otherUserId;
-  final List<Booking> bookings;
- static Route<void> route(String otherUserId, List<Booking> bookings) { // Added booking parameter
+  const ChatWithClientPage({Key? key, required this.clientId}) : super(key: key);
+  final String clientId;
+ static Route<void> route(String clientId) { // Added booking parameter
     return MaterialPageRoute(
-      builder: (context) => ChatWithClientPage(otherUserId: otherUserId, bookings: bookings),
+      builder: (context) => ChatWithClientPage(clientId: clientId),
     );
   }
 
   @override
  Widget build(BuildContext context, WidgetRef ref) {
-  final messagesState = ref.watch(chatProvider(otherUserId));
-  final chatNotifier = ref.read(chatProvider(otherUserId).notifier);
+  final messagesState = ref.watch(chatProvider(clientId));
+  final chatNotifier = ref.read(chatProvider(clientId).notifier);
+  final bookingState = ref.watch(bookingNotifierProvider);
+  if (bookingState.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (bookingState.errorMessage != null) {
+      return Center(child: Text('Error: ${bookingState.errorMessage}'));
+    }
+
+  final bookings = bookingState.groupedBookings[clientId];
     return Scaffold(
       appBar: AppBar(
-        title: _buildAppBarTitle(context, bookings[0].owner_username??""),
+        title: _buildAppBarTitle(context, bookings![0].owner_username??""),
         actions: const [_HeaderMenuButton()],
       ),
       body: Column(
@@ -119,7 +128,7 @@ class ChatWithClientPage extends ConsumerWidget {
             child: messagesState.when(
               data: (messages) => _MessageList(
                 messages: messages,
-                otherUserId: otherUserId,
+                clientId: clientId,
                 onRefresh: () {},
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -132,7 +141,7 @@ class ChatWithClientPage extends ConsumerWidget {
               final message = Message(
                 id: DateTime.now().millisecondsSinceEpoch.toString(),
                 sender_id: myUserId,
-                receiver_id: otherUserId,
+                receiver_id: clientId,
                 content: text,
                 timestamp: DateTime.now(),
                 status: 'unsynced',
@@ -229,12 +238,12 @@ class _MessageBarState extends State<_MessageBar> {
 // Preserved MessageList with pull-to-refresh
 class _MessageList extends StatelessWidget {
   final List<Message> messages;
-  final String otherUserId;
+  final String clientId;
   final VoidCallback onRefresh;
 
   const _MessageList({
     required this.messages,
-    required this.otherUserId,
+    required this.clientId,
     required this.onRefresh,
   });
 
@@ -327,26 +336,29 @@ class _HeaderMenuButton extends StatelessWidget {
 
 
 // Petsitter Booking Card with Actionable State
-class PetsitterBookingCard extends StatefulWidget {
+class PetsitterBookingCard extends ConsumerStatefulWidget {
   final Booking booking;
   
-  const PetsitterBookingCard({super.key, required this.booking});
+  const PetsitterBookingCard({Key? key, required this.booking}) : super(key: key);
 
   @override
-  State<PetsitterBookingCard> createState() => _PetsitterBookingCardState();
+  ConsumerState<PetsitterBookingCard> createState() => _PetsitterBookingCardState();
 }
 
-class _PetsitterBookingCardState extends State<PetsitterBookingCard> {
-  String? _processingState; // null = not processing, 'accepting' or 'declining'
-
+class _PetsitterBookingCardState extends ConsumerState<PetsitterBookingCard> {
+  /// Represents whether a process is ongoing.
+  /// null means not processing, 'accepting' or 'declining' indicates the current action.
+  String? _processingState;
+  
   bool get _isProcessing => _processingState != null;
   double _cardElevation = 2;
   final Duration _elevationDuration = const Duration(milliseconds: 200);
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final daysUntilBooking = _calculateDaysRemaining(widget.booking.dateBegin);
+    
     
     return MouseRegion(
       onEnter: (_) => setState(() => _cardElevation = 4),
@@ -405,9 +417,30 @@ Widget _buildUrgencyBadge(int daysUntilBooking, ThemeData theme) {
   );
 }
   Widget _buildHeaderSection(int daysUntilBooking, ThemeData theme) {
+    Color color;
+    String label;
+    switch (widget.booking.state) {
+    case "Richiesta":
+      color = Colors.orange;
+      label = "Richiesta"; // Or a localized version
+      break;
+    case "Confermata":
+      color = Colors.green;
+      label = "Confermata"; // Or a localized version
+      break;
+    case "Rifiutata":
+      color = Colors.red;
+      label = "Rifiutata"; // Or a localized version
+      break;
+    default:
+      color = Colors.grey; // Default color for unknown statuses
+      label = "Sconosciuto"; // Or a localized "Unknown"
+      break;
+  }
+
     return Row(
       children: [
-        _buildStatusIndicator('Richiesta', Colors.orange, theme),
+        _buildStatusIndicator(label, color, theme),
         const Spacer(),
         _buildUrgencyBadge(daysUntilBooking, theme),
       ],
@@ -523,6 +556,9 @@ Color _getProgressColor(double progress) {
   }
 
   Widget _buildActionButtons() {
+    if (widget.booking.state != "Richiesta") {
+      return const SizedBox.shrink();
+    }
     return Row(
       children: [
         Expanded(
@@ -612,40 +648,41 @@ void _showStatusChangeError(String errorMessage) {
   //   child: ... your error message widget ...,
   // );
 }
-  void _handleBookingResponse(bool accepted) async {
-    if (widget.booking.state != 'Richiesta') {
-      _showStatusChangeError("error");
-      return;
-    }
+void _handleBookingResponse(bool accepted) async {
+  if (widget.booking.state != 'Richiesta') return;
 
-    if (_isProcessing) return; // Prevent duplicate actions
+  if (_isProcessing) return;
 
-    setState(() => _processingState = accepted ? 'Confermata' : 'Rifiutata');
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Confermi di ${accepted ? 'accettare' : 'rifiutare'} ?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Torna Indietro'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Confermo'),
+        ),
+      ],
+    ),
+  );
 
-    try {
-      final success = await BookingService().respondToBooking(
-        widget.booking.id,
-        accepted: accepted,
-      );
+  if (confirmed != true) return;
 
-      if (success) {
-        // Update booking state using Provider
-       /* final bookingsModel = context.read<BookingsModel>(); // Your model class name might differ
-        bookingsModel.updateBooking(widget.booking.copyWith(
-          state: accepted ? 'accettato' : 'rifiutato',
-        ));*/
+  setState(() => _processingState = accepted ? 'accepting' : 'declining');
 
-        _showConfirmationAnimation(accepted);
-        HapticFeedback.selectionClick();
-      } else {
-        _showActionError(accepted);
-      }
-    } catch (e) {
-      _showActionError(accepted);
-    } finally {
-      setState(() => _processingState = null);
-    }
+  try {
+    final success = await ref.read(bookingNotifierProvider.notifier)
+        .respondToBooking(widget.booking.id, accepted: accepted);
+    if (!success) throw Exception('Failed');
+  } catch (e) {
+    _showStatusChangeError("Error");
+  } finally {
   }
+}
 
   void _showDeclineConfirmationDialog() {
     TextEditingController reasonController = TextEditingController();
@@ -721,37 +758,52 @@ void _showStatusChangeError(String errorMessage) {
 
     Future.delayed(const Duration(seconds: 2), () => Navigator.pop(context));
   }
-  void _showActionError(bool errorMessage, {VoidCallback? onRetry}) {
+  void _showActionError(String errorMessage, {VoidCallback? onRetry}) {
   showDialog(
-    barrierDismissible: false, // Prevent dismissing by tapping outside
     context: context,
-    builder: (context) => PopScope(
-      canPop: false, // Prevent back button from closing
-      child: AlertDialog(
-        backgroundColor: Theme.of(context).colorScheme.error.withOpacity(0.1), // Error background
-        icon: Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error), // Error icon
-        title: const Text("Errore"), // Optional title
-        content: Text(
-          "errorMessage",
-          textAlign: TextAlign.center,
-        ),
-        actions: [ // Action buttons
-          TextButton(
-            onPressed: () => Navigator.pop(context), // Close the dialog
-            child: const Text('Annulla'), // Localized cancel label
-          ),
-          if (onRetry != null) // Show retry button only if a callback is provided
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-                onRetry(); // Execute the retry callback
-              },
-              child: const Text('Riprova'), // Localized retry label
-            ),
-        ],
+    barrierDismissible: false,
+    builder: (context) => AlertDialog(
+      backgroundColor: Theme.of(context).colorScheme.surface, // Use a surface color
+      shape: RoundedRectangleBorder( // Rounded corners
+        borderRadius: BorderRadius.circular(16),
       ),
+      icon: Icon(
+        Icons.error_outline,
+        size: 64, // Larger icon
+        color: Theme.of(context).colorScheme.error,
+      ),
+      title: Text(
+        "Errore", // Localized title
+        style: Theme.of(context).textTheme.headlineSmall?.copyWith( // Style the title
+          color: Theme.of(context).colorScheme.error,
+        ),
+        textAlign: TextAlign.center,
+      ),
+      content: Padding(
+        padding: const EdgeInsets.only(top: 16.0), // Add padding to the top of the content
+        child: Text(
+          errorMessage,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium, // Use bodyMedium for content
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Annulla'),
+        ),
+        if (onRetry != null)
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              onRetry();
+            },
+            child: const Text('Riprova'),
+          ),
+      ],
     ),
   );
+
 }
 
   // Helper Methods
