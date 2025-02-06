@@ -7,6 +7,7 @@ import 'package:happy_tails/UserManage/repositories/local_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:meta/meta.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Recupera l'utente dalle SharedPreferences
   Future<model.User?> _getUserFromPrefs() async {
@@ -221,6 +222,202 @@ class BookNotifier extends AsyncNotifier<List<Booking>>{
       }
     }
     return false;
+  }
+}
+
+
+
+
+
+
+// Provider for the Supabase client
+final supabaseClientProvider = Provider<SupabaseClient>((ref) {
+  return Supabase.instance.client;
+});
+
+// Provider for the BookingRepository
+final bookingRepositoryProvider = Provider<BookingRepository>((ref) {
+  final client = ref.watch(supabaseClientProvider);
+  return BookingRepository(client: client);
+});
+
+// StateNotifierProvider for BookingNotifier
+final bookingNotifierProvider =
+    StateNotifierProvider<BookingNotifier, BookingState>((ref) {
+  final repository = ref.watch(bookingRepositoryProvider);
+  return BookingNotifier(repository: repository);
+});
+
+
+class BookingRepository {
+  final SupabaseClient client;
+
+  BookingRepository({required this.client});
+
+  /// Fetch bookings and group them by owner.
+  Future<Map<String, List<Booking>>> fetchBookingsGroupedByClient() async {
+    final response = await Supabase.instance.client.rpc('get_my_bookings_with_owners')
+        .select('booking_id, owner_username, pet_name, pet_type, booking_details');
+
+
+    final List<dynamic> bookings = response as List<dynamic>;
+    final Map<String, List<Booking>> uniqueClients = {};
+
+    for (final booking in bookings) {
+      final String clientId = booking['booking_details']['owner_id'];
+      final bookingDetails = booking['booking_details'];
+      
+      
+
+      if (bookingDetails != null) {
+        final actualBooking = Booking.fromMapFull(bookingDetails,booking["owner_username"],booking["pet_name"],booking["pet_type"]);
+
+        if (!uniqueClients.containsKey(clientId)) {
+          uniqueClients[clientId] = [];
+        }
+        uniqueClients[clientId]!.add(actualBooking);
+      }
+      else{
+        uniqueClients[clientId] = [];
+
+      }
+    }
+    print(uniqueClients);
+
+    print("Fetched ${uniqueClients.length} unique clients.");
+    return uniqueClients;
+  }
+
+  /// Update a booking's state.
+  Future<bool> updateBookingState(int bookingId, {required bool accepted}) async {
+    final String state = accepted ? "Confermata" : "Rifiutata";
+    try{
+      final response = await Supabase.instance.client
+          .from('bookings')
+          .update({'state': state})
+          .eq('id', bookingId);
+      print("success is");
+    
+
+
+      return true;
+    }
+    catch(e){
+      print('Exception in respondToBooking: $e');
+      return false;
+    }
+  }
+
+}
+
+
+/// Define a state class to hold our booking data and loading state.
+class BookingState {
+  final Map<String, List<Booking>> groupedBookings;
+  final bool isLoading;
+  final String? errorMessage;
+
+  BookingState({
+    required this.groupedBookings,
+    this.isLoading = false,
+    this.errorMessage,
+  });
+
+  BookingState copyWith({
+    Map<String, List<Booking>>? groupedBookings,
+    bool? isLoading,
+    String? errorMessage,
+  }) {
+    return BookingState(
+      groupedBookings: groupedBookings ?? this.groupedBookings,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: errorMessage,
+    );
+  }
+}
+
+/// Create a StateNotifier for managing booking data.
+class BookingNotifier extends StateNotifier<BookingState> {
+  final BookingRepository repository;
+  // Optionally store the subscription if you want to unsubscribe later.
+  var _subscription;
+
+
+  BookingNotifier({required this.repository})
+      : super(BookingState(groupedBookings: {}, isLoading: true)) {
+    fetchBookings();
+    _initRealtimeSubscription();
+  }
+
+  Future<void> fetchBookings() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      final data = await repository.fetchBookingsGroupedByClient();
+      state = state.copyWith(groupedBookings: data, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+    }
+  }
+
+    Future<bool> respondToBooking(int bookingId, {required bool accepted}) async {
+      print("sucsssscess is");
+
+      final success = await repository.updateBookingState(bookingId, accepted: accepted);
+      print("success is");
+      print(success);
+      if (success) {
+        await fetchBookings();
+        return true;
+      }
+      else {
+      // Log the failure
+      print('Failed to update booking $bookingId');
+      return false;
+    }
+    }
+
+
+  void _initRealtimeSubscription() {
+    _subscription = repository.client
+        .channel('public:bookings:petsitter_id=eq.${repository.client.auth.currentUser!.id}')
+      .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'bookings',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'petsitter_id',
+            value: repository.client.auth.currentUser!.id,
+          ),
+          callback: (payload) {
+            print('Change received: ${payload.toString()}');
+            fetchBookings();
+
+          })
+      .subscribe();
+      
+
+    @override
+void dispose() {
+  // Unsubscribe from the realtime updates
+  repository.client
+        .channel('public:bookings:petsitter_id=eq.${repository.client.auth.currentUser!.id}')
+      .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'bookings',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'petsitter_id',
+            value: repository.client.auth.currentUser!.id,
+          ),
+          callback: (payload) {
+            print('Change received: ${payload.toString()}');
+          })
+      .unsubscribe();
+  super.dispose();
+}
+
   }
 }
 

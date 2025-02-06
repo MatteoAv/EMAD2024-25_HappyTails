@@ -14,6 +14,9 @@ class Booking {
   final int pet_id;
   final String owner_id;
   final int petsitter_id;
+  final String? owner_username;
+  final String? pet_name;
+  final String? pet_type;
 
   Booking({
     required this.id,
@@ -28,7 +31,11 @@ class Booking {
     required this.state_Payment,
     required this.pet_id,
     required this.owner_id,
-    required this.petsitter_id
+    required this.petsitter_id,
+    this.owner_username,
+    this.pet_name,
+    this.pet_type
+
   });
 
   factory Booking.fromMap(Map<String, dynamic> map) {
@@ -48,6 +55,29 @@ class Booking {
       pet_id: map ['pet_id'],
       owner_id: map['owner_id'],
       petsitter_id: map['petsitter_id']
+    );
+  }
+  factory Booking.fromMapFull(Map<String, dynamic> map,String?owner_name,String?pet_name,String?pet_type) {
+    return Booking(
+      id: map['id'],
+      id_trans: map['id_trans'],
+      dateBegin: map['dateBegin'],
+      dateEnd: map ['dateEnd'],
+      price: (map['price'] is int)
+          ? (map['price'] as int).toDouble()
+          : map['price'] as double,
+      state : map ['state'],
+      state_Payment: map ['state_Payment'],
+      metaPayment: map ['metaPayment'],
+      vote : map ['vote'],
+      summary: map ['review'],
+      pet_id: map ['pet_id'],
+      owner_id: map['owner_id'],
+      petsitter_id: map['petsitter_id'],
+      owner_username: map['owner_username']??owner_name,
+      pet_name: map['pet_name']??pet_name,
+      pet_type: map['pet_type']??pet_type
+
     );
   }
 

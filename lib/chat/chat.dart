@@ -70,7 +70,6 @@ class ChatPage extends ConsumerWidget {
               .where((booking) => booking.petsitter_id == petSitter.id)
               .toList()
             ..sort((a, b) => b.dateBegin.compareTo(a.dateBegin));
-          print("fdsdfj");
 
           if (filteredList.isEmpty) {
             return Scaffold(
@@ -314,8 +313,7 @@ class _HeaderMenuButton extends StatelessWidget {
       ],
     );
   }
-}
-class _BookingHeader extends StatelessWidget {
+}class _BookingHeader extends StatelessWidget {
   final Booking booking;
   final PetSitter petsitter;
 
@@ -1058,16 +1056,3 @@ class _DetailTile extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
