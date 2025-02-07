@@ -296,9 +296,9 @@ class BookingRepository {
           .from('bookings')
           .update({'state': state})
           .eq('id', bookingId);
-      print("success is");
-    
-
+      if(response != null){
+        LocalDatabase.instance.updateStateBooking(bookingId, state);
+      }
 
       return true;
     }

@@ -232,6 +232,21 @@ Future<void> syncData(String tableName,String columnName, String columnValue, Da
   }
 
 
+  Future<bool> updateStateBooking(int id, String state) async{
+    final db = await instance.database;
+    try{
+    final response = await db.update("bookings", {'state' : state}, where: 'id = ?', whereArgs: [id]);
+    if(response != 0) {
+      return true;
+    }
+    }catch(e){
+      return false;
+    }
+    return false;
+  }
+
+
+
   Future<void> addMessage(Message message) async {
     final db = await database;
     print("addMessage");

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:happy_tails/UserManage/model/pet.dart';
 import 'package:happy_tails/UserManage/providers/profile_providers.dart';
 import 'package:happy_tails/UserManage/repositories/local_database.dart';
+import 'package:happy_tails/payment_service.dart';
 import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -84,6 +85,52 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> with Automa
   }
 
   Future<void> prenota(String inizio, String fine, double prezzo, int pet_id, String owner_id, int petsitter_id) async {
+     final user = ref.read(userProvider).value;
+     String? selectedCard;
+     if(user != null && user.customerId != null){
+      final cards = await PaymentService.getPaymentMethods(user.customerId!);
+      if(cards.isEmpty){
+        showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Nessun metodo di pagamento"),
+          content: Text("Per effettuare una prenotazione, devi aggiungere un metodo di pagamento."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("OK"),
+            ),
+          ],
+        ),
+      );
+      return; // Esce dalla funzione
+    }
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Scegli un metodo di pagamento"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: cards.map((card) {
+              return ListTile(
+                leading: Icon(Icons.credit_card),
+                title: Text("•••• ${card['card']['last4']}"),
+                onTap: () {
+                  selectedCard = card['id'];
+                  Navigator.pop(context);
+                },
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+    if (selectedCard == null) return; // L'utente ha annullato la selezione
+  }  
+
+    final success = await PaymentService.createPaymentIntent(prezzo * 100, selectedCard, user?.customerId);
+    if(success != null){
      await Supabase.instance.client.rpc(
       'create_booking', 
       params: {
@@ -93,13 +140,14 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> with Automa
           'pet_id': pet_id,
           'owner_id': owner_id,
           'petsitter_id': petsitter_id,
+          'metapayment' : success['paymentIntentId']
       },
     );
 
     final db = await LocalDatabase.instance.database;
     await LocalDatabase.instance.syncData("bookings", "owner_id", owner_id, db);
     ref.watch(bookingsProvider.notifier).updateBooking();
-
+    }
   }
 
   Future<void> _loadReviews() async {
@@ -172,7 +220,7 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter> with Automa
     final String provincia = petsitter.provincia;
     final double prezzo = petsitter.prezzo;
     final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
-    final selectedDateRange = widget.dateRange;    
+    final selectedDateRange = ref.watch(selectedDateRangeProvider) ?? widget.dateRange;    
 
 
     print("ID del petsitter PETSITTER_PAGE: $petsitterId");

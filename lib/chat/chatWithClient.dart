@@ -10,6 +10,7 @@ import 'package:happy_tails/app/routes.dart';
 import 'package:happy_tails/chat/chatRepository.dart';
 import 'package:happy_tails/chat/message_model.dart';
 import 'package:happy_tails/homeProvider/providers.dart';
+import 'package:happy_tails/payment_service.dart';
 import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
 import 'package:happy_tails/screens/ricerca/petsitter_page.dart';
 import 'package:intl/intl.dart';
@@ -157,7 +158,6 @@ class ChatWithClientPage extends ConsumerWidget {
 }
 
   Widget _buildAppBarTitle(context, String client_name) {
-    print("ddsfhuiaf");
   return GestureDetector(
     onTap: () => Navigator.pushNamed(
  context,
@@ -678,6 +678,12 @@ void _handleBookingResponse(bool accepted) async {
     final success = await ref.read(bookingNotifierProvider.notifier)
         .respondToBooking(widget.booking.id, accepted: accepted);
     if (!success) throw Exception('Failed');
+    if(accepted){
+      await PaymentService.capturePayment(widget.booking.metaPayment!);
+    }else{
+      await PaymentService.cancelPayment(widget.booking.metaPayment!);
+    }
+
   } catch (e) {
     _showStatusChangeError("Error");
   } finally {

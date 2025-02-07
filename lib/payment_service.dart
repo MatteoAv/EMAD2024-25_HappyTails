@@ -1,3 +1,4 @@
+
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -5,18 +6,26 @@ class PaymentService {
   static const String _baseUrl = 'http://localhost:3000'; // Cambia con l'IP del tuo server
 
   // Funzione per creare un PaymentIntent
-  static Future<String?> createPaymentIntent(int amount) async {
+  static Future<Map<String, dynamic>?> createPaymentIntent(double amount, String? selectedCard, String? customerId) async {
     try {
       final url = Uri.parse('$_baseUrl/create-payment-intent');
+      final Map<String, dynamic> body = {'amount' : amount};
+
+      if(selectedCard != null && customerId != null){
+        body['card'] = selectedCard;
+        body['customerId'] = customerId;
+      }
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'amount': amount}), // Importo in centesimi
+        body : jsonEncode(body)
       );
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data['clientSecret']; // Restituisce il client_secret
+        return {
+          "clientSecret": data['clientSecret'],
+          "paymentIntentId" : data['paymentIntentId']
+          }; // Restituisce il client_secret
       } else {
         print('Errore dal server: ${response.body}');
         return null;
@@ -26,6 +35,51 @@ class PaymentService {
       return null;
     }
   }
+
+  /// 🔹 Conferma il pagamento catturando i fondi
+  static Future<bool> capturePayment(String paymentIntentId) async {
+    try {
+      final url = Uri.parse('$_baseUrl/capture-payment');
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'paymentIntentId': paymentIntentId}),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)['status'] == "succeeded";
+      } else {
+        print('Errore nel catturare il pagamento: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Errore nella richiesta di cattura pagamento: $e');
+      return false;
+    }
+  }
+
+  /// 🔹 Annulla il pagamento se la prenotazione viene cancellata
+  static Future<bool> cancelPayment(String paymentIntentId) async {
+    try {
+      final url = Uri.parse('$_baseUrl/cancel-payment');
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'paymentIntentId': paymentIntentId}),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)['status'] == "canceled";
+      } else {
+        print('Errore nell\'annullare il pagamento: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Errore nella richiesta di annullamento pagamento: $e');
+      return false;
+    }
+  }
+
 
   // Recupera i metodi di pagamento di un cliente
   static Future<List<Map<String, dynamic>>> getPaymentMethods(String customerId) async {
