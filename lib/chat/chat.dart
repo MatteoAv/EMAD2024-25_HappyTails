@@ -74,7 +74,10 @@ class ChatPage extends ConsumerWidget {
           if (filteredList.isEmpty) {
             return Scaffold(
               appBar: AppBar(
-                title: _buildAppBarTitle(context, petSitter),
+                title: Padding( // Add Padding here
+                padding: const EdgeInsets.only(top: 8.0), // Adjust top padding as needed
+                child: _buildAppBarTitle(context, petSitter),
+              ),
                 actions: const [_HeaderMenuButton()],
               ),
               body: const Center(child: Text('No bookings found')),
