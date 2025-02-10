@@ -41,7 +41,9 @@ class VerticalCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Padding(
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      child : Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
@@ -54,7 +56,7 @@ class VerticalCard extends StatelessWidget {
               child: child,
             );
           },
-          child: Card(
+          child : Card(
             elevation: 4,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
@@ -261,7 +263,7 @@ class VerticalCard extends StatelessWidget {
                               const SizedBox(width: 8),
                               Text(
                                 '${item.numeroRecensioni} recensioni',
-                                style: theme.textTheme.bodyMedium?.copyWith(
+                                style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.outline,
                                 ),
                               ),
@@ -316,6 +318,7 @@ class VerticalCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
       ),
     );
   }

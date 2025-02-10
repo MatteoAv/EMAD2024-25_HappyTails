@@ -81,24 +81,23 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
   Widget build(BuildContext context) {
     final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
     final selectedDateRange = ref.watch(selectedDateRangeProvider);
-
+    final width = MediaQuery.of(context).padding.horizontal;
     return Scaffold(
-     
-      body: Column(
+      body: SafeArea(
+        child : Column(
         children: [
           // Filters Section (Animal, Location, Date Range)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 24),
+                const SizedBox(height: 8),
                 Card(
                   elevation: 10,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
 
-                    
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(20),
@@ -518,6 +517,7 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
             );},),)
 
         ],
+      ),
       ),
     );
   }
