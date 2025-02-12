@@ -32,14 +32,16 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter>
   bool get wantKeepAlive => true;
   Map<int, bool> petSelections = {};
   List<Map<String, dynamic>> reviews = [];
-  double totalRating = 0;
-  int totalReviews = 0;
-  String? selectedType;
-  List<dynamic> pets = [];
-  List<dynamic> petsSelezionati = [];
-  String? selectedPet;
-  int petID = 0;
-  List<int> checkbooking = [];
+  double totalRating = 0;  // Variabile per il punteggio totale
+  int totalReviews = 0;    // Variabile per il numero di recensioni
+  String? selectedType; // Varibile per l'animale selezionato
+  List<dynamic> pets = []; // lista di pet dell'utente da cui puo scegliere
+  List<dynamic> petsSelezionati = []; // lista di pet selezionati dall'utente
+  String? selectedPet; // Pet selezionato tra quelli della lista dell'utente
+  int petID=0;
+  List<int> checkbooking = []; // per ogni animale selezionato si controlla se la data selezionata e' gia stata prenotata, il risultato viene messo in questa lista
+                               // durante il controllo se nella lista e' presente anche un solo 1, cioe anche un solo animale risulta gia prenotato per quella data allora viene restituito
+                               // un messaggio di errore
 
   @override
   void initState() {
@@ -48,7 +50,6 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter>
   }
 
 
-  // Le tue funzioni fetchPets, checkPrenotazione, prenota, _loadReviews, isUserLoggedIn, averageRating rimangono invariate
 
     Future<void> fetchPets(String type, String userId) async {
     final petResponse = await Supabase.instance.client.rpc(
@@ -569,9 +570,82 @@ Widget build(BuildContext context) {
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             sliver: SliverToBoxAdapter(
               child: ElevatedButton(
-                onPressed: () async {
-                  // Mantenere la tua logica esistente
-                },
+                        onPressed: () async {
+                              if(await isUserLoggedIn() == false){
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Per effettuare una prenotazione devi effettuare l'accesso alla piattaforma."),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                              else{
+                                if (selectedDateRange == null || selectedType == null || petsSelezionati.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Per favore, compila tutti i campi prima di proseguire."),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                } 
+
+                                else {
+                                    for(int i=0; i<petsSelezionati.length; i++){
+                                      final alreadyPrenotato = await checkPrenotazione(petsSelezionati[i].id, selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0]);
+                                      checkbooking.add(alreadyPrenotato);
+                                    }
+                                    
+                                    if(checkbooking.contains(1)){
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text("Prenotazione Fallita"),
+                                              content: const Text("L'intervallo di date selezionato è già prenotato per uno dei pet selezionati."),
+                                              actions: <Widget>[
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: const Text("OK"),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                    }
+                                    else{
+                                      int durationDays = selectedDateRange.end.difference(selectedDateRange.start).inDays;
+                                      print('Durata:  $durationDays');
+                                      double totalPrice = petsitter.prezzo * durationDays;
+                                      for(int j=0; j<petsSelezionati.length; j++){
+                                        await prenota(selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0], totalPrice, petsSelezionati[j].id ,user!.id, petsitterId);
+                                      }
+                                      showDialog(
+                                        context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text("Prenotazione Avvenuta"),
+                                              content: const Text("La tua prenotazione è stata effettuata con successo."),
+                                              actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop(); // Chiude l'alert box
+                                                },
+                                                child: const Text("OK"),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }
+
+
+                                }
+                              }
+
+
+                        },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepOrange,
                   foregroundColor: Colors.white,
