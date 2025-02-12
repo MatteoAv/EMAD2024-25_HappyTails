@@ -78,7 +78,9 @@ class LocalDatabase {
         owner_id TEXT NOT NULL,
         petsitter_id INTEGER NOT NULL,
         datereview DATE,
-        FOREIGN KEY (pet_id) REFERENCES pets(id) ON UPDATE CASCADE
+        FOREIGN KEY (pet_id) REFERENCES pets(id) 
+        ON UPDATE CASCADE 
+        ON DELETE CASCADE
       );
     ''');
     await db.execute('''
@@ -189,6 +191,30 @@ Future<void> syncData(String tableName,String columnName, String columnValue, Da
     return null;
   }
 
+
+  Future <bool> UpdatePet(int id, String name, String type, String owner_id) async{
+    final db = await database;
+    int res = 0;
+    res = await db.update('pets', {'name': name, 'type' : type}, where: 'owner_id = ? AND id = ?', whereArgs: [owner_id,id]);
+    if(res != 0){
+      await supabase.from('pets').update({'name' : name, 'type' : type}).eq('id', id);
+      return true;
+    }
+    return false;
+  }
+
+  Future <bool> DeletePet(int id)async{
+    final db = await database;
+    int res = 0;
+    res = await db.delete('pets', where: 'id = ?', whereArgs: [id]);
+    if(res != 0){
+      await supabase.from('pets').delete().eq('id', id);
+      return true;
+    }
+    return false;
+  }
+
+
   Future<List<Booking>> getBookings(String user_id) async {
     final db = await instance.database;
     var maps = await db.query('bookings',
@@ -203,6 +229,20 @@ Future<void> syncData(String tableName,String columnName, String columnValue, Da
       syncData("bookings", "owner_id", user_id, db);
     }
     return maps.map((map) => Booking.fromMap(map)).toList();
+  }
+
+
+  Future<bool> updateStateBooking(int id, String state) async{
+    final db = await instance.database;
+    try{
+    final response = await db.update("bookings", {'state' : state}, where: 'id = ?', whereArgs: [id]);
+    if(response != 0) {
+      return true;
+    }
+    }catch(e){
+      return false;
+    }
+    return false;
   }
 
 

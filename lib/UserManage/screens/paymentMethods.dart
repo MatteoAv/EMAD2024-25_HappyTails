@@ -84,9 +84,8 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                                     'Scadenza: ${method['card']['exp_month']}/${method['card']['exp_year']}',
                                     style: TextStyle(color: Colors.grey.shade700),
                                   ),
-                                  trailing: Icon(Icons.arrow_forward_ios, size: 16),
                                   onTap: () {
-                                    print('Metodo selezionato: ${method['id']}');
+                                    
                                   },
                                 ),
                               ),

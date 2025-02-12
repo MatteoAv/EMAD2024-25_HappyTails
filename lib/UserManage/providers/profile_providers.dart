@@ -135,6 +135,30 @@ class PetNotifier extends AsyncNotifier<List<Pet>>{
     }
     return false;
   }
+
+  Future <bool> UpdatePet(int id, String name, String type, String owner_id) async{
+    state = AsyncLoading();
+
+    bool res = await LocalDatabase.instance.UpdatePet(id, name, type, owner_id);
+    if(res){
+      state = AsyncData(await LocalDatabase.instance.getPets(owner_id));
+      ref.read(bookingsProvider.notifier).updateBooking();
+      return true;
+    }
+    return false;
+  }
+
+  Future <bool> DeletePet(int id, String owner_id) async{
+    state = AsyncLoading();
+
+    bool res = await LocalDatabase.instance.DeletePet(id);
+    if(res){
+      state = AsyncData(await LocalDatabase.instance.getPets(owner_id));
+      ref.read(bookingsProvider.notifier).updateBooking();
+      return true;
+    }
+    return false;
+  }
 }
 
 class AddPetStateNotifier extends Notifier<AddPetState> {
@@ -272,9 +296,9 @@ class BookingRepository {
           .from('bookings')
           .update({'state': state})
           .eq('id', bookingId);
-      print("success is");
-    
-
+      if(response != null){
+        LocalDatabase.instance.updateStateBooking(bookingId, state);
+      }
 
       return true;
     }
