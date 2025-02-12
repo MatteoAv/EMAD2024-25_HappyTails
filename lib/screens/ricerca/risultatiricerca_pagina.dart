@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
 import 'package:happy_tails/screens/ricerca/risultati_provider.dart';
 import 'package:happy_tails/screens/ricerca/risultato_card.dart';
+import 'package:happy_tails/screens/ricerca/skeleton-card.dart';
 import 'package:intl/intl.dart';
 import 'package:happy_tails/screens/ricerca/locations.dart';
 import 'package:happy_tails/screens/ricerca/risultati_repository.dart';
@@ -376,7 +377,6 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                               ? const Center(
                                   child: Padding(
                                     padding: EdgeInsets.all(20),
-                                    child: CircularProgressIndicator(),
                                   ),
                                 ):
                       _petSitters.isNotEmpty
@@ -476,44 +476,50 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
               final sortedSitters = sortPetSitters(_petSitters, sortBy);
 
               return _isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? ListView.builder( // Skeleton Loading State
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    itemCount: 3, // Display a few skeleton cards while loading, adjust as needed
+                    itemBuilder: (context, index) {
+                      return const SkeletonVerticalCard(); // Use the SkeletonVerticalCard widget
+                    },
+                  )
                   : ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       itemCount: sortedSitters.length,
                       itemBuilder: (context, index) {
 
                       final petSitter = sortedSitters[index];
-                        print(petSitter['rating']);
-                          print(petSitter['id']);
+                      print(petSitter['rating']);
+                      print(petSitter['id']);
 
                       
 
-                // Convert data to a PetSitter object
-                final petSitterItem = PetSitter(
-                  id: petSitter['id'] as int,
-                  nome: petSitter['nome'],
-                  cognome: petSitter['cognome'],
-                  email: petSitter['email'],
-                  provincia: petSitter['provincia'],
-                  comune: petSitter['comune'],
-                  imageUrl: petSitter['imageurl'] ??
-                      'https://images.contentstack.io/v3/assets/blt6f84e20c72a89efa/blt2577cbc57a834982/6363df6833df8e693d1e44c7/img-pet-sitter-download-header.jpg',
-                  cani: petSitter['cani'],
-                  gatti: petSitter['gatti'],
-                  uccelli: petSitter['uccelli'],
-                  pesci: petSitter['pesci'],
-                  rettili: petSitter['rettili'],
-                  roditori: petSitter['roditori'],
-                  distanza: petSitter['distance'].toInt(),
-                  prezzo: petSitter['prezzo'].toDouble(),
-                  numeroRecensioni: petSitter['numeroRecensioni'],
-                  rating:petSitter['rating']
+                      // Convert data to a PetSitter object
+                      final petSitterItem = PetSitter(
+                        id: petSitter['id'] as int,
+                        nome: petSitter['nome'],
+                        cognome: petSitter['cognome'],
+                        email: petSitter['email'],
+                        provincia: petSitter['provincia'],
+                        comune: petSitter['comune'],
+                        imageUrl: petSitter['imageurl'] ??
+                            'https://images.contentstack.io/v3/assets/blt6f84e20c72a89efa/blt2577cbc57a834982/6363df6833df8e693d1e44c7/img-pet-sitter-download-header.jpg',
+                        cani: petSitter['cani'],
+                        gatti: petSitter['gatti'],
+                        uccelli: petSitter['uccelli'],
+                        pesci: petSitter['pesci'],
+                        rettili: petSitter['rettili'],
+                        roditori: petSitter['roditori'],
+                        distanza: petSitter['distance'].toInt(),
+                        prezzo: petSitter['prezzo'].toDouble(),
+                        numeroRecensioni: petSitter['numeroRecensioni'],
+                        rating:petSitter['rating']
 
-                );
+                      );
 
-                final data = selectedDateRange;
+                      final data = selectedDateRange;
                 
-                return VerticalCard(item: petSitterItem, disponibilita: petSitter['disponibilita'] ?? [], dateRange: data!,);
+                      return VerticalCard(item: petSitterItem, disponibilita: petSitter['disponibilita'] ?? [], dateRange: data!,);
               },
             );},),)
 
