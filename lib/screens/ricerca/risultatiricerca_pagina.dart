@@ -194,6 +194,7 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                               ),
                             ),
                             const SizedBox(width: 16),
+                            // Modifica nel widget Autocomplete per il comune
                             Expanded(
                               child: Autocomplete<String>(
                                 initialValue: TextEditingValue(text: selectedLocation),
@@ -217,6 +218,10 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                                       ),
                                       contentPadding: const EdgeInsets.symmetric(vertical: 16),
                                     ),
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      overflow: TextOverflow.ellipsis, // Aggiungi questa riga
+                                    ),
+                                    maxLines: 1, // Assicurati che sia presente
                                   );
                                 },
                                 onSelected: (selection) {
@@ -246,44 +251,58 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
                                 ref.read(selectedDateRangeProvider.notifier).state = range;
                               }
                             },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surfaceVariant,
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(Icons.calendar_month_rounded,
-                                        color: Theme.of(context).colorScheme.primary),
-                                      const SizedBox(width: 12),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                            child: // Modifica il Container del date range picker
+                              Container(
+                                constraints: BoxConstraints(
+                                  minWidth: 120,
+                                  maxWidth: MediaQuery.of(context).size.width - 32,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surfaceVariant,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Flexible( // Aggiungi Flexible
+                                      child: Row(
                                         children: [
-                                          Text(
-                                            selectedDateRange == null 
-                                              ? "Seleziona date" 
-                                              : "${_dateFormat.format(selectedDateRange.start)} - ${_dateFormat.format(selectedDateRange.end)}",
-                                            style: Theme.of(context).textTheme.bodyLarge,
-                                          ),
-                                          if (selectedDateRange != null)
-                                            Text(
-                                              "${selectedDateRange.duration.inDays} ${selectedDateRange.duration.inDays == 1 ? 'giorno' : 'giorni'}",
-                                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                color: Theme.of(context).colorScheme.outline),
+                                          Icon(Icons.calendar_month_rounded,
+                                            color: Theme.of(context).colorScheme.primary),
+                                          SizedBox(width: 12),
+                                          Flexible( // Doppio Flexible
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  selectedDateRange == null 
+                                                    ? "Seleziona date" 
+                                                    : "${_dateFormat.format(selectedDateRange.start)} - ${_dateFormat.format(selectedDateRange.end)}",
+                                                  style: Theme.of(context).textTheme.bodyLarge,
+                                                  overflow: TextOverflow.ellipsis, // Aggiungi ellissi
+                                                  maxLines: 1,
+                                                ),
+                                                if (selectedDateRange != null)
+                                                  Text(
+                                                    "${selectedDateRange.duration.inDays} ${selectedDateRange.duration.inDays == 1 ? 'giorno' : 'giorni'}",
+                                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                      color: Theme.of(context).colorScheme.outline),
+                                                    overflow: TextOverflow.ellipsis,
+                                                    maxLines: 1,
+                                                  ),
+                                              ],
                                             ),
+                                          ),
                                         ],
                                       ),
-                                    ],
-                                  ),
-                                  Icon(Icons.chevron_right_rounded,
-                                    color: Theme.of(context).colorScheme.outline),
-                                ],
-                              ),
-                            ),
+                                    ),
+                                    Icon(Icons.chevron_right_rounded,
+                                      color: Theme.of(context).colorScheme.outline),
+                                  ],
+                                ),
+                              )
                           ),
                         ),
                         const SizedBox(height: 24),

@@ -68,29 +68,29 @@ class VerticalCard extends StatelessWidget {
             child: InkWell(
               borderRadius: BorderRadius.circular(20),
               onTap: () {
-        List<dynamic> items = [item, disponibilita, dateRange];
-        // Print ID to debug
-        print('ID del petsitter RISULTATO_CARD: ${item.id}');
-        print('Data passata: ${dateRange}');
-        Navigator.pushNamed(
-          context,
-          AppRoutes.sitterpage,
-          arguments: items,// Pass the pet sitter
-        );
-      },
+                List<dynamic> items = [item, disponibilita, dateRange];
+                // Print ID to debug
+                print('ID del petsitter RISULTATO_CARD: ${item.id}');
+                print('Data passata: ${dateRange}');
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.sitterpage,
+                  arguments: items,// Pass the pet sitter
+                );
+              },
               highlightColor: Colors.transparent,
               splashColor: theme.colorScheme.primary.withOpacity(0.1),
               child: Padding(
                 padding: const EdgeInsets.all(10),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Profile Image
                     Hero(
                       tag: item.id,
                       child: Container(
-                        width: 90,
-                        height: 90,
+                        width: 100,
+                        height: 100,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           image: DecorationImage(
@@ -113,19 +113,35 @@ class VerticalCard extends StatelessWidget {
                                 top: 8,
                                 left: 8,
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
+                                  padding: const EdgeInsets.all(4),
                                   decoration: BoxDecoration(
                                     color: Colors.green.shade600,
                                     borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.2),
+                                        spreadRadius: 1,
+                                        blurRadius: 4,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
-                                  child: Text(
-                                    'Verificato',
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.5,
-                                    ),
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.verified,
+                                        color: Colors.white,
+                                        size: 22,
+                                        grade: -25, // Personalizzazione del peso dell'icona
+                                        opticalSize: 24, // Regolazione della dimensione ottica
+                                      ),
+                                      Icon(
+                                        Icons.verified,
+                                        color: Colors.white.withOpacity(0.3),
+                                        size: 22,
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
@@ -152,7 +168,7 @@ class VerticalCard extends StatelessWidget {
                                     // Name
                                     Text(
                                       '${item.nome}',
-                                      style: theme.textTheme.titleLarge?.copyWith(
+                                      style: theme.textTheme.titleMedium?.copyWith(
                                         fontWeight: FontWeight.w600,
                                         letterSpacing: -0.25,
                                       ),
@@ -193,8 +209,8 @@ class VerticalCard extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
-                                    '${NumberFormat('0.00').format(item.prezzo)}€',
-                                    style: theme.textTheme.headlineSmall?.copyWith(
+                                    '${NumberFormat('0.00').format(item.prezzo)} €',
+                                    style: theme.textTheme.titleLarge?.copyWith(
                                       fontWeight: FontWeight.w700,
                                       color: theme.colorScheme.primary,
                                     ),
@@ -216,15 +232,13 @@ class VerticalCard extends StatelessWidget {
                           Row(
                             children: [
                               Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
                                   color: Colors.amber.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Row(
                                   children: [
-                    
                                     const SizedBox(width: 4),
                                     Row(
                                       children: List.generate(5, (index) {
@@ -261,10 +275,14 @@ class VerticalCard extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                '${item.numeroRecensioni} recensioni',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.outline,
+                              Expanded( // <-- Aggiunto Expanded qui
+                                child: Text(
+                                  '${item.numeroRecensioni} recensioni',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.outline,
+                                  ),
+                                  overflow: TextOverflow.ellipsis, // <-- Aggiunto overflow
+                                  maxLines: 1, // <-- Aggiunto maxLines
                                 ),
                               ),
                             ],
@@ -273,35 +291,36 @@ class VerticalCard extends StatelessWidget {
                           const SizedBox(height: 12),
 
                           // Pet Types
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                if (item.cani) ...[
-                                  _PetTypeChip(
-                                    icon: Icons.pets,
-                                    label: 'Cani',
-                                    color: Colors.brown.shade400,
-                                  ),
-                                  const SizedBox(width: 6), // Small spacing
-                                ],
-                                if (item.gatti) ...[
-                                  _PetTypeChip(
-                                    icon: Icons.catching_pokemon,
-                                    label: 'Gatti',
-                                    color: Colors.blueGrey.shade400,
-                                  ),
-                                  const SizedBox(width: 6), // Small spacing
-                                ],
-                                if (item.pesci || item.rettili || item.roditori || item.uccelli)
-                                  _PetTypeChip(
-                                    icon: Icons.pest_control,
-                                    label: 'Altri',
-                                    color: Colors.green.shade400,
-                                  ),
-                              ],
-                            ),
-                          )
+// Modifica nella sezione Pet Types
+SingleChildScrollView(
+  scrollDirection: Axis.horizontal,
+  child: Row(
+    children: [
+      if (item.cani) ...[
+        _PetTypeChip(
+          imagePath: 'assets/IconPets/dog1.png',
+          label: 'Cani',
+          color: Colors.brown.shade400,
+        ),
+        const SizedBox(width: 6),
+      ],
+      if (item.gatti) ...[
+        _PetTypeChip(
+          imagePath: 'assets/IconPets/cat1.png', 
+          label: 'Gatti',
+          color: Colors.brown.shade400,
+        ),
+        const SizedBox(width: 6),
+      ],
+      if (item.pesci || item.rettili || item.roditori || item.uccelli)
+        _PetTypeChip(
+          imagePath: 'assets/IconPets/sea1.png', 
+          label: 'Altri',
+          color: Colors.brown.shade400,
+        ),
+    ],
+  ),
+)
                         ],
                       ),
                     ),
@@ -325,14 +344,14 @@ class VerticalCard extends StatelessWidget {
 }
 
 class _PetTypeChip extends StatelessWidget {
-  final IconData icon;
+  final String imagePath;
   final String label;
   final Color color;
 
   const _PetTypeChip({
-    required this.icon,
     required this.label,
-    required this.color,
+    required this.color, 
+    required this.imagePath,
   });
 
   @override
@@ -347,7 +366,12 @@ class _PetTypeChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: color),
+          Image.asset(
+            imagePath,
+            width: 20, // Regola la dimensione
+            height: 20,
+            color: color, // Applica il colore se l'immagine supporta la colorazione
+          ),
           const SizedBox(width: 4),
           Text(
             label,
