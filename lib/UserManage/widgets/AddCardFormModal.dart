@@ -13,6 +13,7 @@ class AddCardFormModal extends StatefulWidget {
 }
 
 class _AddCardFormModalState extends State<AddCardFormModal> {
+  // ignore: unused_field
   final _formKey = GlobalKey<FormState>();
   final CardEditController _cardController = CardEditController();
   bool _isProcessing = false;

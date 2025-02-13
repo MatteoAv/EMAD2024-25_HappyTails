@@ -8,7 +8,7 @@ import 'package:happy_tails/app/routes.dart';
 import 'package:happy_tails/stripe_backend/StartServer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'dart:io';
+
 
 
 Future<void> main() async{
@@ -22,6 +22,7 @@ Future<void> main() async{
 
   // Configura la chiave pubblica di Stripe
   Stripe.publishableKey = "pk_test_51QnI64HHgxdC6vSSMHcpNZYlfGNYojbojvLWrJVgUX8Uoy1IvuKOTNHUfeJcZw6OJqIt3xxwJyR5sEVuPRsMmyn7000Kl0wG14";
+  // ignore: unused_local_variable
   final serverController = ServerController();
   //serverController.startServer();
   //await LocalDatabase.instance.deleteDatabaseFile();

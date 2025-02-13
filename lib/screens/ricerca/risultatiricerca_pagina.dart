@@ -81,7 +81,6 @@ class _RisultatiCercaPageState extends ConsumerState<RisultatiCercaPage> {
   Widget build(BuildContext context) {
     final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
     final selectedDateRange = ref.watch(selectedDateRangeProvider);
-    final width = MediaQuery.of(context).padding.horizontal;
     return Scaffold(
       body: SafeArea(
         child : Column(
