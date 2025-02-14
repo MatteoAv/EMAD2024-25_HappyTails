@@ -7,7 +7,6 @@ import 'package:happy_tails/app/bottom_navbar.dart';
 import 'package:happy_tails/app/routes.dart';
 import 'package:happy_tails/chat/chat_provider.dart';
 import 'package:happy_tails/homeProvider/providers.dart';
-import 'package:happy_tails/screens/ricerca/risultatiricerca_pagina.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -35,7 +34,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     TextEditingController? _surnameController;
     TextEditingController? _provinciaController;
     TextEditingController? _priceController;
-  late final fileName;
+  String? fileName;
   Map<String,dynamic>? petSitter;
   File? _selected_image;
   double prezzo = 10.0 ;
@@ -69,12 +68,36 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         'Bird': petSitter!['uccelli'],
         'Other': petSitter!['roditori'] || petSitter!['rettili']
        };
-      _nameController = TextEditingController(text: petSitter!['nome']);
-      _surnameController = TextEditingController(text: petSitter!['cognome']);
-      _provinciaController = TextEditingController(text: petSitter!['provincia']);
-      _priceController = TextEditingController(text: petSitter!['prezzo_giornaliero'].toString());
-      prezzo = petSitter!['prezzo_giornaliero'] is int ? (petSitter!['prezzo_giornaliero'] as int).toDouble() 
-      : petSitter!['prezzo_giornaliero'] ;
+  final user = ref.read(userProvider).valueOrNull;
+  if(user!=null && user.isPetSitter){
+    final result = await get_petsitter_by_email(user.email);
+    if(result != null){
+      petSitter = result.first;
+      Map<String, bool> pets = {
+        'Dog' : petSitter!['cani'],
+        'Cat' : petSitter!['gatti'],
+        'Fish': petSitter!['pesci'],
+        'Bird': petSitter!['uccelli'],
+        'Other': petSitter!['roditori'] || petSitter!['rettili']
+      };
+
+      _nameController ??= TextEditingController(text: petSitter!['nome']);
+      _surnameController ??= TextEditingController(text: petSitter!['cognome']);
+      _provinciaController ??= TextEditingController(text: petSitter!['provincia']);
+      _priceController ??= TextEditingController(text: petSitter!['prezzo_giornaliero'].toString());
+      
+      prezzo = petSitter!['prezzo_giornaliero'] is int 
+          ? (petSitter!['prezzo_giornaliero'] as int).toDouble() 
+          : petSitter!['prezzo_giornaliero'];
+
+      if (mounted) {
+        setState(() {
+          petSitter = result.first;
+          ref.read(managePetsNotifierProvider).copyWith(selectedPets: pets);
+        });
+      }
+    }
+  }
       if(mounted){
       setState(() {
         petSitter = result.first;
@@ -141,13 +164,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   Future<void> _updateImageProfile(String user_id)async{
           fileName = "${user_id}_${basename(_selected_image!.path)}";
           await Supabase.instance.client.storage.from('imageProfile').
-          upload(fileName, _selected_image!, fileOptions: const FileOptions(upsert: true));
+          upload(fileName!, _selected_image!, fileOptions: const FileOptions(upsert: true));
 
           final publicUrl = Supabase.instance.client.storage.
-          from('imageProfile').getPublicUrl(fileName);
+          from('imageProfile').getPublicUrl(fileName!);
 
           await Supabase.instance.client.from("petsitter").update({"imageurl": publicUrl})
-          .eq("idd", user_id);
+          .eq("uuid", user_id);
         }
 
 
@@ -231,7 +254,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       checkPetSitter();
     }
     final userAsync = ref.watch(userProvider);
-    final selectedRange = ref.watch(selectedDateRangeProvider);
+    final selectedRange = ref.watch(selectionDateProvider);
     final managePets = ref.watch(managePetsNotifierProvider).selectedPets;
 
     return Scaffold(
@@ -361,7 +384,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                   '_email' : user.email, '_provincia': _provinciaController!.text, '_imageurl' : fileName, '_cani' : managePets['Dog'],
                                   '_gatti': managePets['Cat'], '_pesci': managePets['Fish'], '_uccelli' : managePets['Bird'], '_rettili': managePets['Other']
                                   , '_roditori': managePets['Other'], '_comune' : user.citta.trim(), '_posizione' : formatPoint, '_prezzo_giornaliero' : prezzo, '_idd': user.id});
-
+                                  final dateBegin = ref.read(selectionDateProvider)?.start.toIso8601String();
+                                  final dateEnd = ref.read(selectionDateProvider)?.end.toIso8601String();
+                                  await supabase.from("indisponibilita").insert({'id' : petSitter?['id'], 'data_inizio' : dateBegin,
+                                  'data_fine' : dateEnd});
                                 }
                             if (success) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -400,7 +426,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     title: const Text("Gestione PetSitting"),
                     leading: Icon(Icons.pets, size:30, color: Colors.black,),
                   children : [
-                    ListTile(
+                    Visibility(
+                    visible: petSitter!= null,
+                    child: ListTile(
                     leading: const Icon(Icons.calendar_month),
                     title: const Text('Indisponibilità'),
                     onTap: ()async {
@@ -414,6 +442,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         ref.read(selectionDateProvider.notifier).state = dateRange;
                       }
                     },
+                  ),
                   ),
                     ListTile(
                       leading : const Icon(Icons.add_task),
@@ -438,7 +467,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ElevatedButton(
                     onPressed: () async{
                         Supabase.instance.client.auth.signOut();
-                        //ref.invalidate(userProvider);
                         ref.read(pageProvider.notifier).updatePages();
                         ref.invalidate(petsProvider);
                         ref.invalidate(bookingsProvider);

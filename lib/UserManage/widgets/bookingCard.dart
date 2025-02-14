@@ -61,10 +61,11 @@ class bookingCard extends StatefulWidget{
     );
 
     print("Response from get_pet_name: $response");
-
+    if(mounted){
     setState(() {
       petName = response as String? ?? "Nome non disponibile";
     });
+    }
   }
 
   Future<void> getPetSitter(int petSitterId) async {
@@ -74,10 +75,11 @@ class bookingCard extends StatefulWidget{
     );
 
     print("Response from get_pet_name: $response");
-
+    if(mounted){
     setState(() {
       petSitterName = response?.toString() ?? "Nome non disponibile";
     });
+    }
   }
 
 

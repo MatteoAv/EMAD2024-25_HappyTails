@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:happy_tails/UserManage/model/pet.dart';
 import 'package:happy_tails/UserManage/providers/profile_providers.dart';
-import 'package:happy_tails/UserManage/repositories/local_database.dart';
 import 'package:happy_tails/payment_service.dart';
 import 'package:happy_tails/screens/ricerca/petsitter_model.dart';
 import 'package:intl/intl.dart';
@@ -85,7 +84,7 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter>
     } 
   }
 
-  Future<void> prenota(String inizio, String fine, double prezzo, int pet_id, String owner_id, int petsitter_id) async {
+  Future<bool> prenota(String inizio, String fine, double prezzo, int pet_id, String owner_id, int petsitter_id) async {
      final user = ref.read(userProvider).value;
      String? selectedCard;
      if(user != null && user.customerId != null){
@@ -104,7 +103,7 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter>
           ],
         ),
       );
-      return; // Esce dalla funzione
+      return false; // Esce dalla funzione
     }
     await showDialog(
       context: context,
@@ -127,7 +126,7 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter>
         );
       },
     );
-    if (selectedCard == null) return; // L'utente ha annullato la selezione
+    if (selectedCard == null) return false; // L'utente ha annullato la selezione
   }  
 
     final success = await PaymentService.createPaymentIntent(prezzo * 100, selectedCard, user?.customerId);
@@ -144,11 +143,9 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter>
           'metapayment' : success['paymentIntentId']
       },
     );
-    /* se provate a rimetterlo avvertite
-    final db = await LocalDatabase.instance.database;
-    await LocalDatabase.instance.syncData("bookings", "owner_id", owner_id, db);
-    ref.watch(bookingsProvider.notifier).updateBooking();*/
+    return true;
     }
+    return false;
   }
 
   Future<void> _loadReviews() async {
@@ -626,9 +623,11 @@ Widget build(BuildContext context) {
                                       int durationDays = selectedDateRange.end.difference(selectedDateRange.start).inDays;
                                       print('Durata:  $durationDays');
                                       double totalPrice = petsitter.prezzo * durationDays;
+                                      bool res = false;
                                       for(int j=0; j<petsSelezionati.length; j++){
-                                        await prenota(selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0], totalPrice, petsSelezionati[j].id ,user!.id, petsitterId);
+                                        res = await prenota(selectedDateRange.start.toIso8601String().split('T')[0], selectedDateRange.end.toIso8601String().split('T')[0], totalPrice, petsSelezionati[j].id ,user!.id, petsitterId);
                                       }
+                                      if(res){
                                       showDialog(
                                         context: context,
                                           builder: (BuildContext context) {
@@ -647,7 +646,7 @@ Widget build(BuildContext context) {
                                         },
                                       );
                                     }
-
+                                    }
 
                                 }
                               }
