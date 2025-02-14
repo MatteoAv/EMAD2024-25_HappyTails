@@ -214,23 +214,29 @@ Future<void> syncData(String tableName,String columnName, String columnValue, Da
     return false;
   }
 
+Future<List<Booking>> getBookings(String user_id) async {
+  final db = await instance.database;
 
-  Future<List<Booking>> getBookings(String user_id) async {
-    final db = await instance.database;
-    var maps = await db.query('bookings',
-    where: 'owner_id = ?',
-    whereArgs: [user_id],
-    );
-    if(maps.isEmpty){
-      //Chiedi al database principale
-      maps = await supabase.from('bookings')
-      .select()
-      .eq('owner_id', user_id);
-      syncData("bookings", "owner_id", user_id, db);
-    }
+  try {
+    final maps = await supabase.from('bookings').select().eq('owner_id', user_id);
+
+    await db.transaction((txn) async {
+      // Clear existing bookings for this user (optional but often a good idea)
+      await txn.delete('bookings', where: 'owner_id =?', whereArgs: [user_id]);
+
+      for (final row in maps) {
+        await txn.insert('bookings', row); // Always insert (after clearing)
+        print("Inserted/Updated row: $row");
+      }
+    });
+
     return maps.map((map) => Booking.fromMap(map)).toList();
-  }
 
+  } catch (e) {
+    print("Error getting bookings: $e");
+    rethrow; // Or handle as needed
+  }
+}
 
   Future<bool> updateStateBooking(int id, String state) async{
     final db = await instance.database;

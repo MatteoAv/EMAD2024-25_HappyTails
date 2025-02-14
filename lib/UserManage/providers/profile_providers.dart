@@ -194,13 +194,17 @@ class AddPetState {
 }
 
 
+
 class BookNotifier extends AsyncNotifier<List<Booking>>{
-  
+
+  var _subscription; // To store the realtime subscription
+
   @override
   Future<List<Booking>> build() async{
     final user = ref.watch(userProvider).value;
     if(user != null){
       final bookList = await LocalDatabase.instance.getBookings(user.id);
+      _initRealtimeSubscription(user.id); // Initialize real-time subscription here, after getting user and initial data
       if(bookList.isEmpty){
         return [];
       }
@@ -208,6 +212,7 @@ class BookNotifier extends AsyncNotifier<List<Booking>>{
     }
     return [];
   }
+
 
   Future<bool> updateBooking() async{
     final user = ref.watch(userProvider).value;
@@ -223,8 +228,34 @@ class BookNotifier extends AsyncNotifier<List<Booking>>{
     }
     return false;
   }
-}
 
+  void _initRealtimeSubscription(String userId) { // Pass userId here
+    print('Initializing Realtime Subscription for user ID: $userId');
+    _subscription = Supabase.instance.client // Assuming repository has access to Supabase client
+        .channel('public:bookings:owner_id=eq.$userId') // Using user_id and eq.$userId
+      .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'bookings',
+          filter: PostgresChangeFilter( // Assuming you want to filter by user_id
+            type: PostgresChangeFilterType.eq,
+            column: 'owner_id', // Filter by user_id column
+            value: userId, // Use the userId obtained in build()
+          ),
+          callback: (payload) {
+            print('----- REALTIME CALLBACK EXECUTED! -----');
+            print('Payload: ${payload.toString()}');
+            updateBooking(); // Call updateBooking to refresh state
+          })
+      .subscribe();
+  }
+
+  @override
+  void dispose() {
+    print('Disposing BookNotifier and unsubscribing from realtime');
+    _subscription?.unsubscribe(); // Unsubscribe on dispose
+  }
+}
 
 
 
@@ -339,7 +370,7 @@ class BookingState {
 /// Create a StateNotifier for managing booking data.
 class BookingNotifier extends StateNotifier<BookingState> {
   final BookingRepository repository;
-  // Optionally store the subscription if you want to unsubscribe later.
+  // Store the subscription object
   var _subscription;
 
 
@@ -377,48 +408,51 @@ class BookingNotifier extends StateNotifier<BookingState> {
     }
 
 
-  void _initRealtimeSubscription() {
-    _subscription = repository.client
-        .channel('public:bookings:petsitter_id=eq.${repository.client.auth.currentUser!.id}')
-      .onPostgresChanges(
-          event: PostgresChangeEvent.update,
-          schema: 'public',
-          table: 'bookings',
-          filter: PostgresChangeFilter(
-            type: PostgresChangeFilterType.eq,
-            column: 'petsitter_id',
-            value: repository.client.auth.currentUser!.id,
-          ),
-          callback: (payload) {
-            print('Change received: ${payload.toString()}');
-            fetchBookings();
+  void _initRealtimeSubscription() async { // Make this function async
+    try {
+      final petsitterIdResult = await repository.client
+          .rpc('get_current_petsitter_id');
 
-          })
-      .subscribe();
+     
+
+      final petsitterId = petsitterIdResult; // Get the petsitter ID from RPC response
+      print('RPC get_current_petsitter_id returned ID: $petsitterId'); // Log the ID
+
+      final channelName = 'public:bookings:petsitter_id=eq.$petsitterId'; // Use RPC result in channel name
+      print('Subscribing to channel: $channelName'); // Log the channel name
+
+      _subscription = repository.client
+          .channel(channelName) // Use dynamically constructed channel name
+          .onPostgresChanges(
+              event: PostgresChangeEvent.update,
+              schema: 'public',
+              table: 'bookings',
+              filter: PostgresChangeFilter(
+                type: PostgresChangeFilterType.eq,
+                column: 'petsitter_id',
+                value: petsitterId.toString(), // Use the RPC-obtained petsitterId here too, and ensure it's a string
+              ),
+              callback: (payload) {
+                print('----- REALTIME CALLBACK EXECUTED! -----');
+                print('Payload: ${payload.toString()}');
+                fetchBookings();
+              })
+          .subscribe();
+
+    } catch (e) {
+      print('Error initializing realtime subscription: ${e.toString()}');
+      // Handle error during RPC call or subscription setup
+    }
+  }
       
 
-    @override
-void dispose() {
-  // Unsubscribe from the realtime updates
-  repository.client
-        .channel('public:bookings:petsitter_id=eq.${repository.client.auth.currentUser!.id}')
-      .onPostgresChanges(
-          event: PostgresChangeEvent.update,
-          schema: 'public',
-          table: 'bookings',
-          filter: PostgresChangeFilter(
-            type: PostgresChangeFilterType.eq,
-            column: 'petsitter_id',
-            value: repository.client.auth.currentUser!.id,
-          ),
-          callback: (payload) {
-            print('Change received: ${payload.toString()}');
-          })
-      .unsubscribe();
-  super.dispose();
-}
+  @override
+  void dispose() {
+      // Unsubscribe from the realtime updates using the stored _subscription
+      _subscription?.unsubscribe(); // Use the stored subscription and ?. for safety
+      super.dispose();
+    }
 
-  }
 }
 
 
