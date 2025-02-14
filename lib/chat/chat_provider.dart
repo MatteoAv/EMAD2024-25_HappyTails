@@ -56,6 +56,7 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<Message>>> {
 
   @override
   void dispose() {
+    
     _refreshTimer?.cancel();
     super.dispose();
   }

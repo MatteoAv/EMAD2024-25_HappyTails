@@ -144,10 +144,10 @@ class _ProfiloPetsitterState extends ConsumerState<ProfiloPetsitter>
           'metapayment' : success['paymentIntentId']
       },
     );
-
+    /* se provate a rimetterlo avvertite
     final db = await LocalDatabase.instance.database;
     await LocalDatabase.instance.syncData("bookings", "owner_id", owner_id, db);
-    ref.watch(bookingsProvider.notifier).updateBooking();
+    ref.watch(bookingsProvider.notifier).updateBooking();*/
     }
   }
 
