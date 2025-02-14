@@ -249,7 +249,7 @@ Widget build(BuildContext context) {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.deepOrange.shade800, Colors.deepOrange.shade400],
+              colors: [Colors.deepOrange.shade700, Colors.deepOrange.shade400],
               stops: [0.1, 0.9],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -305,16 +305,16 @@ Widget build(BuildContext context) {
                                   style: TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.w800,
-                                      color: Colors.grey.shade800)),
+                                      color: Colors.grey.shade700 )),
                               const SizedBox(height: 8),
                               Row(
                                 children: [
                                   Icon(Icons.location_pin,
-                                      color: Colors.deepOrange.shade300, size: 20),
+                                      color: Colors.deepOrange.shade400, size: 20),
                                   const SizedBox(width: 8),
                                   Text(provincia,
                                       style: TextStyle(
-                                          color: Colors.grey.shade600,
+                                          color: Colors.grey.shade500,
                                           fontSize: 16)),
                                 ],
                               ),
@@ -325,8 +325,8 @@ Widget build(BuildContext context) {
                                     TextSpan(
                                       text: '${NumberFormat('0.00').format(prezzo)}€ ',
                                       style: TextStyle(
-                                        color: Colors.deepOrange.shade800,
-                                        fontWeight: FontWeight.w800,
+                                        color: Colors.deepOrange.shade600,
+                                        fontWeight: FontWeight.w600,
                                         fontSize: 20
                                       ),
                                     ),
@@ -396,7 +396,7 @@ Widget build(BuildContext context) {
                                 style: TextStyle(
                                   color: isSelected 
                                       ? Colors.deepOrange
-                                      : Colors.grey.shade800,
+                                      : Colors.grey.shade700 ,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 12,
                                 ),
@@ -411,6 +411,7 @@ Widget build(BuildContext context) {
               ),
             ),
           ),
+          
 
 
           // Pet Selection
@@ -461,8 +462,15 @@ Widget build(BuildContext context) {
                             },
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(6)),
-                            fillColor: MaterialStateProperty.resolveWith<Color>(
-                                (states) => Colors.deepOrange),
+                            fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+                              if (states.contains(MaterialState.selected)) {
+                                // When the checkbox is SELECTED (checked), make it orange
+                                return Colors.deepOrange;
+                              } else {
+                                // When the checkbox is NOT SELECTED (unchecked), make it a neutral color
+                                return Colors.grey.shade400; // Or a different shade of grey you prefer for unselected
+                              }
+                            }),
                           ),
                           title: Text(pet.name,
                               style: const TextStyle(fontWeight: FontWeight.w600)),
@@ -818,7 +826,7 @@ class _SectionTitle extends StatelessWidget {
         style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w700,
-          color: Colors.grey.shade800,
+          color: Colors.grey.shade700 ,
           letterSpacing: -0.5,
         ),
       ),
