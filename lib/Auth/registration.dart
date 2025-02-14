@@ -103,7 +103,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Errore: $e')),
+        SnackBar(content: Text('Errore: campi forniti non validi'),backgroundColor: Colors.red,),
       );
     }
   }

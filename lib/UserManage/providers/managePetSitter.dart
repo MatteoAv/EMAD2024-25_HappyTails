@@ -25,6 +25,10 @@ class ManagePetsNotifier extends StateNotifier<ManagePetsState> {
     'Other'
   ];
 
+  void copyWith({Map<String, bool>? selectedPets}){
+    state = state.copyWith(selectedPets: selectedPets);
+  }
+
   void togglePet(String petType) {
     final updatedPets = Map<String, bool>.from(state.selectedPets);
     if (updatedPets.containsKey(petType)) {
