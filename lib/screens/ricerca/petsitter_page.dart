@@ -541,6 +541,7 @@ Widget build(BuildContext context) {
                           const SizedBox(width: 16),
                           Expanded(
                             child: Text(
+                              // ignore: unnecessary_null_comparison
                               selectedDateRange == null
                                   ? "Seleziona date"
                                   : "${_dateFormat.format(selectedDateRange.start)} - ${_dateFormat.format(selectedDateRange.end)}",
@@ -548,22 +549,21 @@ Widget build(BuildContext context) {
                                   fontWeight: FontWeight.w600),
                             ),
                           ),
-                          if (selectedDateRange != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.deepOrange.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                "${selectedDateRange.duration.inDays} giorni",
-                                style: TextStyle(
-                                  color: Colors.deepOrange,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.deepOrange.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              "${selectedDateRange.duration.inDays} giorni",
+                              style: TextStyle(
+                                color: Colors.deepOrange,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
+                          ),
                         ],
                       ),
                     ),
@@ -588,7 +588,7 @@ Widget build(BuildContext context) {
                                 );
                               }
                               else{
-                                if (selectedDateRange == null || selectedType == null || petsSelezionati.isEmpty) {
+                                if (selectedType == null || petsSelezionati.isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text("Per favore, compila tutti i campi prima di proseguire."),

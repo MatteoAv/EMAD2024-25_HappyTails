@@ -103,6 +103,9 @@ flutter:
     - assets/IconPets/petsitter.png
     - assets/IconPets/dogRegistration.png
     - assets/IconPets/catLogin.png
+    - assets/IconPets/cat1.png    
+    - assets/IconPets/dog1.png
+    - assets/IconPets/sea1.png
 
 
 

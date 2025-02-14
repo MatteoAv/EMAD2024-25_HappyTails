@@ -83,324 +83,457 @@ class bookingCard extends StatefulWidget{
 
 
 
-  void _showReviewDialog(BuildContext context) {
-    double rating = 0.5; // Valore iniziale
-    TextEditingController reviewController = TextEditingController();
+void _showReviewDialog(BuildContext context) {
+  double rating = 0.5;
+  TextEditingController reviewController = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              content: SizedBox(
-                width: 300, // Larghezza fissa
-                height: 250, // Altezza fissa per non espandere il dialogo
-                child: Column(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // RIGA 1: Nome del Pet Sitter
-                        Row(
-                          children: [
-                            const Icon(
-                              FontAwesomeIcons.user, 
-                              size: 20, 
-                              color: Colors.orange,
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              "PetSitter: ",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                            Text(
-                              petSitterName.toString(),
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.deepOrangeAccent,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 5),
-
-                        // RIGA 2: Nome del Pet
-                        Row(
-                          children: [
-                            const Icon(
-                              FontAwesomeIcons.paw, 
-                              size: 20, 
-                              color: Colors.orange,
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              "Pet: ",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                            Text(
-                              petName.toString(),
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.deepOrangeAccent,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 5),
-
-                        // RIGA 3: Prezzo
-                        Row(
-                          children: [
-                            const Icon(
-                              FontAwesomeIcons.moneyBillWave, 
-                              size: 20, 
-                              color: Colors.green,
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              "Prezzo: ",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                            const Icon(
-                              Icons.euro, 
-                              size: 20, 
-                              color: Colors.green,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              widget.bookPrice.toStringAsFixed(2),
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.8,
-                                shadows: [
-                                  Shadow(
-                                    blurRadius: 2.0,
-                                    color: Colors.black12,
-                                    offset: Offset(1.0, 1.0),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 5),
-
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Rating Bar con mezze stelle abilitate
-                            RatingBar.builder(
-                              initialRating: rating,
-                              minRating: 0.5,
-                              direction: Axis.horizontal,
-                              allowHalfRating: true,
-                              itemCount: 5,
-                              itemBuilder: (context, _) => const Icon(
-                                Icons.star,
-                                color: Colors.amber,
-                              ),
-                              onRatingUpdate: (newRating) {
-                                rating = newRating;
-                              },
-                            ),
-                            const SizedBox(height: 10),
-                            // Contenitore fisso per la recensione con scrolling
-                            SizedBox(
-                              height: 90, // Altezza fissa per il campo di testo
-                              child: TextField(
-                                controller: reviewController,
-                                decoration: const InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  hintText: "Scrivi una recensione...",
-                                ),
-                                maxLines: null, // Permette più righe senza espandere il dialog
-                                keyboardType: TextInputType.multiline,
-                                expands: true, // Riempie il contenitore senza allargarsi
-                                textAlignVertical: TextAlignVertical.top, // Allinea il testo in alto
-                                onChanged: (_) {
-                                  setState(() {}); // Rende possibile l'aggiornamento dello stato
-                                },
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+  showDialog(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Dialog(
+            elevation: 8,
+            insetPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.8,
               ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context), // Chiude il dialogo
-                  child: const Text("Annulla"),
-                ),
-                ElevatedButton(
-                  onPressed: reviewController.text.isEmpty
-                      ? null // Disabilita il pulsante se il campo è vuoto
-                      : () {
-                          int punteggio = (rating * 2).round(); // Converte il rating in punteggio (0.5 → 1, 1.5 → 3, ecc.)
-                          String reviewText = reviewController.text;
-
-                          // Simulazione della chiamata per inviare la recensione
-                          try {
-                            creaRecensione(widget.id, punteggio, reviewText); // Funzione di invio recensione
-                            Navigator.pop(context); // Chiude il dialogo
-
-                            // Mostra la notifica di successo
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Recensione effettuata con successo!"),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-                          } catch (e) {
-                            Navigator.pop(context); // Chiude il dialogo in caso di errore
-
-                            // Mostra la notifica di errore
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Errore nell'invio della recensione. Riprova."),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
-                        },
-                  child: const Text("Conferma"),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 30),
-      child: Material(
-        elevation: 8,
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.deepOrange[50],
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          splashColor: Colors.deepOrange[100],
-          onTap: () {
-            if (widget.bookState == 'Confermata') {
-              _showReviewDialog(context);
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Non puoi lasciare una recensione per una prenotazione non confermata."),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.event_available,
-                  color: Colors.orange,
-                  size: 32,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
+              child: SingleChildScrollView(
+                physics: ClampingScrollPhysics(),
+                child: Padding(
+                  padding: EdgeInsets.all(24),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        '${widget.bookingBegin} → ${widget.bookingEnd}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
+                      // Header
                       Row(
                         children: [
-                          Text( 
-                            petName.toString(), 
-                            style: const TextStyle(fontSize: 14), 
-                          ), 
-                          const SizedBox(width: 15),
-                          const Icon(Icons.euro, size: 16, color: Colors.green),
-                          const SizedBox(width: 4),
-                          Text(
-                            widget.bookPrice.toStringAsFixed(2),
-                            style: const TextStyle(fontSize: 14),
-                          )
+                          Icon(Icons.reviews, color: Colors.deepOrange, size: 28),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              "Lascia una recensione",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.grey[800],
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Icon(
-                            widget.bookState == 'Confermata' ? Icons.check_circle : Icons.error,
-                            color: widget.bookState == 'Confermata' ? Colors.green : Colors.red,
-                            size: 16,
+                      SizedBox(height: 24),
+
+                      // Info Cards
+                      _buildInfoTile(
+                        icon: FontAwesomeIcons.user,
+                        title: "PetSitter",
+                        value: petSitterName,
+                        color: Colors.blueAccent),
+                      SizedBox(height: 12),
+                      _buildInfoTile(
+                        icon: FontAwesomeIcons.paw,
+                        title: "Pet",
+                        value: petName,
+                        color: Colors.orange),
+                      SizedBox(height: 12),
+                      _buildInfoTile(
+                        icon: FontAwesomeIcons.moneyBill,
+                        title: "Prezzo",
+                        value: "€${widget.bookPrice.toStringAsFixed(2)}",
+                        color: Colors.green),
+
+                      SizedBox(height: 24),
+
+                      // Rating Section
+                      Center(
+                        child: RatingBar.builder(
+                          initialRating: rating,
+                          minRating: 0.5,
+                          glowColor: Colors.amber[100],
+                          unratedColor: Colors.grey[300],
+                          direction: Axis.horizontal,
+                          allowHalfRating: true,
+                          itemCount: 5,
+                          itemSize: 40,
+                          itemPadding: EdgeInsets.symmetric(horizontal: 4),
+                          itemBuilder: (context, _) => Icon(
+                            Icons.star_rounded,
+                            color: Colors.amber,
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            widget.bookState,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: widget.bookState == 'Confermata' ? Colors.green : Colors.red,
-                            ),
+                          onRatingUpdate: (newRating) {
+                            rating = newRating;
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 24),
+
+                      // Review Input
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: 100,
+                          maxHeight: 100,
+                        ),
+                        child: TextField(
+                          controller: reviewController,
+                          maxLines: null,
+                          expands: true,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                            hintText: "Descrivi la tua esperienza...",
+                            hintStyle: TextStyle(color: Colors.grey[500]),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none),
+                            contentPadding: EdgeInsets.all(16),
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                            suffixIcon: Icon(Icons.edit, color: Colors.grey)),
+                            onChanged: (text) {
+                              setState(() {}); // Aggiungi questo
+                            },
+                        ),
+                      ),
+                      SizedBox(height: 24),
+
+                      // Action Buttons
+                      Wrap(
+                        alignment: WrapAlignment.end,
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          TextButton.icon(
+                            icon: Icon(Icons.close, size: 20),
+                            label: Text("ANNULLA"),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.grey,
+                              backgroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8))),
+                            onPressed: () => Navigator.pop(context)),
+                          ElevatedButton.icon(
+                            icon: Icon(Icons.check_circle, size: 20),
+                            label: Text("INVIA"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.deepOrangeAccent,
+                              foregroundColor: Colors.white,
+                              elevation: 2,
+                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8))),
+                            onPressed: reviewController.text.isEmpty
+                                ? null
+                                : () {
+                                    int punteggio = (rating * 2).round();
+                                    String reviewText = reviewController.text;
+                                    try {
+                                      creaRecensione(widget.id, punteggio, reviewText);
+                                      Navigator.pop(context);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text("Recensione effettuata con successo!"),
+                                          backgroundColor: Colors.green,
+                                        ),
+                                      );
+                                    } catch (e) {
+                                      Navigator.pop(context);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text("Errore nell'invio della recensione. Riprova."),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  },
                           ),
                         ],
                       ),
                     ],
                   ),
                 ),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.rate_review,
-                      size: 26,
-                      color: Colors.orange,
-                    ),
-                    const Icon(Icons.chevron_right, color: Colors.grey)  
-                  ],
-                ),
-              ],
+              ),
             ),
+          );
+        },
+      );
+    },
+  );
+}
+Widget _buildInfoTile({IconData? icon, String? title, String? value, Color? color}) {
+  return Container(
+    padding: EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: Colors.grey[50],
+      borderRadius: BorderRadius.circular(12)),
+    child: Row(
+      children: [
+        Container(
+          padding: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color!.withOpacity(0.1),
+            shape: BoxShape.circle),
+          child: Icon(icon, size: 20, color: color)),
+        SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title!,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500)),
+            SizedBox(height: 2),
+            Text(value!,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[800],
+                  fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            colors: [
+              Colors.white,
+              Colors.deepOrange.shade50,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.deepOrange.withOpacity(0.1),
+              blurRadius: 12,
+              spreadRadius: 2,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            splashColor: Colors.deepOrange.withOpacity(0.1),
+            onTap: () {
+              if (widget.bookState == 'Confermata') {
+                _showReviewDialog(context);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Non puoi lasciare una recensione per una prenotazione non confermata."),
+                    duration: Duration(seconds: 2),
+                ));
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Row(
+                children: [
+                  // Icona sinistra
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 8,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.calendar_month,
+                      color: Colors.deepOrangeAccent,
+                      size: 28,
+                    ),
+                  ),
+                  SizedBox(width: 16),
+
+                  // Contenuto centrale
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Riga data e prezzo
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                '${widget.bookingBegin} ${widget.bookingEnd}',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey[800],
+                                  letterSpacing: -0.2,
+                                ),
+                                overflow: TextOverflow.ellipsis, // Aggiungi questo
+                                maxLines: 2,
+                              ),
+                            ),
+                            _PriceTag(price: widget.bookPrice),
+                          ],
+                        ),
+                        SizedBox(height: 12),
+
+                        // Riga nome pet e stato
+                        Row(
+                          children: [
+                            _PetInfo(name: petName), // Già contiene Expanded
+                            _StatusIndicator(state: widget.bookState),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 12),
+
+                  // Freccia destra
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: Colors.grey[400],
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Widget per lo stato
+class _StatusIndicator extends StatelessWidget {
+  final String state;
+
+  const _StatusIndicator({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: state == 'Confermata' 
+            ? Colors.green.withOpacity(0.15)
+            : Colors.red.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            state == 'Confermata' 
+                ? Icons.check_circle_rounded
+                : Icons.error_rounded,
+            size: 16,
+            color: state == 'Confermata' ? Colors.green : Colors.red),
+          SizedBox(width: 6),
+          Text(
+            state,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: state == 'Confermata' ? Colors.green : Colors.red),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// Widget per il pet
+class _PetInfo extends StatelessWidget {
+  final String name;
+
+  const _PetInfo({required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded( // Usa Expanded invece di Row
+      child: Row(
+        children: [
+          Icon(
+            Icons.pets_rounded,
+            color: Colors.grey[600],
+            size: 18,
+          ),
+          SizedBox(width: 8),
+          Expanded( // Aggiungi un altro Expanded
+            child: Text(
+              name,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[700],
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Modifica il widget _PriceTag
+class _PriceTag extends StatelessWidget {
+  final double price;
+
+  const _PriceTag({required this.price});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(maxWidth: 120), // Aggiungi questo
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.deepOrangeAccent.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: FittedBox( // Aggiungi FittedBox
+        fit: BoxFit.scaleDown,
+        child: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: '€${price.toStringAsFixed(2)}',
+                style: TextStyle(
+                  color: Colors.deepOrangeAccent,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              TextSpan(
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ),
       ),
