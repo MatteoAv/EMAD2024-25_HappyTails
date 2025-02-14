@@ -81,8 +81,12 @@ class VerticalCard extends StatelessWidget {
               splashColor: theme.colorScheme.primary.withOpacity(0.1),
               child: Padding(
                 padding: const EdgeInsets.all(10),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                
+                child:
+                IntrinsicHeight(
+                  child: 
+                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Profile Image
                     Hero(
@@ -290,48 +294,52 @@ class VerticalCard extends StatelessWidget {
                           const SizedBox(height: 12),
 
                           // Pet Types
-// Modifica nella sezione Pet Types
-SingleChildScrollView(
-  scrollDirection: Axis.horizontal,
-  child: Row(
-    children: [
-      if (item.cani) ...[
-        _PetTypeChip(
-          imagePath: 'assets/IconPets/dog1.png',
-          label: 'Cani',
-          color: Colors.brown.shade400,
-        ),
-        const SizedBox(width: 6),
-      ],
-      if (item.gatti) ...[
-        _PetTypeChip(
-          imagePath: 'assets/IconPets/cat1.png', 
-          label: 'Gatti',
-          color: Colors.brown.shade400,
-        ),
-        const SizedBox(width: 6),
-      ],
-      if (item.pesci || item.rettili || item.roditori || item.uccelli)
-        _PetTypeChip(
-          imagePath: 'assets/IconPets/sea1.png', 
-          label: 'Altri',
-          color: Colors.brown.shade400,
-        ),
-    ],
-  ),
-)
+                          // Modifica nella sezione Pet Types
+                          
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                if (item.cani) ...[
+                                  _PetTypeChip(
+                                    imagePath: 'assets/IconPets/dog1.png',
+                                    label: 'Cani',
+                                    color: Colors.brown.shade400,
+                                  ),
+                                  const SizedBox(width: 6),
+                                ],
+                                if (item.gatti) ...[
+                                  _PetTypeChip(
+                                    imagePath: 'assets/IconPets/cat1.png', 
+                                    label: 'Gatti',
+                                    color: Colors.blueGrey.shade400,
+                                  ),
+                                  const SizedBox(width: 6),
+                                ],
+                                if (item.pesci || item.rettili || item.roditori || item.uccelli)
+                                  _PetTypeChip(
+                                    imagePath: 'assets/IconPets/sea1.png', 
+                                    label: 'Altri',
+                                    color: Colors.green.shade400,
+                                  ),
+                              ],
+                            ),
+                          )
                         ],
                       ),
                     ),
 
                     // Navigation Arrow
-                    Icon(
+                    Align(
+                    alignment: Alignment.center,
+                    child: Icon(
                       Icons.arrow_forward_ios_rounded,
                       size: 20,
                       color: theme.colorScheme.outline.withOpacity(0.5),
                     ),
+                  ),
                   ],
-                ),
+                ),),
               ),
             ),
           ),

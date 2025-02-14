@@ -433,34 +433,56 @@ class _StatusIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Define a map to hold styles for different states
+    const Map<String, Map<String, dynamic>> stateStyles = {
+      'Confermata': {
+        'color': Colors.green,
+        'icon': Icons.check_circle_rounded,
+      },
+      'Richiesta': {
+        'color': Colors.orange,
+        'icon': Icons.warning_rounded, // Changed to warning for 'Richiesta'
+      },
+      'Rifiutata': {
+        'color': Colors.red,
+        'icon': Icons.cancel_rounded, // Using cancel for 'Rifiutata'
+      },
+    };
+
+    // Get the style for the current state, default to orange if state is not found
+    final currentStyle = stateStyles[state] ?? stateStyles['Richiesta']!; // Default to 'Richiesta' style if state is unknown
+
+    final Color color = currentStyle['color']!.withOpacity(0.15); // Background color
+    final Color textColor = currentStyle['color']!; // Text and Icon color
+    final IconData iconData = currentStyle['icon']!; // Icon
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: state == 'Confermata' 
-            ? Colors.green.withOpacity(0.15)
-            : Colors.red.withOpacity(0.15),
+        color: color,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         children: [
           Icon(
-            state == 'Confermata' 
-                ? Icons.check_circle_rounded
-                : Icons.error_rounded,
+            iconData,
             size: 16,
-            color: state == 'Confermata' ? Colors.green : Colors.red),
-          SizedBox(width: 6),
+            color: textColor,
+          ),
+          const SizedBox(width: 6),
           Text(
             state,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: state == 'Confermata' ? Colors.green : Colors.red),
+              color: textColor,
             ),
+          ),
         ],
       ),
     );
   }
+
 }
 
 // Widget per il pet
