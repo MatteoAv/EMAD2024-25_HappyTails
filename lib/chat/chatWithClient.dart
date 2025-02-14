@@ -117,6 +117,19 @@ class ChatWithClientPage extends ConsumerWidget {
     }
 
   final bookings = bookingState.groupedBookings[clientId];
+  if (bookings != null) { // Make sure bookings is not null before sorting
+  bookings.sort((a, b) {
+    // Define the sorting logic
+    if (a.state == "Richiesta" && b.state != "Richiesta") {
+      return -1; // a comes before b (Richiesta comes first)
+    } else if (a.state != "Richiesta" && b.state == "Richiesta") {
+      return 1;  // b comes before a (Richiesta comes first)
+    } else {
+      return 0;  // a and b are considered equal in terms of "Richiesta" state
+                  // We can add further sorting criteria here if needed,
+                  // for example, by another field or by their original order.
+    }
+  });}
     return Scaffold(
       appBar: AppBar(
         title: _buildAppBarTitle(context, bookings![0].owner_username??""),
@@ -602,6 +615,12 @@ Color _getProgressColor(double progress) {
     );
   }
 void _showStatusChangeError(String errorMessage) {
+  // Check if the widget is still mounted before using context
+  if (!mounted) {
+    print("Warning: Widget is unmounted, cannot show SnackBar.");
+    return; // Do nothing if the widget is unmounted
+  }
+
   // 1. Find the relevant context (usually the Scaffold or a key'd widget)
   final scaffoldMessenger = ScaffoldMessenger.of(context);
 
@@ -635,18 +654,6 @@ void _showStatusChangeError(String errorMessage) {
       ),
     ),
   );
-
-  // Optional: Subtle animation or visual feedback (if appropriate)
-  // Example using a local variable to control a fade-in animation:
-  // setState(() {
-  //   _showError = true; // Trigger animation
-  // });
-  // ... (In your widget build method, wrap the relevant part with AnimatedOpacity)
-  // AnimatedOpacity(
-  //   opacity: _showError ? 1.0 : 0.0,
-  //   duration: const Duration(milliseconds: 300),
-  //   child: ... your error message widget ...,
-  // );
 }
 void _handleBookingResponse(bool accepted) async {
   if (widget.booking.state != 'Richiesta') return;
