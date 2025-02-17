@@ -37,6 +37,14 @@ class HomePagePetSitter extends ConsumerWidget {
                   BookingCalendar(),
                   const SizedBox(height: 16,),
 
+                  ElevatedButton(
+                  
+                  onPressed: () => ref.read(busyDatesProvider.notifier).initialize(),
+                  child: const Text('Carica calendario'),
+                  ),
+
+                  const SizedBox(height: 16,),
+
                   _buildStatCard(
                     title: 'Guadagno Medio',
                     value: totalEarnings.when(
@@ -70,6 +78,16 @@ class HomePagePetSitter extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
+
+                  ElevatedButton(
+                    onPressed: () {
+                    ref.invalidate(petSitterProvider);
+                    ref.invalidate(totalEarningsProvider);
+                    ref.invalidate(averageRatingProvider);
+                    ref.invalidate(oldEarningsProvider);
+                  }, 
+                  child: Text("Aggiorna statistiche")
+                  ),
                   const Text('Statistiche Dettagliate', 
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
                   oldEarnings.when(
