@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:happy_tails/Auth/EncryptService.dart';
 import 'package:happy_tails/app/bottom_navbar.dart';
 import 'package:happy_tails/payment_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,7 +30,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     final password = passwordController.text;
     final username = usernameController.text;
     final city = cityController.text;
-    final encrypter = EncryptionService();
 
     if (email.isEmpty || password.isEmpty || username.isEmpty || city.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -127,6 +125,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           onPressed: () {
             Navigator.pop(context); // Chiude il dialog
             Navigator.pop(context);
+            Navigator.pushNamed(context, AppRoutes.userProfile);
             Navigator.pushNamed(context, AppRoutes.settings); // Naviga alla pagina delle impostazioni
           },
           child: const Text('Vai alle Impostazioni'),

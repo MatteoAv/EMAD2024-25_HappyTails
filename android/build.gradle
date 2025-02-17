@@ -1,3 +1,16 @@
+buildscript {
+    ext.kotlin_version = '1.7.10' // Usa la versione più recente supportata
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.1.2' // Aggiornalo se necessario
+    }
+}
+
+
+
 allprojects {
     repositories {
         google()

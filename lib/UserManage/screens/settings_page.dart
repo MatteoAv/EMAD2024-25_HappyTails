@@ -464,6 +464,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           ref.invalidate(averageRatingProvider);
                           ref.invalidate(oldEarningsProvider);
                           ref.invalidate(earningsCacheProvider);
+                          ref.invalidate(managePetsNotifierProvider);
+
                          Navigator.pop(context);
                         }
                         

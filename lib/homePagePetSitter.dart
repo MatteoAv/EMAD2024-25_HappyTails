@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:happy_tails/header.dart';
 import 'package:happy_tails/homeProvider/providers.dart';
+import 'package:happy_tails/widgetHomePage/BookingCalendar.dart';
 import 'package:happy_tails/widgetHomePage/LegendChart.dart';
 import 'package:happy_tails/widgetHomePage/LineChart.dart';
 import 'package:happy_tails/widgetHomePage/PieChart.dart';
@@ -32,6 +33,10 @@ class HomePagePetSitter extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+
+                  BookingCalendar(),
+                  const SizedBox(height: 16,),
+
                   _buildStatCard(
                     title: 'Guadagno Medio',
                     value: totalEarnings.when(

@@ -7,7 +7,6 @@ import 'package:happy_tails/UserManage/repositories/local_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:meta/meta.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Recupera l'utente dalle SharedPreferences
   Future<model.User?> _getUserFromPrefs() async {
