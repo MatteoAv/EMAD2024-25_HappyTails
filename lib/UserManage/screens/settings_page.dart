@@ -7,6 +7,7 @@ import 'package:happy_tails/app/bottom_navbar.dart';
 import 'package:happy_tails/app/routes.dart';
 import 'package:happy_tails/chat/chat_provider.dart';
 import 'package:happy_tails/homeProvider/providers.dart';
+import 'package:happy_tails/widgetHomePage/BookingCalendar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -465,6 +466,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           ref.invalidate(oldEarningsProvider);
                           ref.invalidate(earningsCacheProvider);
                           ref.invalidate(managePetsNotifierProvider);
+                          ref.read(busyDatesProvider.notifier).reset();
 
                          Navigator.pop(context);
                         }
