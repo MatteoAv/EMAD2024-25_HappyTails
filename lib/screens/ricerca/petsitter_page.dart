@@ -288,7 +288,7 @@ Widget build(BuildContext context) {
                               width: 2
                             ),
                             image: DecorationImage(
-                              image: NetworkImage(petsitter.imageUrl),
+                              image: NetworkImage(petsitter.imageUrl??""),
                               fit: BoxFit.cover
                             ),
                           ),

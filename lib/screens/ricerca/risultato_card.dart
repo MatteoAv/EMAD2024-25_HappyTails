@@ -97,7 +97,7 @@ class VerticalCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           image: DecorationImage(
-                            image: NetworkImage(item.imageUrl),
+                            image: NetworkImage(item.imageUrl??""),
                             fit: BoxFit.cover,
                           ),
                           boxShadow: [

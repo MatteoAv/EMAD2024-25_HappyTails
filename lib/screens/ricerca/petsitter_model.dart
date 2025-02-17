@@ -5,7 +5,7 @@ class PetSitter {
   final String email;
   final String provincia;
   final String comune;
-  final String imageUrl;
+  final String? imageUrl;
   final bool cani;
   final bool gatti;
   final bool uccelli;

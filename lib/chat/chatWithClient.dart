@@ -265,7 +265,7 @@ class _MessageList extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: () async => onRefresh(),
       child: messages.isEmpty
-          ? const Center(child: Text('Start your conversation now :)'))
+          ? const Center(child: Text('Inizia la conversazione'))
           : ListView.builder(
               reverse: true,
               itemCount: messages.length,

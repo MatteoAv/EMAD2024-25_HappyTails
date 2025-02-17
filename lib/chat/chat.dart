@@ -157,8 +157,14 @@ arguments: [sitter,[],DateTimeRange(
  ),
     child: ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(backgroundImage: NetworkImage(sitter.imageUrl)),
-      title: Text(sitter.nome),
+      leading: (sitter.imageUrl != null && sitter.imageUrl!.isNotEmpty)
+          ? CircleAvatar(backgroundImage: NetworkImage(sitter.imageUrl!))
+          : CircleAvatar(
+              backgroundImage: AssetImage('assets/images/default_profile.png'),
+            ),
+  title: Text(sitter.nome),
+
+
       /*subtitle: Text('Attivo', style: TextStyle(
         color: Colors.green.shade500,
         fontSize: 12
@@ -187,41 +193,76 @@ class _MessageBarState extends State<_MessageBar> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.grey[200],
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextFormField(
+  @override
+Widget build(BuildContext context) {
+  return Material(
+    elevation: 4,
+    color: Theme.of(context).colorScheme.surface,
+    child: SafeArea(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: TextField(
                   controller: _textController,
-                  decoration: const InputDecoration(
+                  onChanged: (value) => setState(() {}),
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.transparent,
                     hintText: 'Scrivi un messaggio',
                     border: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.all(8),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
+                    // Removed prefixIcon to remove the plus button
                   ),
                 ),
               ),
-              TextButton(
-                onPressed: () {
-                  final text = _textController.text.trim();
-                  if (text.isNotEmpty) {
-                    widget.onSend(text);
-                    _textController.clear();
-                  }
-                },
-                child: const Text('Invia'),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: _textController.text.trim().isEmpty
+                    ? null
+                    : Theme.of(context).colorScheme.primary,
+                shape: BoxShape.circle,
               ),
-            ],
-          ),
+              child: IconButton(
+                icon: Icon(Icons.send,
+                    color: _textController.text.trim().isEmpty
+                        ? Theme.of(context).colorScheme.onSurfaceVariant
+                        : Theme.of(context).colorScheme.onPrimary),
+                onPressed: _textController.text.trim().isEmpty
+                    ? null
+                    : () {
+                        final text = _textController.text.trim();
+                        widget.onSend(text);
+                        _textController.clear();
+                        setState(() {});
+                      },
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(16),
+                ),
+                tooltip: 'Scrivi un messaggio',
+              ),
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 // Preserved MessageList with pull-to-refresh
 class _MessageList extends StatelessWidget {
@@ -240,7 +281,7 @@ class _MessageList extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: () async => onRefresh(),
       child: messages.isEmpty
-          ? const Center(child: Text('Start your conversation now :)'))
+          ? const Center(child: Text('Inizia la conversazione'))
           : ListView.builder(
               reverse: true,
               itemCount: messages.length,
