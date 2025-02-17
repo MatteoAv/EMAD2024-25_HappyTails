@@ -68,19 +68,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         'Bird': petSitter!['uccelli'],
         'Other': petSitter!['roditori'] || petSitter!['rettili']
        };
-  final user = ref.read(userProvider).valueOrNull;
-  if(user!=null && user.isPetSitter){
-    final result = await get_petsitter_by_email(user.email);
-    if(result != null){
-      petSitter = result.first;
-      Map<String, bool> pets = {
-        'Dog' : petSitter!['cani'],
-        'Cat' : petSitter!['gatti'],
-        'Fish': petSitter!['pesci'],
-        'Bird': petSitter!['uccelli'],
-        'Other': petSitter!['roditori'] || petSitter!['rettili']
-      };
-
       _nameController ??= TextEditingController(text: petSitter!['nome']);
       _surnameController ??= TextEditingController(text: petSitter!['cognome']);
       _provinciaController ??= TextEditingController(text: petSitter!['provincia']);
@@ -93,29 +80,19 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (mounted) {
         setState(() {
           petSitter = result.first;
-          ref.read(managePetsNotifierProvider).copyWith(selectedPets: pets);
+          ref.read(managePetsNotifierProvider.notifier).copyWith(selectedPets: pets);
         });
       }
-    }
-  }
-      if(mounted){
-      setState(() {
-        petSitter = result.first;
-        ref.read(managePetsNotifierProvider).copyWith(selectedPets: pets);
-      });
-      }
-      
     }else{
        _nameController = TextEditingController(text: "Nome");
       _surnameController = TextEditingController(text: "cognome");
       _provinciaController = TextEditingController(text: "provincia");
       _priceController = TextEditingController(text: "Prezzo Giornaliero");
         petSitter = null;
-        
-      }
-      return;
+      return;  
     }
   }
+}   
 
   Future<List<dynamic>?> get_petsitter_by_email(String email)async{
     final supabase = Supabase.instance.client;
@@ -386,13 +363,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                   , '_roditori': managePets['Other'], '_comune' : user.citta.trim(), '_posizione' : formatPoint, '_prezzo_giornaliero' : prezzo, '_idd': user.id});
                                   final dateBegin = ref.read(selectionDateProvider)?.start.toIso8601String();
                                   final dateEnd = ref.read(selectionDateProvider)?.end.toIso8601String();
+                                  if(dateBegin != null && dateEnd != null){
                                   await supabase.from("indisponibilita").insert({'id' : petSitter?['id'], 'data_inizio' : dateBegin,
                                   'data_fine' : dateEnd});
+                                  }
                                 }
                             if (success) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text('Modifiche salvate con successo!'),
+                                  backgroundColor: Colors.green,
                                 ),
                               );
                               if(user.isPetSitter){
@@ -402,6 +382,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text('Errore nel salvataggio delle modifiche.'),
+                                  backgroundColor: Colors.red,
                                 ),
                               );
                             }

@@ -61,10 +61,10 @@ class LoginPage extends ConsumerWidget {
     } else {
       throw Exception('Credenziali non valide');
     }
-  } catch (e, stackTrace) {
-    logger.d('Errore: $e, $stackTrace');
+  } catch (e) {
+    logger.d('Errore: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Errore durante il login: $e')),
+        SnackBar(content: Text('Errore durante il login: credenziali fornite non valide'), backgroundColor: Colors.red,),
       );
     }
   }
