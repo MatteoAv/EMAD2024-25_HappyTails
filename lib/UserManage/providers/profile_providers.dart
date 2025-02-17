@@ -234,7 +234,7 @@ class BookNotifier extends AsyncNotifier<List<Booking>>{
     _subscription = Supabase.instance.client // Assuming repository has access to Supabase client
         .channel('public:bookings:owner_id=eq.$userId') // Using user_id and eq.$userId
       .onPostgresChanges(
-          event: PostgresChangeEvent.update,
+          event: PostgresChangeEvent.all,
           schema: 'public',
           table: 'bookings',
           filter: PostgresChangeFilter( // Assuming you want to filter by user_id
@@ -424,7 +424,7 @@ class BookingNotifier extends StateNotifier<BookingState> {
       _subscription = repository.client
           .channel(channelName) // Use dynamically constructed channel name
           .onPostgresChanges(
-              event: PostgresChangeEvent.update,
+              event: PostgresChangeEvent.all,
               schema: 'public',
               table: 'bookings',
               filter: PostgresChangeFilter(
